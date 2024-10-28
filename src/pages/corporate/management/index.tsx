@@ -1,0 +1,913 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+// ** React Imports
+import { useState, useEffect } from 'react'
+
+// ** MUI Imports
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import Grid from '@mui/material/Grid'
+import Card from '@mui/material/Card'
+import Tooltip from '@mui/material/Tooltip'
+import { styled } from '@mui/material/styles'
+import IconButton from '@mui/material/IconButton'
+import Typography from '@mui/material/Typography'
+import { DataGrid } from '@mui/x-data-grid'
+import Dialog from '@mui/material/Dialog'
+import DialogContent from '@mui/material/DialogContent'
+import DialogActions from '@mui/material/DialogActions'
+import { ICorporateDataTypes, InvoiceType } from 'src/types/apps/invoiceTypes'
+
+// ** Custom Components Imports
+import TableHeader from 'src/views/apps/admission/list/TableHeader'
+
+// ** Third Party Styles Imports
+import 'react-datepicker/dist/react-datepicker.css'
+import { CommonService, DashboardService } from 'src/service'
+import { ProjectStatusTypes, messages, status } from 'src/context/common'
+import { useRouter } from 'next/router'
+import DynamicBreadcrumb from 'src/components/Breadcrumb'
+import { PencilOutline } from 'mdi-material-ui'
+import TextField from '@mui/material/TextField'
+import DialogTitle from '@mui/material/DialogTitle'
+import CorporateInformation from 'src/views/pages/dialog/CorporateInformation'
+import { Controller, useForm } from 'react-hook-form'
+import { yupResolver } from '@hookform/resolvers/yup'
+import * as yup from 'yup'
+import { Autocomplete, Backdrop, Checkbox, CircularProgress, FormControlLabel, Stack, Switch } from '@mui/material'
+import { addressDetails, getStateList, minTwoDigits, serialNumber } from 'src/utils'
+import { errorToast, successToast } from 'src/components/Toast'
+import { ThemeColor } from 'src/@core/layouts/types'
+import Chip from 'src/@core/components/mui/chip'
+import { commonListTypes } from 'src/types/apps/dataTypes'
+import { AxiosResponse } from 'axios'
+import ControlledAutocomplete from 'src/components/ControlledAutocomplete'
+import { IAddressStateTypes } from 'src/types/apps/admittedStudent'
+import RequiredLabel from 'src/components/RequiredLabel'
+
+interface CellType {
+  row: InvoiceType
+}
+const initialState = {
+  statusCode: 1,
+  message: '',
+  data: []
+}
+
+export interface IFormValues {
+  id: number
+  name: string
+  code: string
+  companyTypeCode: string
+  email: string
+  phoneNumber: string
+  address1: string
+  address2: string
+  country: string
+  state: string
+  pincode: string
+}
+
+interface DataParams {
+  q: string
+  status: string
+  pageSize: number
+  pageNumber: number
+}
+interface IRowActionType {
+  actionType: 'Edit' | 'Add'
+  show: boolean
+  data?: InvoiceType | null
+}
+
+interface IIndex {
+  api: {
+    getRowIndex: (arg0: number) => number
+  }
+  row: {
+    id: number
+  }
+}
+interface IProjectStatusType {
+  [key: string]: ThemeColor
+}
+const ProjectStatusObj: IProjectStatusType = {
+  [ProjectStatusTypes.Active]: 'success',
+  [ProjectStatusTypes.Inactive]: 'error'
+}
+
+const getProjectStatus = (status: boolean) => {
+  return status ? ProjectStatusTypes.Active : ProjectStatusTypes.Inactive
+}
+
+// ** Styled component for the link in the dataTable
+const StyledLink = styled('a')(({ theme }) => ({
+  color: theme.palette.primary.main,
+  cursor: 'pointer',
+  ':hover': {
+    textDecoration: 'underline'
+  }
+}))
+
+const defaultValues = {
+  email: '',
+  name: '',
+  code: '',
+  companyType: '',
+  phoneNumber: '',
+  country: '',
+  state: '',
+  address1: '',
+  pincode: '',
+  address2: '',
+  physicalCountry: '',
+  physicalState: '',
+  physicalAddress1: '',
+  physicalAddress2: '',
+  physicalPincode: '',
+  isActive: false,
+  isSameAddress: false
+}
+
+const schema = yup.object().shape({
+  name: yup.string().required('required'),
+  code: yup
+    .string()
+    .matches(/^[\w@.-]*$/, `Code Must be without space you can use dash(-) instead`)
+    .required('required'),
+  companyType: yup.string().required('required'),
+  country: yup.string().required('required'),
+  state: yup.string().required('required'),
+  address1: yup.string().required('required'),
+  pincode: yup.string().required('required').min(5).max(6),
+  physicalCountry: yup.string().required('required'),
+  physicalState: yup.string().required('required'),
+  physicalAddress1: yup.string().required('required'),
+  physicalPincode: yup.string().required('required').min(5).max(6)
+})
+
+const StudentList = () => {
+  // ** State
+  const [value, setQuery] = useState<string>('')
+  const [pageSize, setPageSize] = useState<number>(10)
+  const [pageNumber, setPageNumber] = useState<number>(1)
+  const [selectedRows, setSelectedRows] = useState<any[]>([])
+  const [response, setResponse] = useState<any>(initialState)
+  const [loading, setLoading] = useState<boolean>(false)
+  const [openEdit, setOpenEdit] = useState<IRowActionType>({ show: false, data: null, actionType: 'Add' })
+  const [conformationOpen, setConformationOpen] = useState<boolean>(false)
+  const [corporateFormData, setCorporateFormData] = useState(defaultValues)
+  const [companyTypes, setCompanyTypes] = useState<Array<commonListTypes>>()
+  const [country, setCountry] = useState<Array<commonListTypes>>([])
+  const [states, setStates] = useState<IAddressStateTypes[] | []>([])
+  const [loadingStates, setLoadingStates] = useState<boolean>(false)
+  const [defaultCountry, setDefaultCountry] = useState({})
+  const [defaultState, setDefaultState] = useState({})
+
+  const {
+    setValue,
+    register,
+    handleSubmit,
+    watch,
+    reset,
+    control,
+    formState: { errors }
+  } = useForm<any>({
+    defaultValues: corporateFormData,
+    mode: 'all',
+    reValidateMode: 'onChange',
+    resolver: yupResolver(schema)
+  })
+  const countryWatch = watch('country')
+  const getCountryLists = async () => {
+    const response = await CommonService.getCountryLists()
+    if (response?.status === status.successCode && response?.data?.data?.length) {
+      setCountry(response.data.data)
+    }
+  }
+
+  const fetchStates = async (countryCode: string) => {
+    setLoadingStates(true)
+    if (countryCode) {
+      const fetchedStates = await getStateList(countryCode)
+      const FormattedData = fetchedStates.map((region: any) => {
+        region['code'] = region['isoCode'] || region['code']
+        delete region['isoCode']
+
+        return region
+      })
+      setStates(FormattedData)
+    } else {
+      setStates([])
+    }
+    setLoadingStates(false)
+  }
+
+  useEffect(() => {
+    if (countryWatch) {
+      fetchStates(countryWatch)
+    }
+  }, [countryWatch])
+
+  const formValue = watch()
+  const router = useRouter()
+  const columns = [
+    {
+      flex: 0.1,
+      field: 'id',
+      minWidth: 60,
+      headerName: '#',
+      renderCell: (index: IIndex) => {
+        return <Box>{`${minTwoDigits(serialNumber(index.api.getRowIndex(index.row.id), pageNumber, pageSize))}`}</Box>
+      }
+    },
+    {
+      flex: 0.1,
+      field: 'name',
+      minWidth: 250,
+      headerName: 'Company Name',
+      renderCell: ({ row }: any) => (
+        <Box>
+          <StyledLink
+            onClick={() => {
+              setConformationOpen(!conformationOpen)
+              setSelectedRows(row)
+            }}
+          >
+            {row.name}
+          </StyledLink>
+        </Box>
+      )
+    },
+    {
+      flex: 0.25,
+      field: 'code',
+      minWidth: 150,
+      headerName: 'code'
+    },
+    {
+      flex: 0.1,
+      minWidth: 200,
+      field: 'companyType',
+      headerName: 'Company Type'
+    },
+    {
+      flex: 0.1,
+      minWidth: 200,
+      field: 'country',
+      headerName: 'Country',
+      renderCell: ({ row }: any) => {
+        return <Box>{addressDetails(row?.corporateAddress, 'country')}</Box>
+      }
+    },
+    {
+      flex: 0.1,
+      minWidth: 200,
+      field: 'state',
+      headerName: 'Province/ State',
+      renderCell: ({ row }: any) => {
+        return <Box>{addressDetails(row?.corporateAddress, 'state')}</Box>
+      }
+    },
+    {
+      flex: 0.1,
+      minWidth: 200,
+      field: 'pincode',
+      headerName: 'Pin or Zip Code',
+      renderCell: ({ row }: any) => {
+        return <Box>{addressDetails(row?.corporateAddress, 'pincode')}</Box>
+      }
+    },
+
+    {
+      flex: 0.1,
+      minWidth: 200,
+      field: 'projectCount',
+      headerName: 'No of Projects',
+      renderCell: ({ row }: any) => {
+        return <Box>{row?.projectCount ? row?.projectCount : '-'}</Box>
+      }
+    },
+    {
+      flex: 0.1,
+      minWidth: 200,
+      field: 'studentCount',
+      headerName: 'No of Students',
+      renderCell: ({ row }: any) => {
+        return <Box>{row?.studentCount ? row?.studentCount : '-'}</Box>
+      }
+    },
+    {
+      flex: 0.1,
+      minWidth: 200,
+      field: 'status',
+      headerName: 'Status',
+      renderCell: ({ row }: any) => {
+        return (
+          <Chip
+            skin='light'
+            size='small'
+            label={getProjectStatus(row?.isActive)}
+            color={ProjectStatusObj[getProjectStatus(row?.isActive)]}
+            sx={{ textTransform: 'capitalize', '& .MuiChip-label': { lineHeight: '18px' } }}
+          />
+        )
+      }
+    },
+    {
+      flex: 0.1,
+      minWidth: 130,
+      sortable: false,
+      field: 'actions',
+      headerName: 'Actions',
+      renderCell: ({ row }: CellType) => (
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Tooltip title='Edit'>
+            <Box>
+              <IconButton
+                onClick={() => handleRowClick(row)}
+                size='small'
+                component='a'
+                color='primary'
+                sx={{ textDecoration: 'none', mr: 0.5, border: '1px solid green' }}
+              >
+                <PencilOutline />
+              </IconButton>
+            </Box>
+          </Tooltip>
+        </Box>
+      )
+    }
+  ]
+  const handleRowClick = (row: any) => {
+    setOpenEdit({ show: true, actionType: 'Edit', data: row })
+    setFormData(row)
+  }
+  const setFormData = (data: ICorporateDataTypes) => {
+    const residential = data?.corporateAddress?.find(item => item.addressType === 'RESIDENTIAL') ?? defaultValues
+    const postal = data?.corporateAddress?.find(item => item.addressType === 'POSTAL') ?? defaultValues
+    const rowValues = {
+      email: data.email,
+      name: data.name,
+      code: data.code,
+      companyType: data.companyType,
+      phoneNumber: data.phoneNumber,
+      country: residential.country,
+      state: residential.state,
+      address1: residential.address1,
+      pincode: residential.pincode,
+      address2: residential.address2,
+      physicalCountry: postal.country,
+      physicalState: postal.state,
+      physicalAddress1: postal.address1,
+      physicalAddress2: postal.address2,
+      physicalPincode: postal.pincode,
+      isActive: data.isActive,
+      isSameAddress: data.isSameAddress
+    }
+    setCorporateFormData(rowValues)
+    reset(rowValues)
+  }
+
+  const getCorporateList = async (params: DataParams) => {
+    setLoading(true)
+    const response = await DashboardService?.getCorporateList(params)
+    if (response?.data?.statusCode === status.successCode && response?.data?.data) {
+      setResponse(response?.data?.data)
+    }
+    setLoading(false)
+  }
+  const getCompanyTypeList = async () => {
+    const response = await CommonService.companyType()
+    if (response?.statusCode === status.successCode && !!response?.data) {
+      setCompanyTypes(response?.data)
+    }
+  }
+
+  useEffect(() => {
+    register('isActive')
+    getCompanyTypeList()
+    getCountryLists()
+  }, [])
+  useEffect(() => {
+    getCorporateList({
+      q: value,
+      pageSize: pageSize,
+      pageNumber: pageNumber,
+      status: ''
+    })
+  }, [pageSize, pageNumber, value])
+  const handleModalOpenClose = () => {
+    setOpenEdit(prevState => ({ ...prevState, show: !prevState?.show }))
+    reset(defaultValues)
+  }
+
+  const handleFilter = (val: string) => {
+    setQuery(val)
+  }
+
+  const handleCloseConfirmationPopup = () => {
+    setConformationOpen(!conformationOpen)
+  }
+  const { show, actionType } = { ...openEdit }
+
+  const onSubmit = async (data: any) => {
+    reset({}, { keepValues: true })
+
+    const { name, code, companyType, email, phoneNumber, isSameAddress, isActive } = data
+    let res: AxiosResponse | undefined
+    const { address1 = '', address2 = '', country = '', state = '', pincode = '', ...postalAddress } = { ...data }
+
+    const postalAddr = {
+      address1: postalAddress?.physicalAddress1,
+      address2: postalAddress?.physicalAddress2,
+      country: postalAddress?.physicalCountry,
+      state: postalAddress?.physicalState,
+      pincode: postalAddress?.physicalPincode,
+      addressType: 'POSTAL'
+    }
+    const address = [
+      { address1, address2, country, state, pincode, addressType: 'RESIDENTIAL' },
+      {
+        ...postalAddr,
+        addressType: 'POSTAL'
+      }
+    ]
+
+    const payload = { name, code, companyType, email, phoneNumber, isSameAddress, isActive, address }
+
+    if (openEdit?.actionType === 'Add') {
+      res = await DashboardService?.addCorporate(payload)
+    } else {
+      res = await DashboardService?.updateCorporate(code, payload)
+    }
+    if (res?.data?.statusCode === status?.successCodeOne || res?.data?.statusCode === status?.successCode) {
+      getCorporateList({
+        q: value,
+        pageSize: pageSize,
+        pageNumber: pageNumber,
+        status: ''
+      })
+      setOpenEdit(prevState => ({ ...prevState, show: false, data: null, actionType: 'Add' }))
+      successToast(
+        `${payload.name} ${openEdit?.actionType === 'Add' ? messages.corporateAdded : messages.corporateEdited}`
+      )
+    } else {
+      errorToast(messages.error)
+    }
+  }
+
+  const handlePhysicalAddress = (event: any) => {
+    setLoadingStates(true)
+    const isSameAddress = event.target.checked
+    setDefaultCountry(country?.find(item => (item as any)?.code === watch('country')) ?? '')
+    setDefaultState(states?.find(item => (item as any)?.code === watch('state')) ?? '')
+
+    if (isSameAddress) {
+      const currentCountry = watch('country')
+      const currentState = watch('state')
+
+      setValue('physicalCountry', currentCountry, { shouldDirty: true, shouldValidate: true })
+      setValue('physicalState', currentState, { shouldDirty: true, shouldValidate: true })
+      setValue('physicalAddress1', watch('address1'), { shouldDirty: true, shouldValidate: true })
+      setValue('physicalAddress2', watch('address2'), { shouldDirty: true, shouldValidate: true })
+      setValue('physicalPincode', watch('pincode'), { shouldDirty: true, shouldValidate: true })
+    }
+
+    setValue('isSameAddress', isSameAddress)
+    setLoadingStates(false)
+  }
+
+  return (
+    <Grid container spacing={6}>
+      <Grid item xs={12}>
+        <Typography variant='h5'>Corporate Management</Typography>
+        <Grid item xs={12} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+          <DynamicBreadcrumb asPath={router.asPath} />
+          <Button
+            sx={{ mr: 2 }}
+            variant='contained'
+            size='small'
+            onClick={() => {
+              reset()
+              setOpenEdit(prevState => ({ ...prevState, show: !prevState?.show, data: null, actionType: 'Add' }))
+            }}
+          >
+            Add Corporate
+          </Button>
+        </Grid>
+        <Card>
+          <CorporateInformation
+            conformationOpen={conformationOpen}
+            handleCloseConfirmationPopup={handleCloseConfirmationPopup}
+            selectedRows={selectedRows}
+          />
+          <TableHeader value={value} selectedRows={selectedRows} handleFilter={handleFilter} />
+          <DataGrid
+            loading={loading}
+            autoHeight
+            pagination
+            paginationMode='server'
+            disableColumnMenu
+            disableColumnFilter
+            disableColumnSelector
+            rows={response.data}
+            rowCount={response?.count}
+            columns={columns}
+            disableSelectionOnClick
+            pageSize={Number(pageSize)}
+            rowsPerPageOptions={[10, 25, 50]}
+            sx={{ '& .MuiDataGrid-columnHeaders': { borderRadius: 0 } }}
+            onSelectionModelChange={rows => setSelectedRows(rows)}
+            onPageSizeChange={newPageSize => setPageSize(newPageSize)}
+            onPageChange={newPage => setPageNumber(newPage + 1)}
+          />
+        </Card>
+
+        <Dialog
+          maxWidth='md'
+          open={show}
+          onClose={(event, reason) => {
+            if (reason !== 'backdropClick') {
+              handleCloseConfirmationPopup
+            }
+          }}
+        >
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <DialogTitle sx={{ justifyContent: 'center', textAlign: 'center' }}>
+              <Typography variant='h4'>{actionType} Corporate</Typography>
+            </DialogTitle>
+
+            <DialogContent>
+              <Grid container mt={2} spacing={4}>
+                <Grid item xs={4}>
+                  <Controller
+                    control={control}
+                    name='code'
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        disabled={openEdit?.actionType !== 'Add'}
+                        fullWidth
+                        label={<RequiredLabel label='Company Code' />}
+                        error={!!errors.code}
+                        helperText={errors?.code?.message as string | undefined}
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid item xs={4}>
+                  <TextField
+                    {...register('name')}
+                    fullWidth
+                    onChange={(e: any) => {
+                      setValue(e.target.name, e.target.value)
+                    }}
+                    label={<RequiredLabel label='Company Name' />}
+                    defaultValue={formValue?.name}
+                    helperText={errors?.name?.message as string | undefined}
+                    error={errors.name as any}
+                  />
+                </Grid>
+                <Grid item xs={4}>
+                  <ControlledAutocomplete
+                    control={control}
+                    name='companyType'
+                    options={companyTypes ?? []}
+                    renderInput={params => <TextField {...params} label='Company Type' />}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    fullWidth
+                    {...register('email')}
+                    type='email'
+                    onChange={(e: any) => {
+                      setValue(e.target.name, e.target.value)
+                    }}
+                    label='Email (Optional)'
+                    defaultValue={formValue?.email}
+                    helperText={errors?.email?.message as string | undefined}
+                    error={errors.email as any as any}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    fullWidth
+                    {...register('phoneNumber')}
+                    onChange={(e: any) => {
+                      if (+e.target.value < 0) e.target.value = 0
+                      setValue(e.target.name, e.target.value)
+                    }}
+                    type='number'
+                    label='Contact Number (Optional)'
+                    defaultValue={formValue?.phoneNumber}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <Grid container sx={{ justifyContent: 'center', pt: 4 }}>
+                    <Typography variant='h5'>Contact Information</Typography>
+                  </Grid>
+                </Grid>
+                <Grid item xs={12} ml={5}>
+                  <Grid
+                    container
+                    spacing={4}
+                    sx={{
+                      background: theme => theme.palette.grey[100],
+                      borderRadius: 2,
+                      pl: 3,
+                      pb: 5,
+                      pr: 5,
+                      boxShadow: '1px 6px 6px 0px #b5b3b3fc'
+                    }}
+                  >
+                    <Grid item xs={12}>
+                      <Typography variant='h6'>Physical Address</Typography>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <TextField
+                        {...register('address1')}
+                        fullWidth
+                        onChange={(e: any) => {
+                          setValue(e.target.name, e.target.value)
+                        }}
+                        label={<RequiredLabel label='Address Line 1' />}
+                        defaultValue={formValue?.address1}
+                        helperText={errors?.address1 && (errors?.address1?.message as string | undefined)}
+                        error={errors.address1 as any}
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <TextField
+                        fullWidth
+                        {...register('address2')}
+                        onChange={(e: any) => {
+                          setValue(e.target.name, e.target.value)
+                        }}
+                        label='Address Line 2 (Optional)'
+                        defaultValue={formValue?.address2}
+                      />
+                    </Grid>
+                    <Grid item xs={4}>
+                      <Controller
+                        name='country'
+                        control={control}
+                        render={({ field }) => (
+                          <Autocomplete
+                            {...field}
+                            options={country ?? []}
+                            value={country?.find(item => (item as any)?.code === field?.value)}
+                            getOptionLabel={option => option?.name || ''}
+                            onChange={(event, data) => {
+                              field.onChange(data?.code)
+                            }}
+                            renderInput={params => (
+                              <TextField
+                                {...params}
+                                label='Country'
+                                error={!!errors?.country}
+                                helperText={errors?.country?.message as string | undefined}
+                                fullWidth
+                              />
+                            )}
+                          />
+                        )}
+                      />
+                    </Grid>
+                    <Grid item xs={4}>
+                      <Controller
+                        name='state'
+                        control={control}
+                        render={({ field }) => (
+                          <Autocomplete
+                            {...field}
+                            options={states ?? []}
+                            getOptionLabel={option => option?.name || ''}
+                            value={states?.find(item => (item as any)?.code === field?.value)}
+                            onChange={(event, data: any) => {
+                              field.onChange(data?.code)
+                            }}
+                            renderInput={params => (
+                              <TextField
+                                {...params}
+                                label='Province / State'
+                                error={!!errors?.state}
+                                helperText={errors?.state?.message as string | undefined}
+                                fullWidth
+                              />
+                            )}
+                          />
+                        )}
+                      />
+                    </Grid>
+                    <Grid item xs={4}>
+                      <TextField
+                        {...register('pincode')}
+                        fullWidth
+                        onChange={(e: any) => {
+                          setValue(e.target.name, e.target.value)
+                        }}
+                        type='number'
+                        label={<RequiredLabel label='Pin / Zip Code' />}
+                        defaultValue={formValue?.pincode}
+                        helperText={errors?.pincode && (errors?.pincode?.message as string | undefined)}
+                        error={errors.pincode as any}
+                      />
+                    </Grid>
+                  </Grid>
+                </Grid>
+                <Grid
+                  xs={12}
+                  sx={{
+                    marginTop: 5,
+                    ml: 5,
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignContent: 'center',
+                    alignItems: 'center'
+                  }}
+                >
+                  <Checkbox
+                    checked={formValue?.isSameAddress}
+                    onChange={handlePhysicalAddress}
+                    defaultChecked={false}
+                    size='small'
+                  />
+                  Select if same with Physical Address
+                </Grid>
+                <Grid item xs={12} ml={5}>
+                  <Grid
+                    container
+                    spacing={4}
+                    sx={{
+                      background: theme => theme.palette.grey[100],
+                      borderRadius: 2,
+                      pl: 3,
+                      pb: 5,
+                      pr: 5,
+                      boxShadow: '1px 6px 6px 0px #b5b3b3fc'
+                    }}
+                  >
+                    <Grid item xs={12}>
+                      <Typography variant='h6'>Postal Address</Typography>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <TextField
+                        {...register('physicalAddress1')}
+                        onChange={(e: any) => {
+                          setValue(e.target.name, e.target.value)
+                        }}
+                        fullWidth
+                        disabled={formValue?.isSameAddress}
+                        label={<RequiredLabel label='Address Line 1' />}
+                        value={formValue?.physicalAddress1}
+                        defaultValue={formValue?.physicalAddress1}
+                        helperText={
+                          errors?.physicalAddress1 && (errors?.physicalAddress1?.message as string | undefined)
+                        }
+                        error={errors.physicalAddress1 as any}
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <TextField
+                        {...register('physicalAddress2')}
+                        onChange={(e: any) => {
+                          setValue(e.target.name, e.target.value)
+                        }}
+                        fullWidth
+                        disabled={formValue?.isSameAddress}
+                        label='Address Line 2 (Optional)'
+                        value={formValue?.physicalAddress2}
+                        defaultValue={formValue?.physicalAddress2}
+                        helperText={
+                          errors?.physicalAddress2 && (errors?.physicalAddress2?.message as string | undefined)
+                        }
+                        error={errors.physicalAddress2 as any}
+                      />
+                    </Grid>
+                    <Grid item xs={4}>
+                      <Controller
+                        name='physicalCountry'
+                        control={control}
+                        render={({ field }) => (
+                          <Autocomplete
+                            {...field}
+                            options={country ?? []}
+                            disabled={formValue?.isSameAddress}
+                            value={
+                              defaultCountry
+                                ? defaultCountry
+                                : country?.find(item => (item as any)?.code === field?.value)
+                            }
+                            getOptionLabel={(option: any) => option?.name || ''}
+                            onChange={(event, data: any) => {
+                              setDefaultCountry('')
+                              field.onChange(data?.code)
+                              fetchStates(data?.code)
+                            }}
+                            renderInput={params => (
+                              <TextField
+                                {...params}
+                                label='Country'
+                                error={!!errors?.physicalCountry}
+                                helperText={errors?.physicalCountry?.message as string | undefined}
+                                fullWidth
+                              />
+                            )}
+                          />
+                        )}
+                      />
+                    </Grid>
+                    <Grid item xs={4}>
+                      <Controller
+                        name='physicalState'
+                        control={control}
+                        render={({ field }) => (
+                          <Autocomplete
+                            {...field}
+                            options={states ?? []}
+                            disabled={formValue?.isSameAddress}
+                            value={
+                              defaultState ? defaultState : states?.find(item => (item as any)?.code === field?.value)
+                            }
+                            getOptionLabel={(option: any) => option?.name || ''}
+                            onChange={(event, data: any) => {
+                              setDefaultState('')
+                              field.onChange(data?.code)
+                            }}
+                            renderInput={params => (
+                              <TextField
+                                {...params}
+                                label='State'
+                                error={!!errors?.physicalState}
+                                helperText={errors?.physicalState?.message as string | undefined}
+                                fullWidth
+                              />
+                            )}
+                          />
+                        )}
+                      />
+                    </Grid>
+                    <Grid item xs={4}>
+                      <TextField
+                        {...register('physicalPincode')}
+                        onChange={(e: any) => {
+                          setValue(e.target.name, e.target.value)
+                        }}
+                        fullWidth
+                        disabled={formValue?.isSameAddress}
+                        type='number'
+                        label={<RequiredLabel label='Pin / Zip Code' />}
+                        value={formValue?.physicalPincode}
+                        defaultValue={formValue?.physicalPincode}
+                        helperText={errors?.physicalPincode && (errors?.physicalPincode?.message as string | undefined)}
+                        error={errors.physicalPincode as any}
+                      />
+                    </Grid>
+                  </Grid>
+                </Grid>
+                <Grid item xs={12} mt={5}>
+                  <Stack direction='row' spacing={1} alignItems='center' justifyContent='center'>
+                    <Typography>In active</Typography>
+                    <FormControlLabel
+                      label=''
+                      control={
+                        <Switch
+                          onChange={e => {
+                            const checked = e?.target?.checked
+                            setValue('isActive', checked, { shouldDirty: true })
+                          }}
+                          checked={formValue?.isActive}
+                        />
+                      }
+                    />
+                    <Typography>Active</Typography>
+                  </Stack>
+                </Grid>
+                {loadingStates && (
+                  <Backdrop
+                    open={loadingStates}
+                    sx={{ color: '#fff', zIndex: (theme: { zIndex: { drawer: number } }) => theme.zIndex.drawer + 1 }}
+                  >
+                    <CircularProgress color='inherit' />
+                  </Backdrop>
+                )}
+              </Grid>
+            </DialogContent>
+
+            <DialogActions sx={{ justifyContent: 'center', marginTop: 3 }}>
+              <Button variant='outlined' color='secondary' onClick={handleModalOpenClose}>
+                Cancel
+              </Button>
+              <Button type='submit' variant='contained' sx={{ mr: 1 }}>
+                {openEdit?.actionType !== 'Add' ? 'Save' : 'Add Corporate'}
+              </Button>
+            </DialogActions>
+          </form>
+        </Dialog>
+      </Grid>
+    </Grid>
+  )
+}
+
+export default StudentList

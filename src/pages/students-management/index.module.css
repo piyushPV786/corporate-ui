@@ -1,0 +1,8 @@
+.iconButton {
+  text-decoration: none !important;
+  margin-right: 0.5px !important;
+  padding: 5px !important;
+  border-radius: 50% !important;
+  border-style: solid !important;
+  border-width: 2px !important;
+}

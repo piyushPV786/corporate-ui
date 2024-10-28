@@ -1,0 +1,35 @@
+.overrideContainer {
+  background-color: #1f2b37;
+  border-radius: 8px;
+}
+.innerBox {
+  text-align: center;
+}
+.GreenFormHeading {
+  font-size: 15px;
+  font-weight: 700;
+  color: black;
+}
+.UploadDocsContainer {
+  background: #dde1e3;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  padding: 1rem;
+  width: 100%;
+  overflow: hidden;
+  border: 2px dashed #8d8e8e;
+  border-radius: 4px;
+}
+.Text {
+  color: #008554;
+}
+.Document {
+  display: flex;
+  justify-content: space-between;
+  background-color: white;
+  padding: 5px 9px 5px 13px;
+  border-radius: 5px;
+  width: 100%;
+}

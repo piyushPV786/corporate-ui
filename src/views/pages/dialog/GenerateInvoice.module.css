@@ -1,0 +1,28 @@
+.overrideContainer {
+  background-color: #1f2b37;
+  border-radius: 8px;
+}
+
+.ButtonBox {
+  display: flex;
+  align-items: center;
+  margin-left: 4px;
+}
+
+.Card {
+  background-color: #eeeeee !important;
+  box-shadow: 0px 3px #e1e3e1 !important;
+  margin-top: 10px;
+}
+
+.CardContent {
+  padding: 8px !important;
+  padding-left: 20px !important;
+}
+
+.DiscountBtn {
+  border-radius: initial !important;
+  padding: '15px' !important;
+  margin-right: '1px' !important;
+  width: 7rem !important;
+}

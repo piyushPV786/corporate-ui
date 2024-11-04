@@ -168,7 +168,7 @@ const Error401 = () => {
     setLoading(true)
     window.localStorage.clear()
     window.sessionStorage.clear()
-    router.push('/enrolment/login')
+    router.push('/corporate/login')
     setLoading(false)
   }
 

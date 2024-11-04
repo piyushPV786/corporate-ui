@@ -99,7 +99,7 @@ const AuthProvider = ({ children }: Props) => {
     await window.localStorage.removeItem('userData')
     await window.localStorage.removeItem(authConfig.storageTokenKeyName)
 
-    window.location.href = '/enrolment/login'
+    window.location.href = '/corporate/login'
   }
 
   const handleRegister = (params: RegisterParams, errorCallback?: ErrCallbackType) => {

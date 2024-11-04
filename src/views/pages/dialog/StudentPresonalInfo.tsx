@@ -24,6 +24,8 @@ import { FormHelperText, TextField } from '@mui/material'
 import { successToast } from 'src/components/Toast'
 import { IListOfCommonTypes } from 'src/types/apps/dataTypes'
 import ControlledAutocomplete from 'src/components/ControlledAutocomplete'
+import { yupResolver } from '@hookform/resolvers/yup'
+import { validationPersonalSchema } from 'src/views/apps/project/projectstudent/schema'
 
 interface Ipersonal {
   studentData: any
@@ -54,6 +56,28 @@ const ageValidator = (dateOfBirth: any) => {
 }
 
 const EditInformation = ({ studentData, getStudentDetailById, listOf }: Ipersonal) => {
+  const defaultValues = {
+    firstName: studentData?.lead?.firstName,
+    middleName: studentData?.lead?.middleName,
+    lastName: studentData?.lead?.lastName,
+    gender: studentData?.lead?.gender,
+    dateOfBirth: studentData?.lead?.dateOfBirth,
+    nationality: studentData?.lead?.nationality,
+
+    //citizenship: studentData?.lead?.citizenship,
+    ifOthersSpecifyTheCitizenship: studentData?.lead?.ifOthersSpecifyTheCitizenship,
+    ifOtherSpecifyHomeLanguage: studentData?.lead?.ifOtherSpecifyHomeLanguage,
+    race: studentData?.lead?.race,
+
+    //ifOtherSpecifyEquityCode: studentData?.lead?.ifOtherSpecifyEquityCode,
+    homeLanguage: studentData?.lead?.language,
+    idType: studentData?.lead?.identificationDocumentType,
+    idNo: studentData?.lead?.identificationNumber
+
+    //socioEconomicStatusCode: studentData?.lead?.socioEconomicStatusCode,
+    // disability: studentData?.lead?.disability,
+    //medicalIssueIfAny: studentData?.lead?.medicalIssueIfAny
+  }
   const {
     handleSubmit,
     watch,
@@ -61,7 +85,8 @@ const EditInformation = ({ studentData, getStudentDetailById, listOf }: Ipersona
 
     reset,
     formState: { errors }
-  } = useForm()
+  } = useForm({ defaultValues, resolver: yupResolver(validationPersonalSchema) })
+
   const [show, setShow] = useState(false)
   const [birthDate, setBirthDate] = useState<Date>()
 
@@ -73,21 +98,26 @@ const EditInformation = ({ studentData, getStudentDetailById, listOf }: Ipersona
       gender: data?.gender,
       dateOfBirth: data?.dateOfBirth,
       nationality: data?.nationality,
-      citizenship: data?.citizenship,
-      ifOthersSpecifyTheCitizenship: data?.ifOthersSpecifyTheCitizenship,
-      ifOtherSpecifyHomeLanguage: data?.ifOtherSpecifyHomeLanguage,
+
+      //citizenship: data?.citizenship,
+      //ifOthersSpecifyTheCitizenship: data?.ifOthersSpecifyTheCitizenship,
+      //ifOtherSpecifyHomeLanguage: data?.ifOtherSpecifyHomeLanguage,
       race: data?.race,
-      ifOtherSpecifyEquityCode: data?.ifOtherSpecifyEquityCode,
-      homeLanguage: data?.homeLanguage,
-      socioEconomicStatusCode: data?.socioEconomicStatusCode,
-      disability: data?.disability,
-      medicalIssueIfAny: data?.medicalIssueIfAny
+
+      //ifOtherSpecifyEquityCode: data?.ifOtherSpecifyEquityCode,
+      language: data?.homeLanguage,
+
+      //socioEconomicStatusCode: data?.socioEconomicStatusCode,
+      //disability: data?.disability,
+      //medicalIssueIfAny: data?.medicalIssueIfAny
+      identificationDocumentType: data?.idType,
+      identificationNumber: data?.idNo
     }
 
-    const response = await DashboardService.addUpdateStudentPersonalInfo(payload, studentData?.code)
+    const response = await DashboardService.addUpdateStudentPersonalInfo(payload, studentData?.applicationCode)
 
-    if (response?.code) {
-      getStudentDetailById(studentData?.id)
+    if (response?.studentCode) {
+      getStudentDetailById(studentData?.applicationCode)
 
       successToast(`Student Personal Info updated successfully`)
     }
@@ -105,26 +135,9 @@ const EditInformation = ({ studentData, getStudentDetailById, listOf }: Ipersona
   }, [watch('dateOfBirth')])
 
   useEffect(() => {
-    !!studentData &&
-      reset({
-        firstName: studentData?.firstName,
-        middleName: studentData?.middleName,
-        lastName: studentData?.lastName,
-        gender: studentData?.gender,
-        dateOfBirth: studentData?.dateOfBirth,
-        nationality: studentData?.nationality,
-        citizenship: studentData?.citizenship,
-        ifOthersSpecifyTheCitizenship: studentData?.ifOthersSpecifyTheCitizenship,
-        ifOtherSpecifyHomeLanguage: studentData?.ifOtherSpecifyHomeLanguage,
-        race: studentData?.race,
-        ifOtherSpecifyEquityCode: studentData?.ifOtherSpecifyEquityCode,
-        homeLanguage: studentData?.homeLanguage,
-        socioEconomicStatusCode: studentData?.socioEconomicStatusCode,
-        disability: studentData?.disability,
-        medicalIssueIfAny: studentData?.medicalIssueIfAny
-      })
+    !!studentData && reset(defaultValues)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [studentData])
+  }, [studentData, reset, !show])
 
   return (
     <Grid>
@@ -200,15 +213,14 @@ const EditInformation = ({ studentData, getStudentDetailById, listOf }: Ipersona
 
               <Grid item sm={4}>
                 <FormControl fullWidth>
-                  {studentData?.gender ? (
-                    <ControlledAutocomplete
-                      control={control}
-                      name='gender'
-                      options={listOf?.gender ?? []}
-                      renderInput={params => <TextField {...params} label='Gender' />}
-                    />
-                  ) : null}
+                  <ControlledAutocomplete
+                    control={control}
+                    name='gender'
+                    options={listOf?.gender ?? []}
+                    renderInput={params => <TextField {...params} label='Gender' />}
+                  />
                 </FormControl>
+                <FormHelperText error>{errors?.gender?.message as string | undefined}</FormHelperText>
               </Grid>
 
               <Grid item sm={4}>
@@ -259,10 +271,10 @@ const EditInformation = ({ studentData, getStudentDetailById, listOf }: Ipersona
                     renderInput={params => <TextField {...params} label='Nationality' />}
                   />
 
-                  <FormHelperText color='error'>{errors?.nationality?.message as string | undefined}</FormHelperText>
+                  <FormHelperText error>{errors?.nationality?.message as string | undefined}</FormHelperText>
                 </FormControl>
               </Grid>
-              <Grid item sm={4}>
+              {/* <Grid item sm={4}>
                 <FormControl fullWidth>
                   <ControlledAutocomplete
                     control={control}
@@ -296,7 +308,7 @@ const EditInformation = ({ studentData, getStudentDetailById, listOf }: Ipersona
                     </Grid>
                   ) : null}
                 </Box>
-              </Grid>
+              </Grid> */}
               <Grid item sm={4}>
                 <FormControl fullWidth>
                   <ControlledAutocomplete
@@ -306,10 +318,10 @@ const EditInformation = ({ studentData, getStudentDetailById, listOf }: Ipersona
                     renderInput={params => <TextField {...params} label='Race/Equity code' />}
                   />
 
-                  <FormHelperText color='error'>{errors?.race?.message as string | undefined}</FormHelperText>
+                  <FormHelperText error>{errors?.race?.message as string | undefined}</FormHelperText>
                 </FormControl>
 
-                <Box>
+                {/* <Box>
                   {watch('race') === 'OTHER' ? (
                     <Grid item sm={12} sx={{ pl: 5, pt: 3 }}>
                       <Controller
@@ -330,7 +342,7 @@ const EditInformation = ({ studentData, getStudentDetailById, listOf }: Ipersona
                       />
                     </Grid>
                   ) : null}
-                </Box>
+                </Box> */}
               </Grid>
               <Grid item sm={4}>
                 <FormControl fullWidth>
@@ -341,10 +353,10 @@ const EditInformation = ({ studentData, getStudentDetailById, listOf }: Ipersona
                     renderInput={params => <TextField {...params} label='Home language' />}
                   />
 
-                  <FormHelperText color='error'>{errors?.homeLanguage?.message as string | undefined}</FormHelperText>
+                  <FormHelperText error>{errors?.homeLanguage?.message as string | undefined}</FormHelperText>
                 </FormControl>
 
-                <Box>
+                {/* <Box>
                   {watch('homeLanguage') === 'OTHER' ? (
                     <Grid item sm={12} sx={{ pl: 5, pt: 3 }}>
                       <Controller
@@ -365,10 +377,10 @@ const EditInformation = ({ studentData, getStudentDetailById, listOf }: Ipersona
                       />
                     </Grid>
                   ) : null}
-                </Box>
+                </Box> */}
               </Grid>
 
-              <Grid item sm={4}>
+              {/* <Grid item sm={4}>
                 <FormControl fullWidth>
                   <ControlledAutocomplete
                     control={control}
@@ -381,8 +393,8 @@ const EditInformation = ({ studentData, getStudentDetailById, listOf }: Ipersona
                     {errors?.socioEconomicStatusCode?.message as string | undefined}
                   </FormHelperText>
                 </FormControl>
-              </Grid>
-              <Grid item sm={4}>
+              </Grid> */}
+              {/* <Grid item sm={4}>
                 <FormControl fullWidth>
                   <ControlledAutocomplete
                     control={control}
@@ -393,9 +405,9 @@ const EditInformation = ({ studentData, getStudentDetailById, listOf }: Ipersona
 
                   <FormHelperText color='error'>{errors?.disability?.message as string | undefined}</FormHelperText>
                 </FormControl>
-              </Grid>
+              </Grid> */}
 
-              <Grid item sm={4}>
+              {/* <Grid item sm={4}>
                 <Controller
                   name='medicalIssueIfAny'
                   control={control}
@@ -411,8 +423,50 @@ const EditInformation = ({ studentData, getStudentDetailById, listOf }: Ipersona
                     />
                   )}
                 />
-              </Grid>
+              </Grid> */}
             </Grid>
+            <Box sx={{ marginTop: 8 }}>
+              <Box style={{ padding: '1rem', borderRadius: 10 }}>
+                <Box>
+                  <Typography sx={{ textAlign: 'center' }}>National ID Details</Typography>
+                </Box>
+                <Box></Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', padding: '22px' }}>
+                  <Grid item sm={5} sx={{ width: '100%' }}>
+                    <ControlledAutocomplete
+                      fullWidth
+                      control={control}
+                      name='idType'
+                      options={listOf?.idType ?? []}
+                      renderInput={params => (
+                        <TextField
+                          {...params}
+                          label='ID Type'
+                          error={errors.idType as boolean | undefined}
+                          helperText={errors.idType && (errors.idType?.message as string | undefined)}
+                        />
+                      )}
+                    />
+                  </Grid>
+
+                  <Grid item sm={5} sx={{ width: '100%' }}>
+                    <Controller
+                      name='idNo'
+                      control={control}
+                      render={({ field }) => (
+                        <TextField
+                          {...field}
+                          label='ID Number'
+                          fullWidth
+                          error={errors.idNo as boolean | undefined}
+                          helperText={errors.idNo && (errors.idNo?.message as string | undefined)}
+                        />
+                      )}
+                    />
+                  </Grid>
+                </Box>
+              </Box>
+            </Box>
           </DialogContent>
           <DialogActions sx={{ pb: { xs: 8, sm: 12.5 }, justifyContent: 'center' }}>
             <Button variant='outlined' color='secondary' onClick={onClose}>

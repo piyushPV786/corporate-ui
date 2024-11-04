@@ -231,7 +231,7 @@ export default class Student {
     }
   }
 
-  async getProjectDocuments(projectCode: number) {
+  async getProjectDocuments(projectCode: string) {
     nProgress.start()
     const endUrlName = this.baseUrl + apiEndPoints.projectList
     try {

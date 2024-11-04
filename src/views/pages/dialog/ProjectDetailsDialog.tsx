@@ -51,8 +51,8 @@ interface DataParams {
 }
 
 interface CustomInputProps {
-  value: DateType
-  label: ReactNode
+  value: DateType | any
+  label: string | ReactNode
   error: boolean
   onChange: (event: ChangeEvent) => void
 }

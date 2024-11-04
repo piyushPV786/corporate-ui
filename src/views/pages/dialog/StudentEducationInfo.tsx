@@ -12,37 +12,54 @@ import FileDocumentEdit from 'mdi-material-ui/FileDocumentEdit'
 import Typography from '@mui/material/Typography'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
-import { Controller, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 
 // ** Icons Imports
 // import Close from 'mdi-material-ui/Close'
 
-import { Autocomplete, TextField } from '@mui/material'
+import { FormHelperText, TextField } from '@mui/material'
 import { DashboardService } from 'src/service'
 import { IListOfCommonTypes } from 'src/types/apps/dataTypes'
 import { successToast } from 'src/components/Toast'
 import ControlledAutocomplete from 'src/components/ControlledAutocomplete'
+import { yupResolver } from '@hookform/resolvers/yup'
+import { validationQualificationSchema } from 'src/views/apps/project/projectstudent/schema'
+import { status } from 'src/context/common'
+import { getName } from 'src/utils'
 
 interface Ieducational {
   studentData: any
   getStudentDetailById: any
   listOf: IListOfCommonTypes
+  qualificationList: any
 }
 
-const EditEductionDetail = ({ studentData, getStudentDetailById, listOf }: Ieducational) => {
-  const { handleSubmit, control, reset } = useForm()
+const EditEductionDetail = ({ studentData, getStudentDetailById, listOf, qualificationList }: Ieducational) => {
+  const defaultValues = {
+    highestQualification: getName(qualificationList, studentData?.education?.qualificationCode)
+  }
+  const {
+    handleSubmit,
+    control,
+    reset,
+    formState: { errors }
+  } = useForm({
+    defaultValues,
+    resolver: yupResolver(validationQualificationSchema)
+  })
   const [show, setShow] = useState(false)
 
   const onSubmit = async (data: any) => {
     const payload = {
-      highestQualification: data?.highestQualification,
-      highestQualificationCompletedYear: data?.highestQualificationCompletedYear
+      qualificationCode: data?.highestQualification
+
+      //highestQualificationCompletedYear: data?.highestQualificationCompletedYear
     }
 
-    const response = await DashboardService.addUpdateStudentEducationInfo(payload, studentData?.code)
+    const response = await DashboardService.addUpdateStudentEducationInfo(payload, studentData?.applicationCode)
 
-    if (response?.code) {
-      getStudentDetailById(studentData?.id)
+    if (response?.statusCode === status.successCode) {
+      getStudentDetailById(studentData?.applicationCode)
 
       successToast(`Student Education Info updated successfully`)
     }
@@ -54,13 +71,10 @@ const EditEductionDetail = ({ studentData, getStudentDetailById, listOf }: Ieduc
   }
 
   useEffect(() => {
-    !!studentData &&
-      reset({
-        highestQualification: studentData?.highestQualification,
-        highestQualificationCompletedYear: studentData?.highestQualificationCompletedYear
-      })
+    !!studentData && reset(defaultValues)
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [studentData])
+  }, [studentData, reset, !show])
 
   return (
     <Grid>
@@ -92,9 +106,10 @@ const EditEductionDetail = ({ studentData, getStudentDetailById, listOf }: Ieduc
                   options={listOf?.highestQualification ?? []}
                   renderInput={params => <TextField {...params} label='Higher Qualification' />}
                 />
+                <FormHelperText error>{errors?.highestQualification?.message as string | undefined}</FormHelperText>
               </Grid>
 
-              <Grid item sm={12} xs={12}>
+              {/* <Grid item sm={12} xs={12}>
                 <Controller
                   name='highestQualificationCompletedYear'
                   control={control}
@@ -107,7 +122,7 @@ const EditEductionDetail = ({ studentData, getStudentDetailById, listOf }: Ieduc
                     />
                   )}
                 />
-              </Grid>
+              </Grid> */}
             </Grid>
           </DialogContent>
           <DialogActions sx={{ pb: { xs: 8, sm: 12.5 }, justifyContent: 'center' }}>

@@ -33,14 +33,14 @@ const isLoadingInitialState = {
   listLoading: true
 }
 
-const Documents = ({ projectCode, projectId }: { projectCode: string; projectId: number }) => {
+const Documents = ({ projectCode }: { projectCode: string }) => {
   const [isLoading, setIsLoading] = useState<{ [key: string]: boolean }>(isLoadingInitialState)
   const [viewFileLoader, setViewFileLoader] = useState<{ [key: string]: boolean }>()
   const [documentList, setDocumentList] = useState<Array<IDocumentListResponseTypes>>()
   const [documentTypeList, setDocumentTypeList] = useState<Array<commonListTypes>>([])
 
   const getDocumentList = async () => {
-    const response = await StudentService.getProjectDocuments(projectId)
+    const response = await StudentService.getProjectDocuments(projectCode)
     if (response) {
       setDocumentList(response.data)
       setIsLoading(prev => ({ ...prev, listLoading: false }))
@@ -61,16 +61,17 @@ const Documents = ({ projectCode, projectId }: { projectCode: string; projectId:
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const uploadDocument = async (param: IUploadDocumentParam) => {
+  const uploadDocument = async (param: IUploadDocumentParam, docCode: string) => {
     setIsLoading(prev => ({ ...prev, documentAdding: true, listLoading: true }))
     const { file, documentTypeCode, comment } = param
     const response = await StudentService.addProjectDocuments({
-      projectCode: projectId,
+      projectCode: projectCode,
       body: {
         documentTypeCode: documentTypeCode,
         fileName: file.name,
         fileType: file.type,
-        projectCode: projectId.toString(),
+        code: docCode,
+        projectCode: projectCode.toString(),
         comment: comment
       }
     })

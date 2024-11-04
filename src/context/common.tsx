@@ -305,7 +305,16 @@ export enum Regex {
   Alpha = '^[a-zA-Z]+$',
   Pascal_Case = '^[A-Z][a-z A-Z0-9-]+$'
 }
-
+export const EditStudentMessages = {
+  firstNameRequired: ' First Name is Required',
+  firstNameError:
+    'First name must be character. Please ensure first letter of the name starts with an uppercase letter and use single spaces or hyphens only.',
+  lastNameRequired: 'Last Name is Required',
+  lastNameError:
+    'Last Name must be character. Please ensure first letter of the name starts with an uppercase letter and use single spaces or hyphens only.',
+  middleNameError:
+    'Middle Name must be character. Please ensure first letter of the name starts with an uppercase letter and use single spaces or hyphens only.'
+}
 export const AddStudentMessages = {
   firstNameRequired: ' First Name is Required',
   firstNameError: 'First name must be character',

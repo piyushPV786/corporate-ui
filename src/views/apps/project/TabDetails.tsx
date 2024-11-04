@@ -210,7 +210,7 @@ const TabDetails = ({ projectData, fetchProject }: ITabDetail) => {
           <StudentList projectCode={projectData?.code as any} projectName={projectData?.name as any} />
         </TabPanel>
         <TabPanel value={value} index={5} dir={theme.direction}>
-          <Documents projectCode={projectData?.code} projectId={projectData?.id} />
+          <Documents projectCode={projectData?.code} />
         </TabPanel>
         <TabPanel value={value} index={6} dir={theme.direction}>
           <VenueDetails code={projectData?.code} />

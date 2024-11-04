@@ -41,9 +41,10 @@ export interface IProjectDocumentsPostApiTypes {
   fileType: string
   projectCode: string
   comment?: string
+  code: string
 }
 export interface IAddProjectDocumentsParamTypes {
-  projectCode: number
+  projectCode: string
   body: IProjectDocumentsPostApiTypes
 }
 
@@ -102,9 +103,11 @@ export interface IProjectStudentTypes {
   comments: string
   contactEmail: string
   homeLanguageSpecified: string
+  lead: any
   documents: {
     data: documentType[]
     count: number
   }
   studentCode: string
+  education: any
 }

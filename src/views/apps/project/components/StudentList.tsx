@@ -118,7 +118,7 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
   const [pageSize, setPageSize] = useState<number>(10)
   const [pageNumber, setPageNumber] = useState<number>(1)
   const [projectStudentListData, setProjectStudentListData] = useState<IStudent>()
-  const [studentList, setStudentList] = useState<Array<projectStudentType>>()
+  const [studentList, setStudentList] = useState<Array<any>>()
   const [uploadedFile, setUploadedFile] = useState<CustomFileType | null>()
   const [missingData, setMissingData] = useState<IMissingDataTypes | null>()
   const [selectedRow, setSelectedRow] = useState<GridSelectionModel>([])
@@ -409,7 +409,7 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
             {row?.status === 'Draft' ? (
               <Tooltip title='Edit'>
                 <Box>
-                  <Link href={`/project/preview/${projectCode}/add-student?studentId=${row.id}`} passHref>
+                  <Link href={`/project/preview/${projectCode}/add-student?studentId=${row.applicationCode}`} passHref>
                     <IconButton
                       size='small'
                       component='a'
@@ -424,7 +424,7 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
             ) : (
               <Tooltip title='View'>
                 <Box textAlign='center'>
-                  <Link href={`/project/${projectCode}/student/${row.id}`} passHref>
+                  <Link href={`/project/${projectCode}/student/${row.applicationCode}`} passHref>
                     <IconButton
                       size='small'
                       component='a'

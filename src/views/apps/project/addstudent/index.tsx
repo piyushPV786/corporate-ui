@@ -19,7 +19,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { schema } from './schema'
 import { IDynamicObject } from 'src/types/apps/corporatTypes'
-import { formatDate } from 'src/utils'
+import { formatDate, formatDateYMD } from 'src/utils'
 
 const intialState = {
   firstName: '',
@@ -161,7 +161,7 @@ const AddStudentPreview = ({ projectCode }: IstudentPreview) => {
       language: data.homeLanguage,
       race: data.race,
       isAgreedTermsAndConditions: true,
-      PassportExpiryDate: data.passportExpiryDate ? formatDate(data.passportExpiryDate) : ''
+      passportExpiryDate: data.passportExpiryDate ? formatDateYMD(data.passportExpiryDate) : ''
     }
 
     const addressPayload = {

@@ -4,6 +4,7 @@ import { academicMenu } from './menues/academicMenu'
 import { operationMenu } from './menues/operationMenu'
 import { userManagementMenu } from './menues/userManageMenu'
 import { assessmentMenu } from './menues/assessmentMenu'
+import { corporateMenu } from './menues/corporateMenu'
 
 const mainObject = (mainObject: any) => {
   const sortedObjects = Object.keys(mainObject)
@@ -19,6 +20,7 @@ const mainObject = (mainObject: any) => {
 }
 
 export const MenuData: any = {
+  ...mainObject(corporateMenu),
   ...mainObject(enrolmentMenu),
   ...mainObject(academicMenu),
   ...mainObject(assessmentMenu),

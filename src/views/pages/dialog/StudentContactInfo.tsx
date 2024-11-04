@@ -7,6 +7,8 @@ import { useEffect, useState } from 'react'
 import { FileDocumentEdit } from 'mdi-material-ui'
 import { DashboardService } from 'src/service'
 import { successToast } from 'src/components/Toast'
+import { yupResolver } from '@hookform/resolvers/yup'
+import { validationContactSchema } from 'src/views/apps/project/projectstudent/schema'
 
 interface IContactTypes {
   studentData: any
@@ -14,17 +16,32 @@ interface IContactTypes {
 }
 
 const EditContactDetails = ({ studentData, getStudentDetailById }: IContactTypes) => {
+  const defaultValues = {
+    email: studentData?.lead?.email,
+
+    //contactNumberCountryCode: studentData?.lead?.mobileCountryCode,
+    contactNumber: studentData?.lead?.mobileNumber,
+
+    //alternativeContactCountryCode: studentData?.lead?.alternativeContactCountryCode,
+    //alternativeContact: studentData?.lead?.alternativeContact,
+    //whatsappNumberCountryCode: studentData?.lead?.whatsappNumberCountryCode,
+    whatsappNumber: studentData?.lead?.whatAsppNumber
+
+    //homePhone: studentData?.lead?.homePhone
+  }
   const {
     handleSubmit,
-    watch,
+
+    //watch,
     control,
     setValue,
     reset,
     formState: { errors }
-  } = useForm()
-  const countryCodeContact = (fieldName: string, data: any, dialCode: string) => {
+  } = useForm({ defaultValues, resolver: yupResolver(validationContactSchema) })
+
+  const countryCodeContact = (fieldName: string | any, data: any, dialCode: string) => {
+    console.log(dialCode)
     data && setValue(fieldName, data)
-    data && setValue(`${fieldName}CountryCode`, dialCode)
   }
 
   const [show, setShow] = useState(false)
@@ -32,19 +49,19 @@ const EditContactDetails = ({ studentData, getStudentDetailById }: IContactTypes
   const onSubmit = async (data: any) => {
     const payload = {
       email: data?.email,
-      contactNumberCountryCode: data?.contactNumberCountryCode,
-      contactNumber: data?.contactNumber,
+      mobileCountryCode: data?.contactNumberCountryCode,
+      mobileNumber: data?.contactNumber,
       alternativeContactCountryCode: data?.alternativeContactCountryCode,
       alternativeContact: data?.alternativeContact,
       whatsappNumberCountryCode: data?.whatsappNumberCountryCode,
-      whatsappNumber: data?.whatsappNumber,
+      whatAsppNumber: data?.whatsappNumber,
       homePhone: data?.homePhone
     }
 
-    const response = await DashboardService.addUpdateStudentContactInfo(payload, studentData?.code)
+    const response = await DashboardService.addUpdateStudentContactInfo(payload, studentData?.applicationCode)
 
-    if (response?.code) {
-      getStudentDetailById(studentData?.id)
+    if (response?.studentCode) {
+      getStudentDetailById(studentData?.applicationCode)
 
       successToast(`Student Contact Info updated successfully`)
     }
@@ -57,19 +74,9 @@ const EditContactDetails = ({ studentData, getStudentDetailById }: IContactTypes
   }
 
   useEffect(() => {
-    !!studentData &&
-      reset({
-        email: studentData?.email,
-        contactNumberCountryCode: studentData?.contactNumberCountryCode,
-        contactNumber: studentData?.contactNumber,
-        alternativeContactCountryCode: studentData?.alternativeContactCountryCode,
-        alternativeContact: studentData?.alternativeContact,
-        whatsappNumberCountryCode: studentData?.whatsappNumberCountryCode,
-        whatsappNumber: studentData?.whatsappNumber,
-        homePhone: studentData?.homePhone
-      })
+    !!studentData && reset(defaultValues)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [studentData])
+  }, [studentData, reset, !show])
 
   return (
     <Grid>
@@ -140,14 +147,14 @@ const EditContactDetails = ({ studentData, getStudentDetailById }: IContactTypes
                           width: '100%'
                         }}
                       />
-                      <FormHelperText style={{ color: 'red' }}>
+                      <FormHelperText error>
                         {errors.contactNumber && (errors.contactNumber?.message as string | undefined)}
                       </FormHelperText>
                     </Box>
                   )}
                 />
               </Grid>
-              <Grid item sm={4} xs={12}>
+              {/* <Grid item sm={4} xs={12}>
                 <Controller
                   name='alternativeContact'
                   control={control}
@@ -184,9 +191,9 @@ const EditContactDetails = ({ studentData, getStudentDetailById }: IContactTypes
                 <FormHelperText style={{ color: 'red' }}>
                   {errors.alternativeContact && (errors.alternativeContact?.message as string | undefined)}
                 </FormHelperText>
-              </Grid>
+              </Grid> */}
 
-              <Grid item sm={4}>
+              {/* <Grid item sm={4}>
                 <Controller
                   name='homePhone'
                   control={control}
@@ -201,7 +208,7 @@ const EditContactDetails = ({ studentData, getStudentDetailById }: IContactTypes
                     />
                   )}
                 />
-              </Grid>
+              </Grid> */}
               <Grid item sm={4} xs={12}>
                 <Controller
                   name='whatsappNumber'

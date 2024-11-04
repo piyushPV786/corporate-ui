@@ -170,6 +170,7 @@ const StudentList = () => {
     watch,
     reset,
     control,
+    setError,
     formState: { errors }
   } = useForm<any>({
     defaultValues: corporateFormData,
@@ -207,7 +208,12 @@ const StudentList = () => {
       fetchStates(countryWatch)
     }
   }, [countryWatch])
+  const checkDuplicateCorporateCode = async (code: string, id?: number) => {
+    const response = await DashboardService?.checkDuplicateCorporateCode(code, id)
+    response?.message && setError('code', { type: 'custom', message: response?.message })
 
+    return response?.message
+  }
   const formValue = watch()
   const router = useRouter()
   const columns = [
@@ -412,47 +418,54 @@ const StudentList = () => {
 
   const onSubmit = async (data: any) => {
     reset({}, { keepValues: true })
+    const duplicateName =
+      actionType === 'Add'
+        ? await checkDuplicateCorporateCode(data?.code)
+        : await checkDuplicateCorporateCode(data?.code, openEdit?.data?.id)
 
-    const { name, code, companyType, email, phoneNumber, isSameAddress, isActive } = data
-    let res: AxiosResponse | undefined
-    const { address1 = '', address2 = '', country = '', state = '', pincode = '', ...postalAddress } = { ...data }
+    if (duplicateName === undefined) {
+      const { name, code, companyType, email, phoneNumber, isSameAddress, isActive } = data
+      let res: AxiosResponse | undefined
+      const { address1 = '', address2 = '', country = '', state = '', pincode = '', ...postalAddress } = { ...data }
 
-    const postalAddr = {
-      address1: postalAddress?.physicalAddress1,
-      address2: postalAddress?.physicalAddress2,
-      country: postalAddress?.physicalCountry,
-      state: postalAddress?.physicalState,
-      pincode: postalAddress?.physicalPincode,
-      addressType: 'POSTAL'
-    }
-    const address = [
-      { address1, address2, country, state, pincode, addressType: 'RESIDENTIAL' },
-      {
-        ...postalAddr,
+      const postalAddr = {
+        address1: postalAddress?.physicalAddress1,
+        address2: postalAddress?.physicalAddress2,
+        country: postalAddress?.physicalCountry,
+        state: postalAddress?.physicalState,
+        pincode: postalAddress?.physicalPincode,
         addressType: 'POSTAL'
       }
-    ]
+      const address = [
+        { address1, address2, country, state, pincode, addressType: 'RESIDENTIAL' },
+        {
+          ...postalAddr,
+          addressType: 'POSTAL'
+        }
+      ]
 
-    const payload = { name, code, companyType, email, phoneNumber, isSameAddress, isActive, address }
+      const payload = { name, code, companyType, email, phoneNumber, isSameAddress, isActive, address }
 
-    if (openEdit?.actionType === 'Add') {
-      res = await DashboardService?.addCorporate(payload)
-    } else {
-      res = await DashboardService?.updateCorporate(code, payload)
-    }
-    if (res?.data?.statusCode === status?.successCodeOne || res?.data?.statusCode === status?.successCode) {
-      getCorporateList({
-        q: value,
-        pageSize: pageSize,
-        pageNumber: pageNumber,
-        status: ''
-      })
-      setOpenEdit(prevState => ({ ...prevState, show: false, data: null, actionType: 'Add' }))
-      successToast(
-        `${payload.name} ${openEdit?.actionType === 'Add' ? messages.corporateAdded : messages.corporateEdited}`
-      )
-    } else {
-      errorToast(messages.error)
+      if (openEdit?.actionType === 'Add') {
+        res = await DashboardService?.addCorporate(payload)
+      } else {
+        res = await DashboardService?.updateCorporate(code, payload)
+      }
+      if (res?.data?.statusCode === status?.successCodeOne || res?.data?.statusCode === status?.successCode) {
+        getCorporateList({
+          q: value,
+          pageSize: pageSize,
+          pageNumber: pageNumber,
+          status: ''
+        })
+        setOpenEdit(prevState => ({ ...prevState, show: false, data: null, actionType: 'Add' }))
+        successToast(
+          `${payload.name} ${openEdit?.actionType === 'Add' ? messages.corporateAdded : messages.corporateEdited}`
+        )
+      } else {
+        errorToast(messages.error)
+        setError('code', { type: 'custom', message: response?.message })
+      }
     }
   }
 
@@ -548,6 +561,7 @@ const StudentList = () => {
                         {...field}
                         disabled={openEdit?.actionType !== 'Add'}
                         fullWidth
+                        onBlur={() => checkDuplicateCorporateCode(field.value)}
                         label={<RequiredLabel label='Company Code' />}
                         error={!!errors.code}
                         helperText={errors?.code?.message as string | undefined}

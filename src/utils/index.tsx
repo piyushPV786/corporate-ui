@@ -216,6 +216,12 @@ export const formatDate = (date: Date | string, dateFormat = 'dd-MM-yyyy'): stri
   return format(parsedDate, dateFormat)
 }
 
+export const formatDateYMD = (date: Date | string, dateFormat = 'yyyy-MM-dd'): string => {
+  const parsedDate = new Date(date)
+
+  return format(parsedDate, dateFormat)
+}
+
 export const filterNameByCode = (data: any, code: string) => {
   let name = code
   if (data?.length && code) {

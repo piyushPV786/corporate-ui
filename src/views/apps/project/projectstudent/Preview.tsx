@@ -14,7 +14,7 @@ import { IProjectStudentTypes } from 'src/types/apps/projectTypes'
 import { errorToast, successToast } from 'src/components/Toast'
 
 interface IStudentPreviewProps {
-  id: number
+  id: number | string | any
   projectCode: string
 }
 
@@ -23,6 +23,7 @@ const StudentPreview = ({ id, projectCode }: IStudentPreviewProps) => {
 
   const getStudentDetailById = async () => {
     const response = await DashboardService.getProjectStudentById(id)
+    console.log(response)
     if (response?.status === status?.successCode && response?.data?.data) {
       setStudentDetail(response?.data?.data)
     }
@@ -48,7 +49,8 @@ const StudentPreview = ({ id, projectCode }: IStudentPreviewProps) => {
           studentId={id}
           studentDetail={studentDetail}
           getStudentDetailById={getStudentDetailById}
-          projectCode={projectCode}
+
+          //projectCode={projectCode}
         />
       </Grid>
       <Grid item xl={3} md={4} xs={12}>

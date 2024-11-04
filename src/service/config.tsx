@@ -112,10 +112,10 @@ export const apiEndPoints = {
   getStudentDetailAppCode: 'application/student-details-by-appcode/:appCode',
   applicationDetails: 'lead/:leadId/application',
   salesSudents: 'sales/student',
-  personalInfo: 'projectStudent/projectStudent/personalInformation',
-  contactInfo: 'projectStudent/projectStudent/contactInformation',
-  addressInfo: 'projectStudent/projectStudent/addressInformation',
-  educationInfo: 'projectStudent/projectStudent/educationInformation',
+  personalInfo: 'sales',
+  contactInfo: 'sales',
+  addressInfo: 'sales',
+  educationInfo: 'sales',
   unenrollStudent: 'admitted-students/unenroll-student',
   globalSearch: 'application/global-search',
   checkDuplicateProject: 'project/check-duplicate-project',
@@ -171,7 +171,8 @@ export const apiEndPoints = {
   assignGroup: 'corporate-group/assing/corporateGroup',
   allGroup: 'corporate-group/all',
   corporateGroup: 'corporate-group',
-  corporateGroupStudents: 'corporate-group/all-student'
+  corporateGroupStudents: 'corporate-group/all-student',
+  corporateCode: 'corporate-ed/check-duplicate-corporate'
 }
 
 export const allowedDocsForCreditVetting = ['SMARTID', 'PASSPORT']

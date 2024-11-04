@@ -22,44 +22,84 @@ import { IListOfCommonTypes } from 'src/types/apps/dataTypes'
 import { DashboardService } from 'src/service'
 import { successToast } from 'src/components/Toast'
 import ControlledAutocomplete from 'src/components/ControlledAutocomplete'
+import { yupResolver } from '@hookform/resolvers/yup'
+import { validationAddressSchema } from 'src/views/apps/project/projectstudent/schema'
+
+//import { getName } from 'src/utils'
 
 interface Inational {
   studentData: any
   getStudentDetailById: any
   listOf: IListOfCommonTypes
+  stateList: any
+  getStateList: any
 }
 
-const EditAddress = ({ studentData, getStudentDetailById, listOf }: Inational) => {
+const EditAddress = ({ studentData, getStudentDetailById, listOf, stateList, getStateList }: Inational) => {
+  const defaultValues = {
+    streetAddress: studentData?.lead?.address?.find(
+      (address: { addressType: string }) => address.addressType === 'RESIDENTIAL'
+    )?.street,
+    suburb: studentData?.lead?.address?.find(
+      (address: { addressType: string }) => address.addressType === 'RESIDENTIAL'
+    )?.suburb,
+    town: studentData?.lead?.address?.find((address: { addressType: string }) => address.addressType === 'RESIDENTIAL')
+      ?.town,
+    state: studentData?.lead?.address?.find((address: { addressType: string }) => address.addressType === 'RESIDENTIAL')
+      ?.state,
+    city: studentData?.lead?.address?.find((address: { addressType: string }) => address.addressType === 'RESIDENTIAL')
+      ?.city,
+    province: studentData?.lead?.address?.find(
+      (address: { addressType: string }) => address.addressType === 'RESIDENTIAL'
+    )?.province,
+    country: studentData?.lead?.address?.find(
+      (address: { addressType: string }) => address.addressType === 'RESIDENTIAL'
+    )?.country,
+    zipCode: studentData?.lead?.address?.find(
+      (address: { addressType: string }) => address.addressType === 'RESIDENTIAL'
+    )?.zipcode
+
+    // idType: studentData?.lead?.identificationDocumentType,
+    // ifOthersSpecifyTheIdType: studentData?.lead?.address?.find(
+    //   (address: { addressType: string }) => address.addressType === 'RESIDENTIAL'
+    // )?.ifOthersSpecifyTheIdType,
+    // idNo: studentData?.lead?.identificationNumber
+  }
   const {
     handleSubmit,
-    register,
+
+    //register,
     watch,
     control,
-    setValue,
+
+    //setValue,
 
     reset,
     formState: { errors }
-  } = useForm()
+  } = useForm({ defaultValues, resolver: yupResolver(validationAddressSchema) })
 
   const [show, setShow] = useState(false)
 
   const onSubmit = async (data: any) => {
     const payload = {
-      streetAddress: data?.streetAddress,
+      street: data?.streetAddress,
       suburb: data?.suburb,
       town: data?.town,
       province: data?.province,
       country: data?.country,
-      zipCode: data?.zipCode,
-      idType: data?.idType,
-      ifOthersSpecifyTheIdType: data?.ifOthersSpecifyTheIdType,
-      idNo: data?.idNo
+      zipcode: data?.zipCode,
+
+      // identificationDocumentType: data?.idType,
+      // ifOthersSpecifyTheIdType: data?.ifOthersSpecifyTheIdType,
+      // identificationNumber: data?.idNo
+      city: data?.city,
+      state: data?.state
     }
 
-    const response = await DashboardService.addUpdateStudentAddressInfo(payload, studentData?.code)
+    const response = await DashboardService.addUpdateStudentAddressInfo(payload, studentData?.applicationCode)
 
-    if (response?.code) {
-      getStudentDetailById(studentData?.id)
+    if (response?.lead?.studentCode) {
+      getStudentDetailById(studentData?.applicationCode)
 
       successToast(`Student Address Info updated successfully`)
     }
@@ -72,20 +112,14 @@ const EditAddress = ({ studentData, getStudentDetailById, listOf }: Inational) =
   }
 
   useEffect(() => {
-    !!studentData &&
-      reset({
-        streetAddress: studentData?.streetAddress,
-        suburb: studentData?.suburb,
-        town: studentData?.town,
-        province: studentData?.province,
-        country: studentData?.country,
-        zipCode: studentData?.zipCode,
-        idType: studentData?.idType,
-        ifOthersSpecifyTheIdType: studentData?.ifOthersSpecifyTheIdType,
-        idNo: studentData?.idNo
-      })
+    !!studentData && reset(defaultValues)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [studentData])
+  }, [studentData, reset, !show])
+  useEffect(() => {
+    if (watch('country')) {
+      getStateList(watch('country'))
+    }
+  }, [watch('country')])
 
   return (
     <Grid>
@@ -127,7 +161,7 @@ const EditAddress = ({ studentData, getStudentDetailById, listOf }: Inational) =
                 />
               </Grid>
 
-              <Grid item sm={4} xs={12}>
+              {/* <Grid item sm={4} xs={12}>
                 <Controller
                   name='suburb'
                   control={control}
@@ -141,52 +175,51 @@ const EditAddress = ({ studentData, getStudentDetailById, listOf }: Inational) =
                     />
                   )}
                 />
-              </Grid>
+              </Grid> */}
               <Grid item sm={4} xs={12}>
-                <Controller
-                  name='town'
+                <ControlledAutocomplete
                   control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      error={errors.town as boolean | undefined}
-                      fullWidth
-                      label='Town'
-                      helperText={errors.town && (errors.town?.message as string | undefined)}
-                    />
-                  )}
-                />
-              </Grid>
-              <Grid item sm={4} xs={12}>
-                <Controller
-                  name='province'
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      error={errors.province as boolean | undefined}
-                      fullWidth
-                      label='Province'
-                      helperText={errors.province && (errors.province?.message as string | undefined)}
-                    />
-                  )}
-                />
-              </Grid>
-              <Grid item sm={4} xs={12}>
-                <Controller
                   name='country'
-                  control={control}
-                  render={({ field }) => (
+                  options={listOf?.country ?? []}
+                  renderInput={params => (
                     <TextField
-                      {...field}
-                      error={errors.country as boolean | undefined}
-                      fullWidth
+                      {...params}
                       label='Country'
                       helperText={errors.country && (errors.country?.message as string | undefined)}
                     />
                   )}
                 />
               </Grid>
+              <Grid item sm={4} xs={12}>
+                <ControlledAutocomplete
+                  control={control}
+                  name='state'
+                  options={stateList ?? []}
+                  renderInput={params => (
+                    <TextField
+                      {...params}
+                      label='State'
+                      helperText={errors.state && (errors.state?.message as string | undefined)}
+                    />
+                  )}
+                />
+              </Grid>
+              <Grid item sm={4} xs={12}>
+                <Controller
+                  name='city'
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      error={errors.town as boolean | undefined}
+                      fullWidth
+                      label='City'
+                      helperText={errors.city && (errors.city?.message as string | undefined)}
+                    />
+                  )}
+                />
+              </Grid>
+
               <Grid item sm={4} xs={12}>
                 <Controller
                   name='zipCode'
@@ -205,7 +238,7 @@ const EditAddress = ({ studentData, getStudentDetailById, listOf }: Inational) =
               </Grid>
             </Grid>
             <Box sx={{ marginTop: 8 }}>
-              <Box style={{ padding: '1rem', borderRadius: 10 }}>
+              {/* <Box style={{ padding: '1rem', borderRadius: 10 }}>
                 <Box>
                   <Typography sx={{ textAlign: 'center' }}>National ID Details</Typography>
                 </Box>
@@ -257,7 +290,7 @@ const EditAddress = ({ studentData, getStudentDetailById, listOf }: Inational) =
                     </Grid>
                   ) : null}
                 </Box>
-              </Box>
+              </Box> */}
             </Box>
           </DialogContent>
           <DialogActions sx={{ pb: { xs: 8, sm: 12.5 }, justifyContent: 'center' }}>

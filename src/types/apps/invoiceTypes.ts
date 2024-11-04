@@ -36,6 +36,7 @@ export type InvoiceAddInstallmentType = {
 }
 export type projectStudentType = {
   id: number
+  applicationCode: string
   name: string
   contact: {
     email: string

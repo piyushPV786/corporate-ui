@@ -974,7 +974,7 @@ export default class Dashboard {
     nProgress.start()
     const endUrlName = this.baseUrl + apiEndPoints.personalInfo
     try {
-      const response = await this.apiServer.patch(`${endUrlName}/${code}`, payload)
+      const response = await this.apiServer.patch(`${endUrlName}/${code}/update/basic`, payload)
 
       return response?.data?.data
     } catch (err: any) {
@@ -985,9 +985,10 @@ export default class Dashboard {
   }
   async addUpdateStudentContactInfo(payload: IUpdateStudentContactInfo, code: number) {
     nProgress.start()
+
     const endUrlName = this.baseUrl + apiEndPoints.contactInfo
     try {
-      const response = await this.apiServer.patch(`${endUrlName}/${code}`, payload)
+      const response = await this.apiServer.patch(`${endUrlName}/${code}/update/basic`, payload)
 
       return response?.data?.data
     } catch (err: any) {
@@ -1000,7 +1001,7 @@ export default class Dashboard {
     nProgress.start()
     const endUrlName = this.baseUrl + apiEndPoints.addressInfo
     try {
-      const response = await this.apiServer.patch(`${endUrlName}/${code}`, payload)
+      const response = await this.apiServer.patch(`${endUrlName}/${code}/update/address`, payload)
 
       return response?.data?.data
     } catch (err: any) {
@@ -1013,9 +1014,9 @@ export default class Dashboard {
     nProgress.start()
     const endUrlName = this.baseUrl + apiEndPoints.educationInfo
     try {
-      const response = await this.apiServer.patch(`${endUrlName}/${code}`, payload)
+      const response = await this.apiServer.patch(`${endUrlName}/${code}/update/course`, payload)
 
-      return response?.data?.data
+      return response?.data
     } catch (err: any) {
       console.log('Error fetching Student Education Info ========>', err?.message)
     } finally {
@@ -1317,6 +1318,22 @@ export default class Dashboard {
       return response
     } catch (err: any) {
       console.log('Error updating corporate group  ========>', err?.message)
+    }
+  }
+
+  async checkDuplicateCorporateCode(code: string | number, id?: number) {
+    nProgress.start()
+    let endUrlName = `${this.baseUrl + apiEndPoints.corporateCode}?code=${code}`
+    if (id) endUrlName = `${endUrlName}&corporateId=${id}`
+
+    try {
+      const response = await this.apiServer.get(endUrlName)
+
+      return response?.data?.data
+    } catch (err: any) {
+      console.log('Error in checking duplicate Module code ========>', err?.message)
+    } finally {
+      nProgress.done()
     }
   }
 }

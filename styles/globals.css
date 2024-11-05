@@ -303,3 +303,9 @@ td.MuiTableCell-body p {
   left: 91% !important;
   top: 92% !important;
 }
+
+.phone-number-required .special-label::after {
+  content: '*';
+  color: red;
+  margin-left: 3px;
+}

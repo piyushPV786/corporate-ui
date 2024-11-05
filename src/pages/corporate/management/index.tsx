@@ -678,7 +678,7 @@ const StudentList = () => {
                             renderInput={params => (
                               <TextField
                                 {...params}
-                                label='Country'
+                                label={<RequiredLabel label='Country' />}
                                 error={!!errors?.country}
                                 helperText={errors?.country?.message as string | undefined}
                                 fullWidth
@@ -704,7 +704,7 @@ const StudentList = () => {
                             renderInput={params => (
                               <TextField
                                 {...params}
-                                label='Province / State'
+                                label={<RequiredLabel label='Province / State' />}
                                 error={!!errors?.state}
                                 helperText={errors?.state?.message as string | undefined}
                                 fullWidth
@@ -822,7 +822,7 @@ const StudentList = () => {
                             renderInput={params => (
                               <TextField
                                 {...params}
-                                label='Country'
+                                label={<RequiredLabel label='Country' />}
                                 error={!!errors?.physicalCountry}
                                 helperText={errors?.physicalCountry?.message as string | undefined}
                                 fullWidth
@@ -852,7 +852,7 @@ const StudentList = () => {
                             renderInput={params => (
                               <TextField
                                 {...params}
-                                label='State'
+                                label={<RequiredLabel label='State' />}
                                 error={!!errors?.physicalState}
                                 helperText={errors?.physicalState?.message as string | undefined}
                                 fullWidth

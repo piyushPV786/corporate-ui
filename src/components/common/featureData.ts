@@ -81,7 +81,8 @@ export const FeatureCodes = {
     corporate: 'CORPORATE',
     corporateStudentManagement: 'CORPORATE-STUDENT-MANAGEMENT',
     projectManagement: 'PROJECT-MANAGEMENT',
-    corporateGroup: 'CORPORATE-GROUP'
+    corporateGroup: 'CORPORATE-GROUP',
+    projectManager: 'PROJECT-MANAGER'
   }
 }
 

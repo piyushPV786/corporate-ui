@@ -291,6 +291,7 @@ export const PersonalInformationDetail = ({ errors, setValue, watch, control }: 
                           background: 'none',
                           width: '100%'
                         }}
+                        containerClass='phone-number-required'
                       />
                       <FormHelperText style={{ color: 'red' }}>
                         {errors.mobileNumber && errors.mobileNumber?.message}

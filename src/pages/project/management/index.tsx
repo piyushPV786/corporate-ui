@@ -7,13 +7,14 @@ import Link from 'next/link'
 // ** MUI Imports
 import { Box, Card, Grid, IconButton, Tooltip, Typography } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
+import { styled } from '@mui/material/styles'
 
 // ** Custom Components Imports
 import TableHeader from 'src/views/apps/admission/list/TableHeader'
 import { InvoiceType } from 'src/types/apps/invoiceTypes'
 import { ThemeColor } from 'src/@core/layouts/types'
 import { ProjectStatusTypes, projectMessages, status } from 'src/context/common'
-import { getName, minTwoDigits, serialNumber } from 'src/utils'
+import { getFullName, getName, minTwoDigits, serialNumber } from 'src/utils'
 import ProjectManagementAddDialog from 'src/views/pages/dialog/ProjectManagementAddDialog'
 import { successToast } from 'src/components/Toast'
 import { commonListTypes } from 'src/types/apps/dataTypes'
@@ -23,6 +24,7 @@ import { AcademicService, CommonService, DashboardService, UserManagementService
 import 'react-datepicker/dist/react-datepicker.css'
 import { FolderPlusOutline } from 'mdi-material-ui'
 import CustomChip from 'src/@core/components/mui/chip'
+import ProjectInformation from 'src/views/pages/dialog/ProjectInformation'
 
 interface CellType {
   row: InvoiceType
@@ -68,6 +70,15 @@ const getProjectStatus = (status: boolean) => {
 }
 
 // ** Styled component for the link in the dataTable
+const StyledLink = styled('a')(({ theme }) => ({
+  color: theme.palette.primary.main,
+  cursor: 'pointer',
+  ':hover': {
+    textDecoration: 'underline'
+  }
+}))
+
+// ** Styled component for the link in the dataTable
 
 const ProjectManagement = () => {
   // ** State
@@ -83,6 +94,12 @@ const ProjectManagement = () => {
     accountManagerList: [],
     projectManagerList: []
   })
+  const [selectedProjectDetails, setSelectedProjectDetails] = useState<any>()
+  const [projectDetailsOpen, setProjectDetailsOpen] = useState<boolean>(false)
+
+  const handleCloseProjectDetails = () => {
+    setProjectDetailsOpen(false)
+  }
 
   const columns = [
     {
@@ -99,7 +116,18 @@ const ProjectManagement = () => {
       minWidth: 250,
       headerName: 'Project Name',
       colSize: 6,
-      renderCell: ({ row }: CellType) => <Typography variant='body2'>{row.name}</Typography>
+      renderCell: ({ row }: CellType) => (
+        <Box>
+          <StyledLink
+            onClick={() => {
+              setSelectedProjectDetails(row)
+              setProjectDetailsOpen(true)
+            }}
+          >
+            {row.name}
+          </StyledLink>
+        </Box>
+      )
     },
     {
       flex: 0.25,
@@ -123,7 +151,7 @@ const ProjectManagement = () => {
       field: 'projectManager',
       headerName: 'Project Manager',
       colSize: 6,
-      renderCell: ({ row }: CellType) => getName(commonList.projectManagerList, row?.projectManager)
+      renderCell: ({ row }: CellType) => getFullName(commonList.projectManagerList, row?.projectManager)
     },
     {
       flex: 0.1,
@@ -131,7 +159,7 @@ const ProjectManagement = () => {
       field: 'accountManager',
       headerName: 'Account Manager',
       colSize: 6,
-      renderCell: ({ row }: CellType) => getName(commonList.accountManagerList, row?.accountManager)
+      renderCell: ({ row }: CellType) => getFullName(commonList.accountManagerList, row?.accountManager)
     },
     {
       flex: 0.1,
@@ -145,7 +173,8 @@ const ProjectManagement = () => {
       flex: 0.1,
       minWidth: 200,
       field: 'courseType',
-      headerName: 'Module Type'
+      headerName: 'Module Type',
+      renderCell: ({ row }: CellType) => getName(commonList.courseTypeList, row?.courseType)
     },
     {
       flex: 0.1,
@@ -351,6 +380,12 @@ const ProjectManagement = () => {
             sx={{ '& .MuiDataGrid-columnHeaders': { borderRadius: 0 } }}
             onPageSizeChange={newPageSize => setPageSize(newPageSize)}
             onPageChange={newPage => setPageNumber(newPage + 1)}
+          />
+          <ProjectInformation
+            projectDetailsOpen={projectDetailsOpen}
+            handleCloseProjectDetails={handleCloseProjectDetails}
+            project={selectedProjectDetails}
+            commonList={commonList}
           />
         </Card>
       </Grid>

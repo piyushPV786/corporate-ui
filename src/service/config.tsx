@@ -172,7 +172,8 @@ export const apiEndPoints = {
   allGroup: 'corporate-group/all',
   corporateGroup: 'corporate-group',
   corporateGroupStudents: 'corporate-group/all-student',
-  corporateCode: 'corporate-ed/check-duplicate-corporate'
+  corporateCode: 'corporate-ed/check-duplicate-corporate',
+  corporateManager: 'corporate-managers'
 }
 
 export const allowedDocsForCreditVetting = ['SMARTID', 'PASSPORT']

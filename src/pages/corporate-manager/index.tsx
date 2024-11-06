@@ -5,24 +5,24 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
 // ** MUI Imports
-import { Box, Card, Grid, IconButton, Tooltip, Typography } from '@mui/material'
+import { Box, Card, Grid, Tooltip, Typography } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
 
 // ** Custom Components Imports
 import { successToast } from 'src/components/Toast'
 import { CorporateManagerMessages, status } from 'src/context/common'
 import { DashboardService } from 'src/service'
-import { InvoiceType } from 'src/types/apps/invoiceTypes'
 import { minTwoDigits, serialNumber } from 'src/utils'
 import TableHeader from 'src/views/apps/admission/list/TableHeader'
+import { ICorporateManagerTypes } from 'src/types/apps/corporatTypes'
+import CorporateManagerAddDialog from 'src/views/pages/dialog/CorporateManagerAddDialog'
+import DeleteCorporateManager from 'src/views/pages/dialog/DeleteCorporateManagerDialog'
 
 // ** Third Party Styles Imports
-import { DeleteCircleOutline } from 'mdi-material-ui'
 import 'react-datepicker/dist/react-datepicker.css'
-import CorporateManagerAddDialog from 'src/views/pages/dialog/CorporateManagerAddDialog'
 
 interface CellType {
-  row: InvoiceType
+  row: ICorporateManagerTypes
 }
 const initialState = {
   count: 1,
@@ -31,7 +31,6 @@ const initialState = {
 
 interface DataParams {
   q: string
-  status: any
   pageSize: number
   pageNumber: number
 }
@@ -45,10 +44,7 @@ interface IIndex {
   }
 }
 
-// ** Styled component for the link in the dataTable
-
 const CorporateManager = () => {
-  // ** State
   const [value, setQuery] = useState<string>('')
   const [pageSize, setPageSize] = useState<number>(10)
   const [pageNumber, setPageNumber] = useState<number>(1)
@@ -57,7 +53,7 @@ const CorporateManager = () => {
 
   const getManagersList = async (params: DataParams) => {
     setLoading(true)
-    const response = await DashboardService?.getProjectList(params)
+    const response = await DashboardService?.getCorporateManagerList(params)
     if (response?.status === 200 && response?.data?.data) {
       setResponse(response?.data?.data)
     }
@@ -65,27 +61,37 @@ const CorporateManager = () => {
   }
 
   const createManager = async (params: any) => {
-    const response = await DashboardService?.createProject({ ...params })
+    const response = await DashboardService?.createCorporateManager(params)
     if (response?.status === 201 && response?.data?.data) {
-      //   getProjectList({
-      //     q: value,
-      //     pageSize: pageSize,
-      //     pageNumber: pageNumber,
-      //     status: ''
-      //   })
+      getManagersList({
+        q: value,
+        pageSize: pageSize,
+        pageNumber: pageNumber
+      })
       successToast(CorporateManagerMessages.add)
     }
   }
   const updateManager = async (params: any, code: string) => {
-    const response = await DashboardService?.updateProject({ ...params }, code)
+    const response = await DashboardService?.updateCorporateManager(params, code)
     if (response?.status === status?.successCode && response?.data?.data) {
-      //   getProjectList({
-      //     q: value,
-      //     pageSize: pageSize,
-      //     pageNumber: pageNumber,
-      //     status: ''
-      //   })
+      getManagersList({
+        q: value,
+        pageSize: pageSize,
+        pageNumber: pageNumber
+      })
       successToast(CorporateManagerMessages.edit)
+    }
+  }
+
+  const deleteManager = async (code: string) => {
+    const response = await DashboardService?.deleteCorporateManager(code)
+    if (response?.status === 200) {
+      getManagersList({
+        q: value,
+        pageSize: pageSize,
+        pageNumber: pageNumber
+      })
+      successToast(CorporateManagerMessages.delete)
     }
   }
 
@@ -93,8 +99,7 @@ const CorporateManager = () => {
     getManagersList({
       q: value,
       pageSize: pageSize,
-      pageNumber: pageNumber,
-      status: ''
+      pageNumber: pageNumber
     })
   }, [pageSize, pageNumber, value])
 
@@ -108,69 +113,83 @@ const CorporateManager = () => {
         minTwoDigits(serialNumber(index.api.getRowIndex(index.row.id), pageNumber, pageSize))
     },
     {
-      flex: 0.1,
+      flex: 0.25,
       field: 'name',
-      minWidth: 250,
+      minWidth: 150,
       headerName: 'Name',
       colSize: 6,
-      renderCell: ({ row }: CellType) => <Typography variant='body2'>{row.name}</Typography>
+      renderCell: ({ row }: CellType) => (
+        <Tooltip title={`${row.firstName ?? ''} ${row.middleName ?? ''} ${row.lastName ?? ''}`} placement='top'>
+          <Typography variant='body2' className='ellipsis-text'>
+            {row.firstName} {row.middleName} {row.lastName}
+          </Typography>
+        </Tooltip>
+      )
     },
     {
-      flex: 0.25,
+      flex: 0.2,
       field: 'code',
-      minWidth: 150,
+      minWidth: 100,
       headerName: 'Code',
       colSize: 6
     },
     {
-      flex: 0.1,
-      minWidth: 200,
-      field: 'corporateName',
+      flex: 0.25,
+      minWidth: 150,
+      field: 'email',
       headerName: 'email',
       colSize: 12,
-      renderCell: ({ row }: CellType) => row?.corporateEd?.name
+      renderCell: ({ row }: CellType) => (
+        <Tooltip title={row.email ?? ''} placement='top'>
+          <Typography variant='body2' className='ellipsis-text'>
+            {row.email}
+          </Typography>
+        </Tooltip>
+      )
     },
 
     {
-      flex: 0.1,
-      minWidth: 200,
-      field: 'projectManager',
+      flex: 0.25,
+      minWidth: 150,
+      field: 'mobileNumber',
       headerName: 'Mobile Number',
       colSize: 6,
-      renderCell: ({ row }: CellType) => row.projectManager
+      renderCell: ({ row }: CellType) => (
+        <Tooltip title={`${row.mobileCountryCode ?? ''} ${row.mobileNumber ?? ''}`} placement='top'>
+          <Typography variant='body2' className='ellipsis-text'>
+            {row.mobileCountryCode} {row.mobileNumber}
+          </Typography>
+        </Tooltip>
+      )
     },
     {
-      flex: 0.1,
+      flex: 0.25,
       minWidth: 200,
-      field: 'program',
+      field: 'roles',
       headerName: 'Roles',
-      renderCell: ({ row }: CellType) => row?.program
+      renderCell: ({ row }: CellType) => {
+        const roles = row.roles?.map(role => role.name).join(', ')
+
+        return (
+          <Tooltip title={roles} placement='top'>
+            <Typography variant='body2' className='ellipsis-text'>
+              {roles}
+            </Typography>
+          </Tooltip>
+        )
+      }
     },
     {
-      flex: 0.1,
-      minWidth: 130,
+      flex: 0.2,
+      minWidth: 100,
       sortable: false,
       field: 'actions',
       headerName: 'Actions',
       renderCell: ({ row }: CellType) => (
-        <Grid container gap={1} alignItems='center' justifyContent='center'>
-          <Grid item>
-            <Tooltip title='Edit'>
-              <Box>
-                <CorporateManagerAddDialog isEdit managerData={row} actions={{ updateManager }} />
-              </Box>
-            </Tooltip>
-          </Grid>
-          <Grid item>
-            <Tooltip title='Delete'>
-              <Box>
-                <IconButton size='small'>
-                  <DeleteCircleOutline sx={{ fontSize: 36 }} color='error' />
-                </IconButton>
-              </Box>
-            </Tooltip>
-          </Grid>
-        </Grid>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <CorporateManagerAddDialog isEdit managerData={row} actions={{ updateManager }} />
+          <DeleteCorporateManager row={row} deleteCorporateManager={deleteManager} />
+        </Box>
       )
     }
   ]

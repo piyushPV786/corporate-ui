@@ -37,8 +37,8 @@ export const corporateMenu = {
     badgeColor: 'error',
     module: moduleKeys.corporate
   },
-  [FeatureCodes.CES.projectManager]: {
-    title: 'Project Manager',
+  [FeatureCodes.CES.corporateManager]: {
+    title: 'Corporate Manager',
     icon: FaceAgent,
     path: '/corporate-manager',
     badgeColor: 'error',

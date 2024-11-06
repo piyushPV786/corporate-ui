@@ -172,3 +172,15 @@ export interface IFilterOptionsTypes {
   status: Array<any>
 }
 export type IDocumentsStatusType = documentStatus.approved | documentStatus.rejected
+
+export interface ICorporateManagerTypes {
+  id: number
+  code: string
+  firstName: string
+  middleName: string
+  lastName: string
+  email: string
+  mobileNumber: string
+  mobileCountryCode: string
+  roles: any[]
+}

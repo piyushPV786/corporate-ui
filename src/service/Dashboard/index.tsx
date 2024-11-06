@@ -1336,4 +1336,49 @@ export default class Dashboard {
       nProgress.done()
     }
   }
+
+  async getCorporateManagerList(params?: DataParams) {
+    let endUrlName = `${this.baseUrl + apiEndPoints.corporateManager}?pageNumber=${params?.pageNumber}&pageSize=${
+      params?.pageSize
+    }`
+
+    if (params?.q) endUrlName = `${endUrlName}&search=${params?.q}`
+    try {
+      const response = await this.apiServer.get<any>(endUrlName)
+
+      return response
+    } catch (err: any) {
+      console.log('Error fetching manager list ========>', err?.message)
+    }
+  }
+  async createCorporateManager(params?: any) {
+    const endUrlName = `${this.baseUrl + apiEndPoints.corporateManager}`
+    try {
+      const response = await this.apiServer.post<any>(endUrlName, { ...params })
+
+      return response
+    } catch (err: any) {
+      console.log('Error creating manager ========>', err?.message)
+    }
+  }
+  async updateCorporateManager(params: any, code: number | string) {
+    const endUrlName = `${this.baseUrl + apiEndPoints.corporateManager}/${code}`
+    try {
+      const response = await this.apiServer.patch(endUrlName, { ...params })
+
+      return response
+    } catch (err: any) {
+      console.log('Error updating manager ========>', err?.message)
+    }
+  }
+  async deleteCorporateManager(code?: string) {
+    const endUrlName = `${this.baseUrl + apiEndPoints.corporateManager}/${code}`
+    try {
+      const response = await this.apiServer.delete(endUrlName)
+
+      return response
+    } catch (err: any) {
+      console.log('Error Delete Manager ========>', err?.message)
+    }
+  }
 }

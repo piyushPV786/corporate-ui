@@ -225,7 +225,8 @@ export const projectMessages = {
 
 export const CorporateManagerMessages = {
   add: 'Manager Added Successfully',
-  edit: 'Manager Updated Successfully'
+  edit: 'Manager Updated Successfully',
+  delete: 'Manager Deleted Successfully'
 }
 
 export enum documentStatus {

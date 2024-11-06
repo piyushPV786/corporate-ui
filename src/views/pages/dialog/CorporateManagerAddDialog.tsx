@@ -30,8 +30,8 @@ interface ICorporateManagerAddDialogTypes {
   isEdit?: boolean
   managerData?: any
   actions: {
-    createManager?: (params: any) => void
-    updateManager?: (params: any, code: string) => void
+    createManager?: (params: any) => Promise<void>
+    updateManager?: (params: any, code: string) => Promise<void>
   }
 }
 const schema = yup.object().shape({
@@ -39,6 +39,10 @@ const schema = yup.object().shape({
     .string()
     .required(userInformationStatus.FirstNameRequired)
     .matches(/^[a-zA-z]*$/, userInformationStatus.FirstNameError),
+  middleName: yup
+    .string()
+    .matches(/^[a-zA-Z]*$/, userInformationStatus.MiddleNameError)
+    .notRequired(),
   lastName: yup
     .string()
     .required(userInformationStatus.LastNameRequired)
@@ -57,7 +61,8 @@ const defaultValues = {
   lastName: '',
   email: '',
   mobileNumber: '',
-  mobileCountryCode: ''
+  mobileCountryCode: '',
+  roles: []
 }
 
 const ManagersTypesList = [
@@ -77,7 +82,6 @@ const CorporateManagerAddDialog = ({ isEdit, managerData, actions }: ICorporateM
     watch,
     clearErrors,
     trigger,
-    setError,
     formState: { errors, isDirty }
   } = useForm<FieldValues>({
     mode: 'all',
@@ -85,12 +89,16 @@ const CorporateManagerAddDialog = ({ isEdit, managerData, actions }: ICorporateM
     resolver: yupResolver(schema)
   })
 
-  const setFormData = (projectData: IDynamicObject) => {
-    let formData: IDynamicObject = {}
-    Object.keys(defaultValues).map(item => {
-      formData = { ...formData, [item]: projectData[item] }
-    })
-    formData.corporateEdCode = projectData?.corporateEd?.code
+  const setFormData = (managerData: IDynamicObject) => {
+    const formData: IDynamicObject = {
+      firstName: managerData.firstName,
+      middleName: managerData.middleName ?? '',
+      lastName: managerData.lastName,
+      email: managerData.email,
+      mobileNumber: managerData.mobileCountryCode.replace('+', '') + managerData.mobileNumber,
+      mobileCountryCode: managerData.mobileCountryCode.replace('+', ''),
+      roles: managerData.roles.map((role: any) => role.code)
+    }
 
     reset(formData)
   }
@@ -112,16 +120,38 @@ const CorporateManagerAddDialog = ({ isEdit, managerData, actions }: ICorporateM
   }
 
   const onSubmit = async (data: FieldValues) => {
+    setLoading(true)
     reset({}, { keepValues: true })
-    let isDuplicateMsg: boolean | string = true
-    if (!!isDuplicateMsg) {
-      setError('code', { type: 'custom', message: String(isDuplicateMsg) })
-    } else {
-      !!actions?.updateManager && !!managerData && actions?.updateManager(data, managerData?.code)
-      !!actions?.createManager && actions?.createManager(data)
-      handleClose()
+    const managerDetails = {
+      firstName: data.firstName.trim(),
+      middleName: data.middleName?.trim() || '',
+      lastName: data.lastName.trim(),
+      email: data.email.trim(),
+      mobileNumber: data.mobileNumber.slice(data.mobileCountryCode.length),
+      mobileCountryCode: `+${data.mobileCountryCode}`,
+      roles: data.roles
     }
+    if (!isEdit && !managerDetails.middleName) {
+      delete managerDetails.middleName
+    }
+    if (isEdit && !!actions?.updateManager && !!managerData) {
+      await actions.updateManager(managerDetails, managerData?.code)
+    } else if (!!actions?.createManager) {
+      await actions?.createManager(managerDetails)
+    }
+    setLoading(false)
+    handleClose()
   }
+
+  const hasUnsavedChanges =
+    watch('firstName') !== managerData?.firstName ||
+    watch('middleName') !== managerData?.middleName ||
+    watch('lastName') !== managerData?.lastName ||
+    watch('email') !== managerData?.email ||
+    watch('mobileNumber') !== managerData?.mobileCountryCode.replace('+', '') + managerData?.mobileNumber ||
+    JSON.stringify(watch('roles')) !== JSON.stringify(managerData?.roles?.map((role: any) => role.code))
+
+  const isUpdateRequired = isEdit && hasUnsavedChanges
 
   return (
     <Fragment>
@@ -151,7 +181,7 @@ const CorporateManagerAddDialog = ({ isEdit, managerData, actions }: ICorporateM
         sx={{ '& .MuiDialog-paper': { p: 10 } }}
       >
         <DialogTitle textAlign='center'>
-          <strong>{isEdit ? 'Edit' : 'Add'} Project</strong>
+          <strong>{isEdit ? 'Edit' : 'Add'} Manager</strong>
         </DialogTitle>
         <Backdrop sx={{ color: '#fff', zIndex: theme => theme.zIndex.drawer + 1 }} open={loading}>
           <FallbackSpinner />
@@ -178,7 +208,15 @@ const CorporateManagerAddDialog = ({ isEdit, managerData, actions }: ICorporateM
                 <Controller
                   name='middleName'
                   control={control}
-                  render={({ field }) => <TextField {...field} fullWidth label='Middle Name' />}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      label='Middle Name'
+                      error={!!errors?.middleName}
+                      helperText={errors?.middleName && (errors?.middleName?.message as string | undefined)}
+                    />
+                  )}
                 />
               </Grid>
               <Grid item xs={4}>
@@ -257,7 +295,7 @@ const CorporateManagerAddDialog = ({ isEdit, managerData, actions }: ICorporateM
                       <Controller
                         name='roles'
                         control={control}
-                        render={({ field, fieldState }) => (
+                        render={({ field }) => (
                           <Autocomplete
                             {...field}
                             options={ManagersTypesList}
@@ -284,29 +322,23 @@ const CorporateManagerAddDialog = ({ isEdit, managerData, actions }: ICorporateM
                 </Grid>
               </Grid>
             </Grid>
-            {isEdit &&
-              (watch('firstName') !== managerData?.firstName ||
-              watch('middleName') !== managerData?.middleName ||
-              watch('lastName') !== managerData?.lastName ||
-              watch('email') !== managerData?.email ||
-              watch('mobileNumber') !== managerData?.mobileNumber ||
-              watch('roles') !== managerData?.roles ? (
-                <AlertBox
-                  sx={{ mb: 6 }}
-                  color='warning'
-                  variant={'filled ' as any}
-                  header='Unsaved Changes'
-                  message='You have made changes. Do you want to save or cancel them?'
-                  severity='warning'
-                />
-              ) : null)}
+            {isUpdateRequired ? (
+              <AlertBox
+                sx={{ mb: 6 }}
+                color='warning'
+                variant={'filled ' as any}
+                header='Unsaved Changes'
+                message='You have made changes. Do you want to save or cancel them?'
+                severity='warning'
+              />
+            ) : null}
           </DialogContent>
           <DialogActions sx={{ justifyContent: 'center' }}>
             <Button variant='outlined' color='secondary' onClick={handleClose}>
               CANCEL
             </Button>
-            <Button type='submit' variant='contained' disabled={!isDirty}>
-              {isEdit ? 'Save' : 'Add Project'}
+            <Button type='submit' variant='contained' disabled={isEdit ? !isUpdateRequired : !isDirty}>
+              {isEdit ? 'Save' : 'Add Manager'}
             </Button>
           </DialogActions>
         </form>

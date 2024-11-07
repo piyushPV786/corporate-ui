@@ -25,7 +25,7 @@ export const validationPersonalSchema = yup.object().shape({
 export const validationContactSchema = yup.object().shape({
   email: yup.string().email().required(AddStudentMessages.emailRequired),
   contactNumber: yup.string().required(AddStudentMessages.contactRequired),
-  whatsappNumber: yup.string().required(AddStudentMessages.whatappContactRequired)
+  whatsappNumber: yup.string().notRequired()
 })
 
 export const validationAddressSchema = yup.object().shape({

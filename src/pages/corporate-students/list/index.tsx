@@ -123,7 +123,7 @@ const CorporateStudents = () => {
       field: 'email',
       headerName: 'Email & Contact Details',
       renderCell: ({ row }: CellType) => {
-        const { email, mobileNumber } = row.lead || {}
+        const { email, mobileNumber, mobileCountryCode } = row.lead || {}
 
         return (
           <Grid container>
@@ -134,7 +134,7 @@ const CorporateStudents = () => {
             </Grid>
             <Grid item xs={12}>
               <Typography noWrap variant='caption'>
-                {mobileNumber}
+                +{mobileCountryCode} {mobileNumber}
               </Typography>
             </Grid>
           </Grid>

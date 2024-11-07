@@ -172,7 +172,7 @@ const PreviewCard = ({ studentData }: IPropsTypes) => {
                             ? item === corporateConstant.dateOfBirth
                               ? `${dateBirth.getDate()}/${dateBirth.getMonth() + 1}/${dateBirth.getFullYear()}`
                               : item === corporateConstant.mobileNumber
-                                ? `${lead[parentName]['mobileCountryCode']}${lead[parentName][item]}`
+                                ? `+${lead[parentName]['mobileCountryCode']} ${lead[parentName][item]}`
                                 : corporateConstant.getNameCommonListArray.includes(item) && !!commonList
                                   ? getName(commonList[item], lead[parentName][item])
                                   : lead[parentName][item]

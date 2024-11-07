@@ -155,9 +155,9 @@ const CorporateManager = () => {
       headerName: 'Mobile Number',
       colSize: 6,
       renderCell: ({ row }: CellType) => (
-        <Tooltip title={`${row.mobileCountryCode ?? ''} ${row.mobileNumber ?? ''}`} placement='top'>
+        <Tooltip title={`+${row.mobileCountryCode ?? ''} ${row.mobileNumber ?? ''}`} placement='top'>
           <Typography variant='body2' className='ellipsis-text'>
-            {row.mobileCountryCode} {row.mobileNumber}
+            +{row.mobileCountryCode} {row.mobileNumber}
           </Typography>
         </Tooltip>
       )

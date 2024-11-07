@@ -95,8 +95,8 @@ const CorporateManagerAddDialog = ({ isEdit, managerData, actions }: ICorporateM
       middleName: managerData.middleName ?? '',
       lastName: managerData.lastName,
       email: managerData.email,
-      mobileNumber: managerData.mobileCountryCode.replace('+', '') + managerData.mobileNumber,
-      mobileCountryCode: managerData.mobileCountryCode.replace('+', ''),
+      mobileNumber: managerData.mobileCountryCode + managerData.mobileNumber,
+      mobileCountryCode: managerData.mobileCountryCode,
       roles: managerData.roles.map((role: any) => role.code)
     }
 
@@ -128,7 +128,7 @@ const CorporateManagerAddDialog = ({ isEdit, managerData, actions }: ICorporateM
       lastName: data.lastName.trim(),
       email: data.email.trim(),
       mobileNumber: data.mobileNumber.slice(data.mobileCountryCode.length),
-      mobileCountryCode: `+${data.mobileCountryCode}`,
+      mobileCountryCode: data.mobileCountryCode,
       roles: data.roles
     }
     if (!isEdit && !managerDetails.middleName) {
@@ -145,10 +145,10 @@ const CorporateManagerAddDialog = ({ isEdit, managerData, actions }: ICorporateM
 
   const hasUnsavedChanges =
     watch('firstName') !== managerData?.firstName ||
-    watch('middleName') !== managerData?.middleName ||
+    watch('middleName') !== (managerData?.middleName ?? '') ||
     watch('lastName') !== managerData?.lastName ||
     watch('email') !== managerData?.email ||
-    watch('mobileNumber') !== managerData?.mobileCountryCode.replace('+', '') + managerData?.mobileNumber ||
+    watch('mobileNumber') !== managerData?.mobileCountryCode + managerData?.mobileNumber ||
     JSON.stringify(watch('roles')) !== JSON.stringify(managerData?.roles?.map((role: any) => role.code))
 
   const isUpdateRequired = isEdit && hasUnsavedChanges

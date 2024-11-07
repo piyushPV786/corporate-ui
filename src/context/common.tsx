@@ -324,6 +324,7 @@ export const EditStudentMessages = {
 export const AddStudentMessages = {
   firstNameRequired: ' First Name is Required',
   firstNameError: 'First name must be character',
+  middleNameError: 'Middle name must be character',
   lastNameRequired: 'last Name is Required',
   lastNameError: 'last Name must be character',
   genderRequired: 'Gender is required',

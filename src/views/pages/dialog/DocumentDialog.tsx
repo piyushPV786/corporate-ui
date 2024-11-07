@@ -257,6 +257,8 @@ const DocumentDialog = ({
                       if (value) {
                         setValue('documentTypeCode', value.code)
                         clearErrors('documentTypeCode')
+                      } else {
+                        setValue('documentTypeCode', '')
                       }
                     }}
                     getOptionLabel={(option: DocumentTypes) => option?.name}
@@ -275,7 +277,7 @@ const DocumentDialog = ({
                   )}
                 </FormControl>
               </Grid>
-              {watch('documentTypeCode') !== '' && (
+              {watch('documentTypeCode') && (
                 <Grid item xs={12}>
                   <Grid container {...getRootProps()}>
                     <Box width='100%' className={Styles.UploadDocsContainer}>

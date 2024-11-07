@@ -18,7 +18,7 @@ import { getFullName, getName, minTwoDigits, serialNumber } from 'src/utils'
 import ProjectManagementAddDialog from 'src/views/pages/dialog/ProjectManagementAddDialog'
 import { successToast } from 'src/components/Toast'
 import { commonListTypes } from 'src/types/apps/dataTypes'
-import { AcademicService, CommonService, DashboardService, UserManagementService } from 'src/service'
+import { AcademicService, CommonService, DashboardService } from 'src/service'
 
 // ** Third Party Styles Imports
 import 'react-datepicker/dist/react-datepicker.css'

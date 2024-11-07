@@ -223,6 +223,12 @@ export const projectMessages = {
   courseType: 'Please Select a Module Type'
 }
 
+export const CorporateManagerMessages = {
+  add: 'Manager Added Successfully',
+  edit: 'Manager Updated Successfully',
+  delete: 'Manager Deleted Successfully'
+}
+
 export enum documentStatus {
   pending = 'PENDING',
   approved = 'APPROVED',
@@ -443,7 +449,8 @@ export enum userInformationStatus {
   IdentificationNumbermax = 'Maximum 13 characters allowed',
   IdentificationNumberSmart = 'Identification number must be 13 digits and contain only numbers for smartID, e.g.- YYMMDD1234567',
   IdentificationNumberPassport = 'Passport number must be valid, e.g:- P4366918',
-  CityNameInvalid = 'City name must be characters'
+  CityNameInvalid = 'City name must be characters',
+  RoleRequired = 'Role is Required'
 }
 
 export const costResponse = {

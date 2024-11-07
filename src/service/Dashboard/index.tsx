@@ -1381,4 +1381,32 @@ export default class Dashboard {
       console.log('Error Delete Manager ========>', err?.message)
     }
   }
+  async getCorporateProjectManagerList() {
+    nProgress.start()
+    const endUrlName = this.baseUrl + apiEndPoints.corporateProjectManagerList
+    try {
+      const response = await this.apiServer.get(endUrlName)
+      nProgress.done()
+
+      return response
+    } catch (err: any) {
+      console.log('Error fetching Project Manager List ========>', err?.message)
+      nProgress.done()
+    }
+    nProgress.done()
+  }
+  async getCorporateAccountManagerList() {
+    nProgress.start()
+    const endUrlName = this.baseUrl + apiEndPoints.corporateAccountManagerList
+    try {
+      const response = await this.apiServer.get(endUrlName)
+      nProgress.done()
+
+      return response
+    } catch (err: any) {
+      console.log('Error fetching Account Manager List ========>', err?.message)
+      nProgress.done()
+    }
+    nProgress.done()
+  }
 }

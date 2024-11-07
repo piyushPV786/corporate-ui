@@ -257,13 +257,13 @@ const ProjectManagement = () => {
   }
 
   const getProjectManagerList = async () => {
-    const response = await UserManagementService.getProjectManagerList()
+    const response = await DashboardService.getCorporateProjectManagerList()
     if (response?.status === status?.successCode && response?.data?.data?.length) {
       setCommonList(prev => ({ ...prev, projectManagerList: response?.data?.data }))
     }
   }
   const getAccountManagerList = async () => {
-    const response = await UserManagementService.getAccountManagerList()
+    const response = await DashboardService.getCorporateAccountManagerList()
     if (response?.status === status?.successCode && response?.data?.data?.length) {
       setCommonList(prev => ({ ...prev, accountManagerList: response?.data?.data }))
     }

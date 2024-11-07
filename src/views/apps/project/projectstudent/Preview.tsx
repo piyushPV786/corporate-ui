@@ -23,7 +23,6 @@ const StudentPreview = ({ id, projectCode }: IStudentPreviewProps) => {
 
   const getStudentDetailById = async () => {
     const response = await DashboardService.getProjectStudentById(id)
-    console.log(response)
     if (response?.status === status?.successCode && response?.data?.data) {
       setStudentDetail(response?.data?.data)
     }

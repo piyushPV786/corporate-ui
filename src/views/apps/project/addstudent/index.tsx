@@ -150,7 +150,7 @@ const AddStudentPreview = ({ projectCode }: IstudentPreview) => {
       lastName: data.lastName,
       email: data.email,
       mobileNumber: data.mobileNumber.slice(data.mobileNumberCountryCode.length),
-      mobileCountryCode: `+${data.mobileNumberCountryCode}`,
+      mobileCountryCode: data.mobileNumberCountryCode,
       dateOfBirth: data.dateOfBirth ? formatDate(data.dateOfBirth) : '',
       nationalityStatus: data.nationalityStatus,
       permenantResident: data.permanentResident,

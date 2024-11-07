@@ -227,8 +227,8 @@ export interface IUpdateStudentContactInfo {
   alternativeContactCountryCode: string
   alternativeContact: string
   homePhone: string
-  whatsappNumberCountryCode: string
-  whatAsppNumber: string
+  whatsappNumberCountryCode?: string
+  whatAsppNumber?: string
 }
 export interface IUpdateStudentAddressInfo {
   street: string

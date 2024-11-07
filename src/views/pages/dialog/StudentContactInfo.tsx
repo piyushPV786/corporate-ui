@@ -15,33 +15,28 @@ interface IContactTypes {
   getStudentDetailById: any
 }
 
+type ValidContactNumberFieldNames = 'contactNumber' | 'whatsappNumber'
+
 const EditContactDetails = ({ studentData, getStudentDetailById }: IContactTypes) => {
   const defaultValues = {
     email: studentData?.lead?.email,
-
-    //contactNumberCountryCode: studentData?.lead?.mobileCountryCode,
-    contactNumber: studentData?.lead?.mobileNumber,
-
-    //alternativeContactCountryCode: studentData?.lead?.alternativeContactCountryCode,
-    //alternativeContact: studentData?.lead?.alternativeContact,
-    //whatsappNumberCountryCode: studentData?.lead?.whatsappNumberCountryCode,
-    whatsappNumber: studentData?.lead?.whatAsppNumber
-
-    //homePhone: studentData?.lead?.homePhone
+    contactNumberCountryCode: studentData?.lead?.mobileCountryCode,
+    contactNumber: studentData?.lead?.mobileCountryCode + studentData?.lead?.mobileNumber,
+    whatsappNumber: studentData?.lead?.whatAsppNumber ?? '',
+    whatsappNumberCountryCode: ''
   }
   const {
     handleSubmit,
-
-    //watch,
+    watch,
     control,
     setValue,
     reset,
     formState: { errors }
   } = useForm({ defaultValues, resolver: yupResolver(validationContactSchema) })
 
-  const countryCodeContact = (fieldName: string | any, data: any, dialCode: string) => {
-    console.log(dialCode)
+  const countryCodeContact = (fieldName: ValidContactNumberFieldNames, data: any, dialCode: string) => {
     data && setValue(fieldName, data)
+    data && setValue(`${fieldName}CountryCode`, dialCode)
   }
 
   const [show, setShow] = useState(false)
@@ -50,12 +45,18 @@ const EditContactDetails = ({ studentData, getStudentDetailById }: IContactTypes
     const payload = {
       email: data?.email,
       mobileCountryCode: data?.contactNumberCountryCode,
-      mobileNumber: data?.contactNumber,
+      mobileNumber: data.contactNumber.slice(data.contactNumberCountryCode.length),
       alternativeContactCountryCode: data?.alternativeContactCountryCode,
       alternativeContact: data?.alternativeContact,
-      whatsappNumberCountryCode: data?.whatsappNumberCountryCode,
       whatAsppNumber: data?.whatsappNumber,
       homePhone: data?.homePhone
+    }
+    if (
+      !data?.whatsappNumberCountryCode ||
+      !data?.whatsappNumber ||
+      data.whatsappNumber.slice(data.whatsappNumberCountryCode.length).length === 0
+    ) {
+      delete payload.whatAsppNumber
     }
 
     const response = await DashboardService.addUpdateStudentContactInfo(payload, studentData?.applicationCode)
@@ -138,7 +139,8 @@ const EditContactDetails = ({ studentData, getStudentDetailById }: IContactTypes
                         onChange={(data, countryData: { dialCode: string }) =>
                           countryCodeContact('contactNumber', data, countryData?.dialCode)
                         }
-                        country={'US'}
+                        country={'za'}
+                        countryCodeEditable={false}
                         placeholder='Enter phone number'
                         specialLabel='Contact Number'
                         inputStyle={{
@@ -229,7 +231,9 @@ const EditContactDetails = ({ studentData, getStudentDetailById }: IContactTypes
                         onChange={(data, countryData: { dialCode: string }) =>
                           countryCodeContact('whatsappNumber', data, countryData?.dialCode)
                         }
-                        country={'US'}
+                        value={watch('whatsappNumber')}
+                        country={'za'}
+                        countryCodeEditable={false}
                         placeholder='Enter whatsapp number'
                         specialLabel='Whatsapp Number'
                         inputStyle={{

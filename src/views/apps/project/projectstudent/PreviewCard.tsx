@@ -350,7 +350,9 @@ const PreviewCard = ({ studentId, studentDetail, getStudentDetailById }: Props) 
                 </Grid>
                 <Grid item xs={4}>
                   <label>Contact Number</label>
-                  <Typography>{studentDetail?.lead?.mobileNumber}</Typography>
+                  <Typography>
+                    +{studentDetail?.lead?.mobileCountryCode} {studentDetail?.lead?.mobileNumber}
+                  </Typography>
                 </Grid>
                 {/* <Grid item xs={4}>
                   <label>Alternative Number</label>

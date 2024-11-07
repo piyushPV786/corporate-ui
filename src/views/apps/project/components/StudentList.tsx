@@ -301,12 +301,14 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
       headerName: 'Email & Contact Details',
       renderCell: ({ row }: any) => {
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
+          <Box sx={{ display: 'flex', alignItems: 'start', flexDirection: 'column' }}>
             <Tooltip title={row?.lead?.email ?? ''}>
               <TypographyEllipsis variant='body1'>{row?.lead?.email ?? ''}</TypographyEllipsis>
             </Tooltip>
             <Tooltip title={row?.lead?.mobileNumber ?? ''}>
-              <TypographyEllipsis variant='body2'>{row?.lead?.mobileNumber ?? ''}</TypographyEllipsis>
+              <TypographyEllipsis variant='body2'>
+                {row?.lead?.mobileCountryCode ? `+${row?.lead?.mobileCountryCode}` : ''} {row?.lead?.mobileNumber ?? ''}
+              </TypographyEllipsis>
             </Tooltip>
           </Box>
         )

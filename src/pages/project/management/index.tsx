@@ -18,7 +18,7 @@ import { getFullName, getName, minTwoDigits, serialNumber } from 'src/utils'
 import ProjectManagementAddDialog from 'src/views/pages/dialog/ProjectManagementAddDialog'
 import { successToast } from 'src/components/Toast'
 import { commonListTypes } from 'src/types/apps/dataTypes'
-import { AcademicService, CommonService, DashboardService, UserManagementService } from 'src/service'
+import { AcademicService, CommonService, DashboardService } from 'src/service'
 
 // ** Third Party Styles Imports
 import 'react-datepicker/dist/react-datepicker.css'
@@ -257,13 +257,13 @@ const ProjectManagement = () => {
   }
 
   const getProjectManagerList = async () => {
-    const response = await UserManagementService.getProjectManagerList()
+    const response = await DashboardService.getCorporateProjectManagerList()
     if (response?.status === status?.successCode && response?.data?.data?.length) {
       setCommonList(prev => ({ ...prev, projectManagerList: response?.data?.data }))
     }
   }
   const getAccountManagerList = async () => {
-    const response = await UserManagementService.getAccountManagerList()
+    const response = await DashboardService.getCorporateAccountManagerList()
     if (response?.status === status?.successCode && response?.data?.data?.length) {
       setCommonList(prev => ({ ...prev, accountManagerList: response?.data?.data }))
     }

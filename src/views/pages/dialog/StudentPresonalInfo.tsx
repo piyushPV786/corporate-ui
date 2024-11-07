@@ -47,6 +47,9 @@ const currentDate = new Date()
 
 const ageValidator = (dateOfBirth: any) => {
   const selectedDate = new Date(dateOfBirth)
+  if (!(selectedDate instanceof Date && !isNaN(selectedDate.getTime()))) {
+    return 'Please enter a valid date'
+  }
   const age = currentDate.getFullYear() - selectedDate.getFullYear()
   if (age < MIN_AGE || age > MAX_AGE) {
     return `Age must be between ${MIN_AGE} and ${MAX_AGE} years old.`
@@ -244,10 +247,13 @@ const EditInformation = ({ studentData, getStudentDetailById, listOf }: Ipersona
                             <TextField
                               fullWidth
                               {...rest}
-                              error={birthDate && ((ageValidator(birthDate) || !!errors?.dateOfBirth) as any)}
+                              error={
+                                birthDate === null ||
+                                (birthDate && ((ageValidator(birthDate) || !!errors?.dateOfBirth) as any))
+                              }
                               helperText={
-                                (birthDate && ageValidator(birthDate)) ||
-                                (errors?.dateOfBirth?.message as string | undefined)
+                                (birthDate === null ? 'Date is required' : birthDate && ageValidator(birthDate)) ||
+                                (errors?.dateOfBirth?.message as string)
                               }
                               sx={{
                                 '& .MuiSvgIcon-root': {

@@ -20,6 +20,7 @@ import {
 import { errorToast, successToast } from 'src/components/Toast'
 import { IStudent } from '../Preview'
 import * as XLSX from 'xlsx'
+import ExcelJS from 'exceljs'
 import Link from 'next/link'
 import { projectStudentType } from 'src/types/apps/invoiceTypes'
 import { DataParams } from 'src/service/Dashboard'
@@ -45,6 +46,11 @@ interface IKeysObject {
 interface IMissingDataTypes {
   column: (string | number)[]
   row: (string | number)[]
+}
+
+interface BulkUploadResponseType {
+  applicationExist: string
+  createdApplication: string
 }
 
 function transformKeys(keysArray: string[] | IKeysObject[]): any[] {
@@ -236,10 +242,69 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
       } else {
         successToast('File Uploaded Successfully')
       }
-
+      downloadBulkUploadSuccessResponseData(response.data.data, file)
       setUploadedFile(null)
     }
     setIsLoading(true)
+  }
+
+  const downloadBulkUploadSuccessResponseData = (response: BulkUploadResponseType[], file: File) => {
+    const reader = new FileReader()
+    reader.onload = async (e: any) => {
+      const arrayBuffer = e.target.result as ArrayBuffer
+      const workbook = new ExcelJS.Workbook()
+      await workbook.xlsx.load(arrayBuffer)
+
+      // Get the sheet
+      const sheet = workbook.worksheets[0]
+
+      // Add the "Upload_Status" header (add a new cell in the header row)
+      const headerRow = sheet.getRow(1) // Get the first row (header row)
+      headerRow.getCell(headerRow.cellCount + 1).value = 'Upload_Status' // Add new header
+
+      // Process the rows and add status to the "Upload_Status" column
+      response.forEach((responseItem, index) => {
+        let status = ''
+        let fillColor = ''
+
+        if (responseItem.applicationExist) {
+          status = 'Application Exist'
+          fillColor = 'FF0000' // Red for Application Exist
+        } else if (responseItem.createdApplication) {
+          status = 'Application Created'
+          fillColor = '00FF00' // Green for Application Created
+        } else {
+          status = ''
+          fillColor = '' // No color for No Application
+        }
+
+        // Find the corresponding row (skip the header row, so start from index 2)
+        const row = sheet.getRow(index + 2)
+
+        // Set the value of the new "Upload_Status" column
+        const statusCell = row.getCell(headerRow.cellCount) // This should be the last cell in the row (new column)
+        statusCell.value = status
+
+        if (fillColor) {
+          statusCell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: fillColor }
+          }
+          statusCell.font = { bold: true, color: { argb: '000000' } }
+        }
+      })
+
+      // Save the workbook as a file and trigger download
+      const buffer = await workbook.xlsx.writeBuffer()
+      const blob = new Blob([buffer], { type: 'application/octet-stream' })
+      const link = document.createElement('a')
+      link.href = URL.createObjectURL(blob)
+      link.download = `${projectCode}_upload_student_status.xlsx`
+      link.click()
+    }
+
+    reader.readAsArrayBuffer(file)
   }
 
   const downloadStudentDetails = async (fileName: string, msg: string) => {

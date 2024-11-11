@@ -20,6 +20,7 @@ import {
 import { errorToast, successToast } from 'src/components/Toast'
 import { IStudent } from '../Preview'
 import * as XLSX from 'xlsx'
+import ExcelJS from 'exceljs'
 import Link from 'next/link'
 import { projectStudentType } from 'src/types/apps/invoiceTypes'
 import { DataParams } from 'src/service/Dashboard'
@@ -45,6 +46,12 @@ interface IKeysObject {
 interface IMissingDataTypes {
   column: (string | number)[]
   row: (string | number)[]
+}
+
+interface BulkUploadResponseType {
+  applicationExist: string
+  createdApplication: string
+  MissingRequiredFields: string
 }
 
 function transformKeys(keysArray: string[] | IKeysObject[]): any[] {
@@ -201,45 +208,81 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
     //this demo api only for fileName once api ready this will remove
     const response = await DashboardService.uploadBulkStudent(projectCode, file)
     if (response?.data?.statusCode === status.successCodeOne && response?.data?.data) {
-      const existingStudents: string[] = []
+      downloadBulkUploadSuccessResponseData(response.data.data, file)
+      successToast('Your data has been processed successfully. Please find the attached Excel sheet.')
+      setUploadedFile(null)
+    } else {
+      errorToast('There was an issue processing the file. Please try again.')
+    }
+    setIsLoading(true)
+  }
 
-      response.data.data.flat().forEach((student: any) => {
-        if (student.applicationExist) {
-          existingStudents.push(student.applicationExist)
+  const downloadBulkUploadSuccessResponseData = (response: BulkUploadResponseType[], file: File) => {
+    const reader = new FileReader()
+    reader.onload = async (e: any) => {
+      const arrayBuffer = e.target.result as ArrayBuffer
+      const workbook = new ExcelJS.Workbook()
+      await workbook.xlsx.load(arrayBuffer)
+
+      // Get the sheet
+      const sheet = workbook.worksheets[0]
+
+      // Add the "Upload_Status" header (add a new cell in the header row)
+      const headerRow = sheet.getRow(1) // Get the first row (header row)
+      headerRow.getCell(headerRow.cellCount + 1).value = 'Upload_Status' // Add new Upload_Status header
+      headerRow.getCell(headerRow.cellCount + 1).value = 'Message' // Add new Message header
+
+      // Process the rows and add status to the "Upload_Status" column
+      response.forEach((responseItem, index) => {
+        let status = ''
+        let message = ''
+        let fillColor = ''
+
+        if (responseItem.applicationExist) {
+          status = 'Application Exist'
+          message = responseItem.applicationExist
+          fillColor = 'FF0000' // Red for Application Exist
+        } else if (responseItem.createdApplication) {
+          status = 'Application Created'
+          message = responseItem.createdApplication
+          fillColor = '00FF00' // Green for Application Created
+        } else if (responseItem.MissingRequiredFields) {
+          status = 'Missing Required Fields'
+          message = responseItem.MissingRequiredFields
+          fillColor = 'FFFF00' // Yellow for Missing Fields
+        }
+
+        // Find the corresponding row (skip the header row, so start from index 2)
+        const row = sheet.getRow(index + 2)
+
+        // Set the value of the new "Upload_Status" column
+        const statusCell = row.getCell(headerRow.cellCount - 1) // This should be the second-to-last cell in the row (Upload_Status)
+        statusCell.value = status
+
+        // Set the value of the new "Message" column
+        const messageCell = row.getCell(headerRow.cellCount) // This should be the last cell in the row (Message)
+        messageCell.value = message
+
+        if (fillColor) {
+          statusCell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: fillColor }
+          }
+          statusCell.font = { bold: true, color: { argb: '000000' } }
         }
       })
 
-      if (existingStudents.length > 0) {
-        const mobileNumbers: string[] = []
-        const emails: string[] = []
-
-        existingStudents.forEach(student => {
-          const mobileMatch = student.match(/mobileNumber (\d+)/)
-          const emailMatch = student.match(/email (\S+@\S+\.\S+)/)
-
-          if (mobileMatch) {
-            mobileNumbers.push(mobileMatch[1])
-          } else if (emailMatch) {
-            emails.push(emailMatch[1])
-          }
-        })
-
-        const combinedStudents = [...mobileNumbers, ...emails]
-        const maxDisplayCount = 10
-
-        const studentsToShow =
-          combinedStudents.length > maxDisplayCount
-            ? [...combinedStudents.slice(0, maxDisplayCount), '...']
-            : combinedStudents
-
-        errorToast(`${existingStudents.length} students already exist: ${studentsToShow.join(', ')}`)
-      } else {
-        successToast('File Uploaded Successfully')
-      }
-
-      setUploadedFile(null)
+      // Save the workbook as a file and trigger download
+      const buffer = await workbook.xlsx.writeBuffer()
+      const blob = new Blob([buffer], { type: 'application/octet-stream' })
+      const link = document.createElement('a')
+      link.href = URL.createObjectURL(blob)
+      link.download = `${projectCode}_upload_student_status.xlsx`
+      link.click()
     }
-    setIsLoading(true)
+
+    reader.readAsArrayBuffer(file)
   }
 
   const downloadStudentDetails = async (fileName: string, msg: string) => {
@@ -472,9 +515,7 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
 
   const setSelectedFiles = async (file: File & { error?: boolean; typeCode: string }) => {
     const result = await validateExcelForBulkUpload(file)
-    if (result) {
-      setUploadedFile(result)
-    }
+    setUploadedFile(result)
   }
   const uploadBulkDocument = () => {
     bulkUploadStudent(projectCode, uploadedFile!)
@@ -539,7 +580,7 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
             </Alert>
           )}
           {!!missingData?.column?.length && (
-            <Alert variant='outlined' severity='error'>
+            <Alert variant='outlined' severity='error' sx={{ display: 'none' }}>
               Missing values in the columns '{missingData?.column.join(', ')}' in Rows-{' '}
               {missingData?.row?.length > 4
                 ? `${missingData?.row?.slice(0, 3)?.join(', ')}...`
@@ -557,7 +598,7 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
             type='submit'
             variant='contained'
             onClick={uploadBulkDocument}
-            disabled={!uploadedFile || uploadedFile?.error || !!missingData?.column?.length}
+            disabled={!uploadedFile || uploadedFile?.error}
           >
             APPLY TEMPLATE
           </Button>

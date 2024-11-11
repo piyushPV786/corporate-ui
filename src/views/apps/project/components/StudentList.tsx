@@ -579,15 +579,15 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
               Upload a Valid .xls or .xlsx file
             </Alert>
           )}
-          {/* {!!missingData?.column?.length && (
-            <Alert variant='outlined' severity='error'>
+          {!!missingData?.column?.length && (
+            <Alert variant='outlined' severity='error' sx={{ display: 'none' }}>
               Missing values in the columns '{missingData?.column.join(', ')}' in Rows-{' '}
               {missingData?.row?.length > 4
                 ? `${missingData?.row?.slice(0, 3)?.join(', ')}...`
                 : missingData?.row?.join(', ')}
               . Please fill all the mandatory fields and re-upload the file.
             </Alert>
-          )} */}
+          )}
         </DialogContent>
 
         <DialogActions sx={{ justifyContent: 'center' }}>

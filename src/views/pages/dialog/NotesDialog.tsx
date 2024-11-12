@@ -49,7 +49,6 @@ const schema = yup.object().shape({
 })
 
 const NoteDialogs = ({ title, data, projectCode, userName, createNotes, updateNotes }: INoteDialogsProps) => {
-  console.log('data', data)
   const id: number | string = data ? data?.id : ''
 
   // ** State

@@ -4,7 +4,7 @@ import ProjectDetailsDialog from 'src/views/pages/dialog/ProjectDetailsDialog'
 import { IProject } from '../TabDetails'
 import { DDMMYYYDateFormat, getFullName } from 'src/utils'
 import { IAccountManagerList, IProjectManagerList } from 'src/types/apps/dataTypes'
-import { UserManagementService } from 'src/service'
+import { DashboardService } from 'src/service'
 import { status } from 'src/context/common'
 
 interface propsType {
@@ -36,13 +36,13 @@ const ProjectDetails = ({ fetchProject, projectData }: propsType) => {
   const [projectManagerList, setProjectManagerList] = useState<IProjectManagerList[]>([])
 
   const getProjectManagerList = async () => {
-    const response = await UserManagementService.getProjectManagerList()
+    const response = await DashboardService.getCorporateProjectManagerList()
     if (response?.status === status?.successCode && response?.data?.data?.length) {
       setProjectManagerList(response?.data?.data)
     }
   }
   const getAccountManagerList = async () => {
-    const response = await UserManagementService.getAccountManagerList()
+    const response = await DashboardService.getCorporateAccountManagerList()
     if (response?.status === status?.successCode && response?.data?.data?.length) {
       setAccountManagerList(response?.data?.data)
     }

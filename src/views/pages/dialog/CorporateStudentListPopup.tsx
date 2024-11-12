@@ -14,6 +14,7 @@ interface ISelectedCorporateGroup {
   itemNumber: number
   isActive: boolean
   id: number
+  name: string
   intakeCode: string
   status: string
   enrolment: Enrolment[]
@@ -199,7 +200,7 @@ const CorporateStudentListPopup = ({
         <Grid container display='flex'>
           <Grid item xs={11}>
             <Typography sx={{ textAlign: 'center', fontSize: '1.5rem !important', fontWeight: 'bold' }}>
-              {selectedCorporateGroup?.group?.name}
+              {selectedCorporateGroup?.name}
             </Typography>
           </Grid>
           <Grid item xs={1}>

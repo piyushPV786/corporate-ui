@@ -38,6 +38,8 @@ import { commonListTypes } from 'src/types/apps/dataTypes'
 import { Autocomplete } from '@mui/material'
 import { TypographyEllipsis } from 'src/styles/style'
 import RequiredLabel from 'src/components/RequiredLabel'
+import CorporateStudentListPopup from 'src/views/pages/dialog/CorporateStudentListPopup'
+import CorporateGroupInformation from 'src/views/pages/dialog/CorporateGroupInformation'
 
 interface CellType {
   row: InvoiceType
@@ -132,9 +134,13 @@ const StudentList = () => {
   const [response, setResponse] = useState<any>(initialState)
   const [loading, setLoading] = useState<boolean>(false)
   const [openEdit, setOpenEdit] = useState<IRowActionType>({ show: false, data: null, actionType: 'Add' })
-  const [conformationOpen, setConformationOpen] = useState<boolean>(false)
+  const [corporateGroupDetailsOpen, setCorporateGroupDetailsOpen] = useState<boolean>(false)
   const [allProjects, setProjectAll] = useState<Array<commonListTypes>>([])
   const [allIntake, setAllIntake] = useState<Array<commonListTypes>>([])
+  const [studentData, setStudentData] = useState<any>()
+  const [studentListOpen, setStudentListOpen] = useState<boolean>(false)
+  const [selectedCorporateGroup, setSelectedCorporateGroup] = useState<any>()
+  const [studentListLoader, setStudentListLoader] = useState<boolean>(false)
 
   const {
     setValue,
@@ -153,6 +159,32 @@ const StudentList = () => {
 
   const formValue = watch()
   const router = useRouter()
+
+  const handleCloseCorporateGroupDetails = () => {
+    setCorporateGroupDetailsOpen(false)
+    setSelectedCorporateGroup(null)
+  }
+  const handleStudentCountClick = (group: any) => {
+    setStudentListOpen(true)
+    setSelectedCorporateGroup(group)
+    getStudentList({ pageNumber: 1, pageSize: 10 })
+  }
+
+  const getStudentList = async (params: any) => {
+    if (selectedCorporateGroup) {
+      setStudentListLoader(true)
+      const response = await DashboardService.getCorporateStudentListByGroup(selectedCorporateGroup?.id, params)
+      setStudentData(response?.data?.data)
+      setStudentListLoader(false)
+    }
+  }
+
+  const handleCloseCorporateGroupStudentList = () => {
+    setStudentListOpen(false)
+    setSelectedCorporateGroup(null)
+    setStudentData(null)
+  }
+
   const columns = [
     {
       flex: 0.1,
@@ -173,8 +205,8 @@ const StudentList = () => {
         <Box>
           <StyledLink
             onClick={() => {
-              setConformationOpen(!conformationOpen)
-              setSelectedRows(row)
+              setCorporateGroupDetailsOpen(true)
+              setSelectedCorporateGroup(row)
             }}
           >
             {row.name}
@@ -218,7 +250,17 @@ const StudentList = () => {
       field: 'studentCout',
       headerName: 'No of Students',
       renderCell: ({ row }: any) => {
-        return <Box>{row?.studentCout ? row?.studentCout : '-'}</Box>
+        return (
+          <Box>
+            <StyledLink
+              onClick={() => {
+                handleStudentCountClick(row)
+              }}
+            >
+              {row?.studentCout ?? '-'}
+            </StyledLink>
+          </Box>
+        )
       }
     },
     {
@@ -377,6 +419,20 @@ const StudentList = () => {
             onSelectionModelChange={rows => setSelectedRows(rows)}
             onPageSizeChange={newPageSize => setPageSize(newPageSize)}
             onPageChange={newPage => setPageNumber(newPage + 1)}
+          />
+          <CorporateGroupInformation
+            corporateGroupDetailsOpen={corporateGroupDetailsOpen}
+            handleCloseCorporateGroupDetails={handleCloseCorporateGroupDetails}
+            corporateGroup={selectedCorporateGroup}
+          />
+          <CorporateStudentListPopup
+            conformationOpen={studentListOpen}
+            handleCloseConfirmationPopup={handleCloseCorporateGroupStudentList}
+            selectedCorporateGroup={selectedCorporateGroup}
+            response={studentData}
+            getStudentList={getStudentList}
+            loader={studentListLoader}
+            value={value}
           />
         </Card>
 

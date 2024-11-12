@@ -237,7 +237,6 @@ const PreviewCard = ({ id, data, getData }: Props) => {
   }
 
   useEffect(() => {
-    console.log('data =============>', data)
     if (data?.payment?.length) {
       data?.payment?.forEach((element: any) => {
         convertCurrency(element)

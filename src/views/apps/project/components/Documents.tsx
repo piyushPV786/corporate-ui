@@ -117,11 +117,6 @@ const Documents = ({ projectCode }: { projectCode: string }) => {
     },
     {
       flex: 1,
-      field: 'comment',
-      headerName: 'Comments'
-    },
-    {
-      flex: 1,
       field: 'date',
       headerName: 'Upload Date',
       renderCell: ({ row }: GridRenderCellParams) => (

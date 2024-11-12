@@ -309,7 +309,7 @@ const CorporateManagerAddDialog = ({ isEdit, managerData, actions }: ICorporateM
                             renderInput={params => (
                               <TextField
                                 {...params}
-                                label='Roles'
+                                label={<RequiredLabel label='Roles' />}
                                 error={errors?.roles as boolean | undefined}
                                 helperText={errors?.roles?.message as string | undefined}
                               />

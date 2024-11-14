@@ -15,7 +15,8 @@ import {
   RadioGroup,
   TextField
 } from '@mui/material'
-
+import * as Yup from 'yup'
+import { yupResolver } from '@hookform/resolvers/yup'
 import { useForm, Controller } from 'react-hook-form'
 import 'react-datepicker/dist/react-datepicker.css'
 import AdapterDateFns from '@mui/lab/AdapterDateFns'
@@ -37,6 +38,18 @@ interface propsType {
   facilitatorList: any
 }
 
+const validationSchema = Yup.object({
+  courseType: Yup.string().required('Course Type is required'),
+  program: Yup.string().required('Program is required'),
+  startDate: Yup.date().required('Start Date is required'),
+  duration: Yup.number().required('Duration is required'),
+  noOfStudent: Yup.number().required('Number of Students is required'),
+  facilitator: Yup.array().min(1, 'At least one facilitator is required').required('Facilitator is required'),
+  assessmentRequired: Yup.boolean().required('Assessment Required is required'),
+  accreditationRequired: Yup.boolean().required('Accreditation Required is required'),
+  customizationRequired: Yup.boolean().required('Customization Required is required')
+})
+
 const ProgramAndCourseDialog = ({
   open,
   onClose,
@@ -53,10 +66,10 @@ const ProgramAndCourseDialog = ({
     startDate: projectData?.programDetails?.startDate ? projectData?.programDetails?.startDate : new Date(),
     duration: projectData?.programDetails?.duration,
     noOfStudent: projectData?.noOfStudent,
-    facilitator: projectData?.programDetails?.facilitator,
-    assessmentRequired: true,
-    accreditationRequired: true,
-    customizationRequired: true,
+    facilitator: projectData?.programDetails?.facilitator?.split(',') || [],
+    assessmentRequired: projectData?.programDetails?.assessmentRequired ?? true,
+    accreditationRequired: projectData?.programDetails?.accreditationRequired ?? true,
+    customizationRequired: projectData?.programDetails?.customizationRequired ?? true,
     notes: projectData?.programDetails?.notes
   }
 
@@ -71,16 +84,17 @@ const ProgramAndCourseDialog = ({
     watch,
     reset,
     formState: { errors }
-  } = useForm({ defaultValues })
+  } = useForm({
+    defaultValues,
+    resolver: yupResolver(validationSchema) // Apply Yup validation schema
+  })
 
   const handleClose = () => {
     onClose()
   }
 
   const onSubmit = async (data: any) => {
-    const selectedFacilitator = facilitatorList?.find((facilitator: any) => facilitator?.name === data?.facilitator)
-
-    const Data = { ...data, noOfStudent: Number(data?.noOfStudent), facilitatorEmail: selectedFacilitator?.email }
+    const Data = { ...data, facilitator: data.facilitator.join(','), noOfStudent: Number(data?.noOfStudent) }
     await DashboardService?.editProgramAndCourseDetail(code, Data)
     handleClose()
     reset()
@@ -185,7 +199,7 @@ const ProgramAndCourseDialog = ({
                         label={<RequiredLabel label='Start Date' />}
                         value={value || null}
                         onChange={newValue => onChange(newValue)}
-                        renderInput={params => <TextField {...params} />}
+                        renderInput={params => <TextField {...params} error={Boolean(errors.startDate)} />}
                       />
                     </LocalizationProvider>
                   )}
@@ -255,21 +269,29 @@ const ProgramAndCourseDialog = ({
               </FormControl>
             </Grid> */}
 
-            <Grid item xs={12} sm={4} mb={5}>
+            <Grid item xs={12} sm={8} mb={5}>
               <FormControl fullWidth>
                 <Autocomplete
+                  multiple
                   fullWidth
                   {...register('facilitator', { required: true })}
                   style={{ width: '100%' }}
                   options={facilitatorList}
                   onChange={(_, value) => {
-                    value && setValue('facilitator', value.name)
+                    const selectedFacilitators = value.map(facilitator => facilitator.code)
+                    setValue('facilitator', selectedFacilitators)
                     clearErrors('facilitator')
                   }}
-                  value={facilitatorList?.find((i: any) => i.name === watch('facilitator'))}
+                  value={facilitatorList?.filter((i: any) => watch('facilitator')?.includes(i.code))}
                   getOptionLabel={option => option.name}
                   renderInput={params => (
-                    <TextField {...params} label={<RequiredLabel label='Facilitator' />} variant='outlined' fullWidth />
+                    <TextField
+                      {...params}
+                      label={<RequiredLabel label='Facilitator' />}
+                      variant='outlined'
+                      error={Boolean(errors.facilitator)}
+                      fullWidth
+                    />
                   )}
                 />
 

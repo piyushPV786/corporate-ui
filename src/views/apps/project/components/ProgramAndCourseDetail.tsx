@@ -6,6 +6,7 @@ import { AcademicService, CommonService } from 'src/service'
 import { commonListTypes } from 'src/types/apps/dataTypes'
 import { status } from 'src/context/common'
 import { IProgramList } from 'src/types/apps/invoiceTypes'
+import { getName } from 'src/utils'
 
 export const formateDate = (date: string) => {
   const newDate = new Date(date)
@@ -178,7 +179,10 @@ const ProgramAndCourseDetail = ({
                 Facilitator
               </Typography>
               <Typography variant='body2' color='black' sx={{ fontWeight: 600 }}>
-                {projectData?.programDetails?.facilitator}
+                {projectData?.programDetails?.facilitator
+                  ?.split(',')
+                  .map((facilitator: any) => getName(facilitatorList, facilitator))
+                  .join(', ')}
               </Typography>
             </Box>
           </Grid>

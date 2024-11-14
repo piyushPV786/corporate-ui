@@ -175,7 +175,8 @@ export const apiEndPoints = {
   corporateCode: 'corporate-ed/check-duplicate-corporate',
   corporateManager: 'corporate-managers',
   corporateProjectManagerList: 'corporate-managers/all/manager/CE_Project_Manager',
-  corporateAccountManagerList: 'corporate-managers/all/manager/CE_Account_Manager'
+  corporateAccountManagerList: 'corporate-managers/all/manager/CE_Account_Manager',
+  paymentTypes: 'project/paymentTypes/all'
 }
 
 export const allowedDocsForCreditVetting = ['SMARTID', 'PASSPORT']

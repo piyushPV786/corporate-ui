@@ -15,7 +15,7 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 
 import { Controller, useForm } from 'react-hook-form'
-import { paymentTypeList, userInformationStatus } from 'src/context/common'
+import { userInformationStatus } from 'src/context/common'
 
 import {
   FormControl,
@@ -51,13 +51,15 @@ interface ICostContractDialogProps {
   handleEditSuccess: () => void
   data: IFormDataTypes
   createCostContract: (arg: IPayloadTypes) => void
+  paymentTypeList: any[]
 }
 
 const CostContractDetail = ({
   handleClickSuccess,
   data,
   handleEditSuccess,
-  createCostContract
+  createCostContract,
+  paymentTypeList
 }: ICostContractDialogProps) => {
   const [show, setShow] = useState<boolean>(false)
   const [showVariance, setShowVariance] = useState(false)
@@ -217,11 +219,11 @@ const CostContractDetail = ({
                     style={{ width: '100%' }}
                     options={paymentTypeList}
                     onChange={(_, value) => {
-                      value && setValue('paymentType', value.name)
+                      value && setValue('paymentType', value.paymentCode)
                       clearErrors('paymentType')
                     }}
-                    value={paymentTypeList?.find(i => i.name === watch('paymentType'))}
-                    getOptionLabel={option => option.name}
+                    value={paymentTypeList?.find(i => i.paymentCode === watch('paymentType'))}
+                    getOptionLabel={option => option.paymentName}
                     renderInput={params => (
                       <TextField
                         {...params}

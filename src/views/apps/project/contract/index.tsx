@@ -55,6 +55,7 @@ const CostContract = ({ code }: propsType) => {
   const [installmentList, setInstallmentList] = useState<any>()
   const [venueLogisticsList, setVenueLogisticsList] = useState<any>()
   const [currencyList, SetCurrencyList] = useState<any>([])
+  const [paymentTypeList, setPaymentTypeList] = useState<any>([])
 
   const handleCostSuccess = () => {
     successToast(messages.CostContractAdd)
@@ -144,12 +145,20 @@ const CostContract = ({ code }: propsType) => {
     }
   }
 
+  const getPaymentListDetails = async () => {
+    const response = await DashboardService.getPaymentTypesList()
+    if (response?.data.statusCode == status.successCode && response?.data?.data) {
+      setPaymentTypeList(response.data.data)
+    }
+  }
+
   useEffect(() => {
     getCostContractList()
     getInstallmentAll()
     getInstallmentList()
     getVenueLogisticsList()
     getCurrencyListDetails()
+    getPaymentListDetails()
   }, [])
   const columns = [
     {
@@ -252,6 +261,7 @@ const CostContract = ({ code }: propsType) => {
               handleEditSuccess={handleCostEdit}
               data={response}
               createCostContract={createCostContract}
+              paymentTypeList={paymentTypeList}
             />
           </Grid>
         </Grid>
@@ -271,7 +281,12 @@ const CostContract = ({ code }: propsType) => {
             </Grid>
             <Grid item xs={3}>
               <label>Payment Type</label>
-              <Typography>{response?.paymentType ?? '-'}</Typography>
+              <Typography>
+                {response?.paymentType
+                  ? paymentTypeList.find((payment: any) => payment.paymentCode === response.paymentType)?.paymentName ||
+                    response.paymentType
+                  : '-'}
+              </Typography>
             </Grid>
           </Grid>
         ) : (

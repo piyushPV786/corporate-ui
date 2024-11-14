@@ -1409,4 +1409,18 @@ export default class Dashboard {
     }
     nProgress.done()
   }
+  async getPaymentTypesList() {
+    nProgress.start()
+    const endUrlName = this.baseUrl + apiEndPoints.paymentTypes
+    try {
+      const response = await this.apiServer.get(endUrlName)
+      nProgress.done()
+
+      return response
+    } catch (err: any) {
+      console.log('Error fetching Payment Types list ========>', err?.message)
+      nProgress.done()
+    }
+    nProgress.done()
+  }
 }

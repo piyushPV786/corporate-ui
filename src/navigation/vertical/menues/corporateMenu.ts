@@ -3,7 +3,7 @@ import { FeatureCodes, moduleKeys } from 'src/components/common/featureData'
 
 export const corporateMenu = {
   [FeatureCodes.CES.corporateStudents]: {
-    title: 'Corporate Students',
+    title: 'Corporate Student Application',
     icon: FaceAgent,
     path: '/corporate-students/list',
     badgeColor: 'error',

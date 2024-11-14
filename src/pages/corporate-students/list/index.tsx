@@ -13,7 +13,7 @@ import { ThemeColor } from 'src/@core/layouts/types'
 // ** Custom Components Imports
 import CustomChip from 'src/@core/components/mui/chip'
 import TableHeader from 'src/views/apps/corporateStudents/list/TableHeader'
-import { AcademicService, DashboardService } from 'src/service'
+import { AcademicService, CommonService, DashboardService } from 'src/service'
 import { admissionStatus, applicationStatusColor, status, studentApplicationAllStatus } from 'src/context/common'
 import { DataParams } from 'src/service/Dashboard'
 import {
@@ -24,6 +24,9 @@ import {
 } from 'src/types/apps/corporatTypes'
 import DynamicBreadcrumb from 'src/components/Breadcrumb'
 import { corporateConstant, filterOptionDefaultValues } from 'src/context/corporateData'
+import { commonListTypes } from 'src/types/apps/dataTypes'
+import { IProgramList } from 'src/types/apps/invoiceTypes'
+import { getName } from 'src/utils'
 
 // ** Icon Imports
 import EyeOutline from 'mdi-material-ui/EyeOutline'
@@ -50,6 +53,8 @@ const CorporateStudents = () => {
   const [value, setValue] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(false)
   const [filterData, setFilterData] = useState<IDynamicObject>()
+  const [courseTypeList, setCourseTypeList] = useState<commonListTypes[]>([])
+  const [programList, setProgramList] = useState<IProgramList[]>([])
 
   const getCorporateStudentsList = async (params: DataParams) => {
     setLoading(true)
@@ -58,6 +63,18 @@ const CorporateStudents = () => {
       setCorporateStudentList(response?.data)
     }
     setLoading(false)
+  }
+  const getCourseTypeList = async () => {
+    const response = await CommonService.getCourseTypeList()
+    if (response?.status === status?.successCode && response?.data?.data?.length) {
+      setCourseTypeList(response?.data?.data)
+    }
+  }
+  const getProgramList = async () => {
+    const response = await AcademicService.getAllProgramList()
+    if (response?.status === status?.successCode && response?.data?.data?.length) {
+      setProgramList(response?.data?.data)
+    }
   }
   const getFilterOptions = async () => {
     const [projects, programs] = await Promise.all([
@@ -72,6 +89,8 @@ const CorporateStudents = () => {
   }
 
   useEffect(() => {
+    getCourseTypeList()
+    getProgramList()
     getFilterOptions()
   }, [])
   useEffect(() => {
@@ -103,23 +122,44 @@ const CorporateStudents = () => {
     },
     {
       flex: 0.6,
-      minWidth: 100,
+      minWidth: 150,
       field: 'studentCode',
       headerName: 'Student NO',
-      renderCell: ({ row }: CellType) => <Typography variant='body2'>{row?.lead?.studentCode ?? '-'}</Typography>
+      renderCell: ({ row }: CellType) => {
+        return (
+          <Grid container>
+            <Grid item xs={12}>
+              <Tooltip title='Student Code' placement='top'>
+                <Typography variant='body2'>{row?.lead?.studentCode ?? '-'}</Typography>
+              </Tooltip>
+            </Grid>
+            <Grid item xs={12}>
+              <Tooltip title='Application Code'>
+                <Typography variant='caption'>{row?.applicationCode ?? '-'}</Typography>
+              </Tooltip>
+            </Grid>
+          </Grid>
+        )
+      }
     },
     {
       flex: 0.8,
+      minWidth: 150,
       field: 'name',
       headerName: 'Name',
       renderCell: ({ row }: CellType) => {
         const { lead } = row
 
-        return <Typography variant='body2'>{`${lead?.firstName} ${lead?.lastName}`}</Typography>
+        return (
+          <Tooltip title={`${lead?.firstName} ${lead?.lastName}`} placement='top'>
+            <Typography variant='body2'>{`${lead?.firstName} ${lead?.lastName}`}</Typography>
+          </Tooltip>
+        )
       }
     },
     {
       flex: 1,
+      minWidth: 200,
       field: 'email',
       headerName: 'Email & Contact Details',
       renderCell: ({ row }: CellType) => {
@@ -128,14 +168,18 @@ const CorporateStudents = () => {
         return (
           <Grid container>
             <Grid item xs={12}>
-              <Typography noWrap variant='body1'>
-                {email}
-              </Typography>
+              <Tooltip title={email} placement='top'>
+                <Typography noWrap variant='body1'>
+                  {email}
+                </Typography>
+              </Tooltip>
             </Grid>
             <Grid item xs={12}>
-              <Typography noWrap variant='caption'>
-                +{mobileCountryCode} {mobileNumber}
-              </Typography>
+              <Tooltip title={`+${mobileCountryCode} ${mobileNumber}`}>
+                <Typography noWrap variant='caption'>
+                  +{mobileCountryCode} {mobileNumber}
+                </Typography>
+              </Tooltip>
             </Grid>
           </Grid>
         )
@@ -143,6 +187,7 @@ const CorporateStudents = () => {
     },
     {
       flex: 1,
+      minWidth: 200,
       field: 'projectName',
       headerName: 'Project Name / Code',
       renderCell: ({ row }: CellType) => {
@@ -151,14 +196,18 @@ const CorporateStudents = () => {
         return (
           <Grid container>
             <Grid item xs={12}>
-              <Typography noWrap variant='body1'>
-                {project?.name ? project.name : '-'}
-              </Typography>
+              <Tooltip title='Project Name' placement='top'>
+                <Typography noWrap variant='body1'>
+                  {project?.name ? project.name : '-'}
+                </Typography>
+              </Tooltip>
             </Grid>
             <Grid item xs={12}>
-              <Typography noWrap variant='caption'>
-                {project?.code ? project.code : '-'}
-              </Typography>
+              <Tooltip title='Project Code'>
+                <Typography noWrap variant='caption'>
+                  {project?.code ? project.code : '-'}
+                </Typography>
+              </Tooltip>
             </Grid>
           </Grid>
         )
@@ -187,6 +236,7 @@ const CorporateStudents = () => {
 
     {
       flex: 1,
+      minWidth: 275,
       field: 'course',
       headerName: 'Module or Qualification Name / Type',
       renderCell: ({ row }: CellType) => {
@@ -195,14 +245,18 @@ const CorporateStudents = () => {
         return (
           <Grid container>
             <Grid item xs={12}>
-              <Typography noWrap variant='body1'>
-                {project?.program ? project?.program : '-'}
-              </Typography>
+              <Tooltip title='Qualification/Module Name'>
+                <Typography noWrap variant='body1'>
+                  {project?.program ? getName(programList, project.program) : '-'}
+                </Typography>
+              </Tooltip>
             </Grid>
             <Grid item xs={12}>
-              <Typography noWrap variant='caption'>
-                {project?.courseType ? project?.courseType : '-'}
-              </Typography>
+              <Tooltip title='Module Type'>
+                <Typography noWrap variant='caption'>
+                  {project?.courseType ? getName(courseTypeList, project.courseType) : '-'}
+                </Typography>
+              </Tooltip>
             </Grid>
           </Grid>
         )
@@ -210,6 +264,7 @@ const CorporateStudents = () => {
     },
     {
       flex: 1.75,
+      minWidth: 200,
       field: 'status',
       headerName: 'Status',
       renderCell: ({ row }: CellType) => (
@@ -272,7 +327,7 @@ const CorporateStudents = () => {
   return (
     <Grid container spacing={6}>
       <Grid item xs={12}>
-        <Typography className='page-header'>Corporate Students</Typography>
+        <Typography className='page-header'>Corporate Student Applications</Typography>
         <DynamicBreadcrumb asPath={router.asPath} />
         <Card>
           <Fragment>

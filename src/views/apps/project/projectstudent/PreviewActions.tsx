@@ -12,6 +12,8 @@ import ArrowLeft from 'mdi-material-ui/ArrowLeft'
 import { AddStudent } from 'src/context/common'
 import { Box, Tooltip } from '@mui/material'
 
+import ChangeStatus from './ChangeStatus'
+
 type Props = { projectCode: string; enrollStudentById: () => void; disableSubmit: boolean }
 
 const PreviewActions = ({ enrollStudentById, disableSubmit, projectCode }: Props) => {
@@ -23,6 +25,7 @@ const PreviewActions = ({ enrollStudentById, disableSubmit, projectCode }: Props
             Back to List
           </Button>
         </Link>
+        <ChangeStatus />
         <Tooltip title={disableSubmit ? 'Upload Documents to Submit' : ''}>
           <Box>
             <Link href={`${AddStudent.BackToList}${projectCode}`} passHref>

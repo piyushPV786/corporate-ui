@@ -11,10 +11,10 @@ import { corporateConstant } from 'src/context/corporateData'
 // ** Icons Imports
 import ArrowLeft from 'mdi-material-ui/ArrowLeft'
 
-// import CorpStudConfirmationDialog from 'src/views/pages/dialog/CorpStudConfirmationDialog'
 import { Fragment } from 'react'
 import { IDynamicObject } from 'src/types/apps/corporatTypes'
 import { CommonActivityTab } from 'src/views/dashboards/comments/CommentComponenet'
+import EnrollToRetail from './EnrollToRetail'
 
 interface IPropsTypes {
   rejectStudent: (comments: string) => void
@@ -34,6 +34,8 @@ const PreviewActions = ({ data }: IPropsTypes) => {
               Back to List
             </Button>
           </Link>
+
+          <EnrollToRetail />
         </CardContent>
         {/* <CardContent>
           <CorporateReject rejectStudent={rejectStudent} disable={disableReject} />

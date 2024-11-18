@@ -177,7 +177,8 @@ export const apiEndPoints = {
   corporateProjectManagerList: 'corporate-managers/all/manager/CE_Project_Manager',
   corporateAccountManagerList: 'corporate-managers/all/manager/CE_Account_Manager',
   paymentTypes: 'project/paymentTypes/all',
-  salesAgentList: 'user/role/Sales'
+  salesAgentList: 'user/role/Sales',
+  corporateStudentChangeStatus: 'corporate-student/change-status'
 }
 
 export const allowedDocsForCreditVetting = ['SMARTID', 'PASSPORT']

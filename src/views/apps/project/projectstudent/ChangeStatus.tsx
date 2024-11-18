@@ -20,11 +20,19 @@ import RequiredLabel from 'src/components/RequiredLabel'
 // ** Validation Imports
 import * as Yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
+import { DashboardService } from 'src/service'
+import { status } from 'src/context/common'
+import { successToast } from 'src/components/Toast'
 
 // Define the Yup validation schema
 const validationSchema = Yup.object({
   status: Yup.string().required('Status is required')
 })
+
+const statusList = [
+  { name: 'Intake Assignment Pending', code: 'INTAKE-ASSIGNMENT-PEND' },
+  { name: 'Cancelled', code: 'CANCELLED' }
+]
 
 const ChangeStatus = () => {
   const [openChangeStatus, setOpenChangeStatus] = useState<boolean>(false)
@@ -40,14 +48,15 @@ const ChangeStatus = () => {
   } = useForm({
     resolver: yupResolver(validationSchema)
   })
-  const statusList = [
-    { name: 'Intake Assignment Pending', code: 'INTAKE-ASSIGNMENT-PEND' },
-    { name: 'Cancelled', code: 'CANCELLED' }
-  ]
 
-  const onSubmit = (data: any) => {
-    console.log(data) // Handle form submission logic here
-    handleCloseChangeStatus() // Close the modal on form submission
+  const onSubmit = async (data: any) => {
+    console.log(data)
+    const response = await DashboardService?.corporateStudentChangeStatus(data)
+    if (response?.status === status.successCode) {
+      successToast('')
+    } else {
+    }
+    handleCloseChangeStatus()
   }
 
   return (

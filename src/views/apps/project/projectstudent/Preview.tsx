@@ -58,6 +58,7 @@ const StudentPreview = ({ id, projectCode }: IStudentPreviewProps) => {
             enrollStudentById={enrollStudentById}
             disableSubmit={studentDetail?.documents?.data?.length === 0}
             projectCode={projectCode}
+            student={studentDetail}
           />
         </Box>
       </Grid>

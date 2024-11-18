@@ -110,4 +110,12 @@ export interface IProjectStudentTypes {
   }
   studentCode: string
   education: any
+  project: {
+    name: string
+    code: string
+    program: string
+    courseType: string
+    projectManager: string
+    accountManager: string
+  }
 }

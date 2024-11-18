@@ -9,14 +9,20 @@ import { SendOutline } from 'mdi-material-ui'
 
 // ** Icons Imports
 import ArrowLeft from 'mdi-material-ui/ArrowLeft'
-import { AddStudent } from 'src/context/common'
+import { AddStudent, intakeStatue } from 'src/context/common'
 import { Box, Tooltip } from '@mui/material'
 
 import ChangeStatus from './ChangeStatus'
+import { IProjectStudentTypes } from 'src/types/apps/projectTypes'
 
-type Props = { projectCode: string; enrollStudentById: () => void; disableSubmit: boolean }
+type Props = {
+  projectCode: string
+  enrollStudentById: () => void
+  disableSubmit: boolean
+  student: IProjectStudentTypes
+}
 
-const PreviewActions = ({ enrollStudentById, disableSubmit, projectCode }: Props) => {
+const PreviewActions = ({ enrollStudentById, disableSubmit, projectCode, student }: Props) => {
   return (
     <Card sx={{ mt: 13 }}>
       <CardContent>
@@ -25,7 +31,7 @@ const PreviewActions = ({ enrollStudentById, disableSubmit, projectCode }: Props
             Back to List
           </Button>
         </Link>
-        <ChangeStatus />
+        {student?.status !== intakeStatue.intakeAssignedPending && <ChangeStatus />}
         <Tooltip title={disableSubmit ? 'Upload Documents to Submit' : ''}>
           <Box>
             <Link href={`${AddStudent.BackToList}${projectCode}`} passHref>

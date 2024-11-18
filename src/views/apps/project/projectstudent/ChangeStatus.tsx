@@ -20,9 +20,11 @@ import RequiredLabel from 'src/components/RequiredLabel'
 // ** Validation Imports
 import * as Yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
+
 import { DashboardService } from 'src/service'
 import { status } from 'src/context/common'
-import { successToast } from 'src/components/Toast'
+import { errorToast, successToast } from 'src/components/Toast'
+import LoadingBackdrop from 'src/@core/components/loading-backdrop'
 
 // Define the Yup validation schema
 const validationSchema = Yup.object({
@@ -34,8 +36,14 @@ const statusList = [
   { name: 'Cancelled', code: 'CANCELLED' }
 ]
 
-const ChangeStatus = () => {
+type Props = {
+  applicationCode: string
+  getStudentDetail: () => Promise<void>
+}
+
+const ChangeStatus = ({ applicationCode, getStudentDetail }: Props) => {
   const [openChangeStatus, setOpenChangeStatus] = useState<boolean>(false)
+  const [showLoader, setShowLoader] = useState<boolean>(false)
 
   const handleCloseChangeStatus = () => {
     setOpenChangeStatus(false)
@@ -44,19 +52,28 @@ const ChangeStatus = () => {
   const {
     handleSubmit,
     control,
+    reset,
     formState: { errors }
   } = useForm({
     resolver: yupResolver(validationSchema)
   })
 
   const onSubmit = async (data: any) => {
-    console.log(data)
-    const response = await DashboardService?.corporateStudentChangeStatus(data)
+    setShowLoader(true)
+    const payload = {
+      applicationCode: applicationCode,
+      status: data.status
+    }
+    const response = await DashboardService?.corporateStudentChangeStatus(payload)
     if (response?.status === status.successCode) {
-      successToast('')
+      await getStudentDetail()
+      successToast('Status Updated Successfully')
     } else {
+      errorToast('Something went wrong. Please try again')
     }
     handleCloseChangeStatus()
+    reset()
+    setShowLoader(false)
   }
 
   return (
@@ -106,6 +123,7 @@ const ChangeStatus = () => {
               </Button>
             </DialogActions>
           </form>
+          <LoadingBackdrop open={showLoader} />
         </Dialog>
       </Grid>
     </Fragment>

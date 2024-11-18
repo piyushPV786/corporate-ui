@@ -109,6 +109,7 @@ export interface IProjectStudentTypes {
     count: number
   }
   studentCode: string
+  applicationCode: string
   education: any
   project: {
     name: string

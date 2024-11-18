@@ -20,9 +20,10 @@ type Props = {
   enrollStudentById: () => void
   disableSubmit: boolean
   student: IProjectStudentTypes
+  getStudentDetail: () => Promise<void>
 }
 
-const PreviewActions = ({ enrollStudentById, disableSubmit, projectCode, student }: Props) => {
+const PreviewActions = ({ enrollStudentById, disableSubmit, projectCode, student, getStudentDetail }: Props) => {
   return (
     <Card sx={{ mt: 13 }}>
       <CardContent>
@@ -31,7 +32,9 @@ const PreviewActions = ({ enrollStudentById, disableSubmit, projectCode, student
             Back to List
           </Button>
         </Link>
-        {student?.status !== intakeStatue.intakeAssignedPending && <ChangeStatus />}
+        {student?.status !== intakeStatue.intakeAssignedPending && (
+          <ChangeStatus applicationCode={student?.applicationCode} getStudentDetail={getStudentDetail} />
+        )}
         <Tooltip title={disableSubmit ? 'Upload Documents to Submit' : ''}>
           <Box>
             <Link href={`${AddStudent.BackToList}${projectCode}`} passHref>

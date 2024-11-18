@@ -22,6 +22,7 @@ export const apiEndPoints = {
   allIntake: 'intake/all',
   addressList: 'common/address-type',
   qualification: 'common/qualification',
+  interestedQualification: 'programs/all',
   studyMode: 'common/study-mode',
   socialMedia: 'common/social-media',
   agent: 'common/agent',

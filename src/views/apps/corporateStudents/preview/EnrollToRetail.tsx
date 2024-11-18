@@ -21,7 +21,7 @@ import RequiredLabel from 'src/components/RequiredLabel'
 import * as Yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
 
-import { CommonService, UserManagementService } from 'src/service'
+import { AcademicService, CommonService, UserManagementService } from 'src/service'
 import { status } from 'src/context/common'
 
 // Define the Yup validation schema
@@ -55,7 +55,7 @@ const EnrollToRetail = () => {
   }
 
   const getInterestedQualificationList = async () => {
-    const response = await UserManagementService?.getSalesAgentList()
+    const response = await AcademicService?.getInterestedQualificationList()
     if (response?.data?.statusCode === status.successCode && response?.data?.data) {
       setInterestedQualificationList(response.data.data)
     }

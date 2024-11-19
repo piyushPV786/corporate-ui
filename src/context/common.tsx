@@ -525,7 +525,9 @@ export enum ClientContactDetails {
   TelephoneRequired = 'Telephone Number is Required',
   DepartmentRequired = 'Department is Required',
   DesignationRequired = 'Designation is Required',
-  RelationshipRequired = 'Relationship '
+  RelationshipRequired = 'Relationship ',
+  mobileNumberLength = 'Mobile number must be atleast 6 digits',
+  telephoneNumberLength = 'Telephone number must be atleast 6 digits'
 }
 
 interface UserStatusType {

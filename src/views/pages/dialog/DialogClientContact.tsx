@@ -66,9 +66,25 @@ const DialogClientContact = ({ title, data, createClientContact, handleEdit }: I
       .string()
       .required(ClientContactDetails.LastNameRequired)
       .matches(/^[a-zA-z]*$/, ClientContactDetails.LastNameError),
-    mobileNumber: yup.string().required(ClientContactDetails.MobileRequired),
+    mobileNumber: yup.string().required(ClientContactDetails.MobileRequired).test(
+      'is-valid-telephone',
+      ClientContactDetails.mobileNumberLength,
+      function (value) {
+        const { telephoneCountryCode } = this.parent;
+        const telephoneNumberWithoutCode = value?.replace(telephoneCountryCode || '', '') || '';
+
+        return telephoneNumberWithoutCode.length >= 6;
+      }),
     mobileCountryCode: yup.string(),
-    telephoneNumber: yup.string().required(ClientContactDetails.TelephoneRequired),
+    telephoneNumber: yup.string().required(ClientContactDetails.TelephoneRequired).test(
+      'is-valid-telephone',
+      ClientContactDetails.telephoneNumberLength,
+      function (value) {
+        const { telephoneCountryCode } = this.parent;
+        const telephoneNumberWithoutCode = value?.replace(telephoneCountryCode || '', '') || '';
+        
+        return telephoneNumberWithoutCode.length >= 6;
+      }),
     telephoneCountryCode: yup.string(),
     email: yup.string().email().required(ClientContactDetails.EmailRequired),
     department: yup.string().required(ClientContactDetails.DepartmentRequired),
@@ -266,7 +282,7 @@ const DialogClientContact = ({ title, data, createClientContact, handleEdit }: I
                     countryCodeEditable={true}
                     placeholder='Enter Mobile Number'
                     specialLabel={'Mobile Number'}
-                    value={watch('mobileNumber')}
+                    value={watch('mobileNumber') || '+27'}
                     {...register('mobileNumber')}
                     onChange={(data, countryData: { dialCode: string }) => {
                       data && handleChange('mobileNumber', data)
@@ -298,7 +314,7 @@ const DialogClientContact = ({ title, data, createClientContact, handleEdit }: I
                   <PhoneInput
                     placeholder='Enter Telephone number'
                     specialLabel={'Telephone Number'}
-                    value={watch('telephoneNumber')}
+                    value={watch('telephoneNumber') || '+27'}
                     {...register('telephoneNumber')}
                     onChange={(data, countryData: { dialCode: string }) => {
                       data && handleChange('telephoneNumber', data)
@@ -393,7 +409,10 @@ const DialogClientContact = ({ title, data, createClientContact, handleEdit }: I
           </DialogContent>
           {title && title == 'Add' ? (
             <DialogActions sx={{ pb: { xs: 8, sm: 10 }, justifyContent: 'center' }}>
-              <Button variant='outlined' color='secondary' onClick={() => setShow(false)}>
+              <Button variant='outlined' color='secondary' onClick={() => {
+                setShow(false) 
+                reset()
+              }}>
                 CANCEL
               </Button>
               <Button variant='contained' sx={{ mr: 2 }} type='submit'>
@@ -402,7 +421,10 @@ const DialogClientContact = ({ title, data, createClientContact, handleEdit }: I
             </DialogActions>
           ) : (
             <DialogActions sx={{ pb: { xs: 8, sm: 10 }, justifyContent: 'center' }}>
-              <Button variant='outlined' color='secondary' onClick={() => setShow(false)}>
+              <Button variant='outlined' color='secondary' onClick={() => {
+                setShow(false) 
+                reset()
+              }}>
                 CANCEL
               </Button>
               <Button variant='contained' sx={{ mr: 2 }} type='submit'>

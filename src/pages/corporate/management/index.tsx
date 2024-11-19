@@ -132,7 +132,7 @@ const schema = yup.object().shape({
   name: yup.string().required('required'),
   code: yup
     .string()
-    .matches(/^[\w@.-]*$/, `Code Must be without space you can use dash(-) instead`)
+    .matches(/^[\w@.-]*$/, `Special characters are not allowed in the Company Code`)
     .required('required'),
   companyType: yup.string().required('required'),
   country: yup.string().required('required'),

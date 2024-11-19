@@ -43,6 +43,7 @@ import { AxiosResponse } from 'axios'
 import ControlledAutocomplete from 'src/components/ControlledAutocomplete'
 import { IAddressStateTypes } from 'src/types/apps/admittedStudent'
 import RequiredLabel from 'src/components/RequiredLabel'
+import AlertBox from 'src/layouts/components/Alert'
 
 interface CellType {
   row: InvoiceType
@@ -490,6 +491,26 @@ const StudentList = () => {
     setLoadingStates(false)
   }
 
+  const isChange = () => {
+    return (
+      watch('name') !== corporateFormData?.name ||
+      watch('companyType') !== corporateFormData?.companyType ||
+      watch('email') !== corporateFormData?.email ||
+      watch('phoneNumber') !== corporateFormData?.phoneNumber ||
+      watch('address1') !== corporateFormData?.address1 ||
+      watch('address2') !== corporateFormData?.address2 ||
+      watch('country') !== corporateFormData?.country ||
+      watch('state') !== corporateFormData?.state ||
+      watch('pincode') !== corporateFormData?.pincode ||
+      watch('physicalAddress1') !== corporateFormData?.physicalAddress1 ||
+      watch('physicalAddress2') !== corporateFormData?.physicalAddress2 ||
+      watch('physicalCountry') !== corporateFormData?.physicalCountry ||
+      watch('physicalState') !== corporateFormData?.physicalState ||
+      watch('physicalPincode') !== corporateFormData?.physicalPincode ||
+      watch('isActive') !== corporateFormData?.isActive
+    )
+  }
+
   return (
     <Grid container spacing={6}>
       <Grid item xs={12}>
@@ -681,6 +702,7 @@ const StudentList = () => {
                             getOptionLabel={option => option?.name || ''}
                             onChange={(event, data) => {
                               field.onChange(data?.code)
+                              watch('country') == undefined && setValue('country', '')
                             }}
                             renderInput={params => (
                               <TextField
@@ -707,6 +729,7 @@ const StudentList = () => {
                             value={states?.find(item => (item as any)?.code === field?.value)}
                             onChange={(event, data: any) => {
                               field.onChange(data?.code)
+                              watch('state') == undefined && setValue('state', '')
                             }}
                             renderInput={params => (
                               <TextField
@@ -913,6 +936,20 @@ const StudentList = () => {
                     <CircularProgress color='inherit' />
                   </Backdrop>
                 )}
+              </Grid>
+              <Grid container display='flex' justifyContent='center'>
+                <Grid item xs={7.3}>
+                  {formValue && isChange() && openEdit?.actionType !== 'Add' ? (
+                    <AlertBox
+                      sx={{ mb: 6 }}
+                      color='warning'
+                      variant={'filled ' as any}
+                      header='Unsaved Changes'
+                      message='You have made changes. Do you want to save or discard them?'
+                      severity='warning'
+                    />
+                  ) : null}
+                </Grid>
               </Grid>
             </DialogContent>
 

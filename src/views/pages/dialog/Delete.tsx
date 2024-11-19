@@ -64,10 +64,10 @@ const DialogForm = ({ row, userName, deleteNotes }: DialogFormProps) => {
         <DialogContent>
           <DialogContentText variant='body2'>
             <Typography sx={{ mb: 1, fontWeight: '600', justifyContent: 'center', display: 'flex' }}>
-              Are you sure you want to
+              Are you sure that you want to
             </Typography>
             <Typography sx={{ mt: 0, mb: 3, fontWeight: '600', justifyContent: 'center', display: 'flex' }}>
-              delete the Note
+              delete the Notes?
             </Typography>
           </DialogContentText>
         </DialogContent>

@@ -140,7 +140,7 @@ const schema = yup.object().shape({
     .string()
     .matches(/^[\w@.-]*$/, `Code Must be without space you can use dash(-) instead`)
     .required('required'),
-  email: yup.string().email('Must be a valid email format').nullable().notRequired(),
+  email: yup.string().email('Please enter a valid email address').nullable().notRequired(),
   companyType: yup.string().required('required'),
   country: yup.string().required('required'),
   state: yup.string().required('required'),

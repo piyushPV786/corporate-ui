@@ -14,6 +14,7 @@ import StudentList from './components/StudentList'
 import Documents from 'src/views/apps/project/components/Documents'
 import ContactDetailsList from 'src/pages/project/client-contact'
 import { DateType } from 'src/types/forms/reactDatepickerTypes'
+import { useRouter } from 'next/router'
 
 interface TabPanelProps {
   children?: React.ReactNode
@@ -21,6 +22,17 @@ interface TabPanelProps {
   index: number
   value: number
 }
+
+const tabNames = [
+  'project-details',
+  'cost-and-contract',
+  'contact-details',
+  'qualification-module',
+  'students',
+  'documents',
+  'venue-details',
+  'notes'
+]
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props
@@ -119,10 +131,21 @@ interface ITabDetail {
 
 const TabDetails = ({ projectData, fetchProject }: ITabDetail) => {
   const theme = useTheme()
-  const [value, setValue] = React.useState(0)
+  const router = useRouter()
+  const { query } = router
+  const initialTab = query.tab && tabNames.includes(query.tab as string) ? tabNames.indexOf(query.tab as string) : 0
+  const [value, setValue] = React.useState(initialTab)
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue)
+    router.push(
+      {
+        pathname: router.pathname,
+        query: { ...query, tab: tabNames[newValue] }
+      },
+      undefined,
+      { shallow: true }
+    )
   }
 
   return (

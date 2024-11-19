@@ -18,7 +18,7 @@ const PreviewActions = ({ enrollStudentById, disableSubmit, projectCode }: Props
   return (
     <Card sx={{ mt: 13 }}>
       <CardContent>
-        <Link href={`${AddStudent.BackToList}${projectCode}`} passHref>
+        <Link href={`${AddStudent.BackToList}${projectCode}?tab=students`} passHref>
           <Button fullWidth startIcon={<ArrowLeft />} component='a' sx={{ mb: 3.5 }} variant='outlined'>
             Back to List
           </Button>

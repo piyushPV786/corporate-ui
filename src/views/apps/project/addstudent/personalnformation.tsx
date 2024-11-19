@@ -98,7 +98,7 @@ export const PersonalInformationDetail = ({ errors, setValue, watch, control }: 
   }
 
   const getIdentificationTypeList = async () => {
-    const raceResponse = await CommonService?.getIdentificationTypeList()
+    const raceResponse = await CommonService.identificationType({ projectIdentificationType: true })
     if (raceResponse?.data?.data?.length > 0) {
       setIdentificationDocumentType(raceResponse?.data?.data)
     }

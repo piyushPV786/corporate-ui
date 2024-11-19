@@ -10,6 +10,12 @@ import { getName } from 'src/utils'
 
 export const formateDate = (date: string) => {
   const newDate = new Date(date)
+
+  // Check if the resulting Date object is invalid
+  if (isNaN(newDate.getTime())) {
+    return '-'
+  }
+
   let mm = (newDate.getMonth() + 1).toString() // Get month and convert to string
   let dd = newDate.getDate().toString() // Get day and convert to string
   const yyyy = newDate.getFullYear()

@@ -294,7 +294,7 @@ const AddStudentPreview = ({ projectCode }: IstudentPreview) => {
             <Box className='sticky-sidebar'>
               <Card>
                 <CardContent>
-                  <Link href={`${AddStudent.BackToList}${projectCode}`} passHref>
+                  <Link href={`${AddStudent.BackToList}${projectCode}?tab=students`} passHref>
                     <Button fullWidth startIcon={<ArrowLeft />} component='a' sx={{ mb: 3.5 }} variant='outlined'>
                       Back to List
                     </Button>

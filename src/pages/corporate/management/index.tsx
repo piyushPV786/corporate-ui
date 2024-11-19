@@ -129,11 +129,18 @@ const defaultValues = {
 }
 
 const schema = yup.object().shape({
-  name: yup.string().required('required'),
+  name: yup
+    .string()
+    .required('required')
+    .matches(/^[A-Za-z0-9]+([ ]?[A-Za-z0-9]+)*$/, 'Name can only contain alphanumeric characters')
+    .test('not-only-numbers', 'Name cannot contain only numbers', (value: string | undefined) => {
+      return value ? /[a-zA-Z]/.test(value) : false
+    }),
   code: yup
     .string()
     .matches(/^[\w@.-]*$/, `Code Must be without space you can use dash(-) instead`)
     .required('required'),
+  email: yup.string().email('Must be a valid email format').nullable().notRequired(),
   companyType: yup.string().required('required'),
   country: yup.string().required('required'),
   state: yup.string().required('required'),
@@ -159,9 +166,8 @@ const StudentList = () => {
   const [companyTypes, setCompanyTypes] = useState<Array<commonListTypes>>()
   const [country, setCountry] = useState<Array<commonListTypes>>([])
   const [states, setStates] = useState<IAddressStateTypes[] | []>([])
+  const [postalStates, setPostalStates] = useState<IAddressStateTypes[] | []>([])
   const [loadingStates, setLoadingStates] = useState<boolean>(false)
-  const [defaultCountry, setDefaultCountry] = useState({})
-  const [defaultState, setDefaultState] = useState({})
 
   const {
     setValue,
@@ -179,6 +185,8 @@ const StudentList = () => {
     resolver: yupResolver(schema)
   })
   const countryWatch = watch('country')
+  const physicalCountryWatch = watch('physicalCountry')
+
   const getCountryLists = async () => {
     const response = await CommonService.getCountryLists()
     if (response?.status === status.successCode && response?.data?.data?.length) {
@@ -186,7 +194,10 @@ const StudentList = () => {
     }
   }
 
-  const fetchStates = async (countryCode: string) => {
+  const fetchStates = async (
+    countryCode: string,
+    setStates: React.Dispatch<React.SetStateAction<IAddressStateTypes[]>>
+  ) => {
     setLoadingStates(true)
     if (countryCode) {
       const fetchedStates = await getStateList(countryCode)
@@ -205,9 +216,16 @@ const StudentList = () => {
 
   useEffect(() => {
     if (countryWatch) {
-      fetchStates(countryWatch)
+      fetchStates(countryWatch, setStates)
     }
   }, [countryWatch])
+
+  useEffect(() => {
+    if (physicalCountryWatch) {
+      fetchStates(physicalCountryWatch, setPostalStates)
+    }
+  }, [physicalCountryWatch])
+
   const checkDuplicateCorporateCode = async (code: string, id?: number) => {
     const response = await DashboardService?.checkDuplicateCorporateCode(code, id)
     response?.message && setError('code', { type: 'custom', message: response?.message })
@@ -472,8 +490,6 @@ const StudentList = () => {
   const handlePhysicalAddress = (event: any) => {
     setLoadingStates(true)
     const isSameAddress = event.target.checked
-    setDefaultCountry(country?.find(item => (item as any)?.code === watch('country')) ?? '')
-    setDefaultState(states?.find(item => (item as any)?.code === watch('state')) ?? '')
 
     if (isSameAddress) {
       const currentCountry = watch('country')
@@ -704,7 +720,9 @@ const StudentList = () => {
                             {...field}
                             options={states ?? []}
                             getOptionLabel={option => option?.name || ''}
-                            value={states?.find(item => (item as any)?.code === field?.value)}
+                            value={
+                              states.length > 0 ? states?.find(item => (item as any)?.code === field?.value) : null
+                            }
                             onChange={(event, data: any) => {
                               field.onChange(data?.code)
                             }}
@@ -815,16 +833,10 @@ const StudentList = () => {
                             {...field}
                             options={country ?? []}
                             disabled={formValue?.isSameAddress}
-                            value={
-                              defaultCountry
-                                ? defaultCountry
-                                : country?.find(item => (item as any)?.code === field?.value)
-                            }
+                            value={country?.find(item => (item as any)?.code === field?.value)}
                             getOptionLabel={(option: any) => option?.name || ''}
                             onChange={(event, data: any) => {
-                              setDefaultCountry('')
                               field.onChange(data?.code)
-                              fetchStates(data?.code)
                             }}
                             renderInput={params => (
                               <TextField
@@ -846,14 +858,15 @@ const StudentList = () => {
                         render={({ field }) => (
                           <Autocomplete
                             {...field}
-                            options={states ?? []}
+                            options={postalStates ?? []}
                             disabled={formValue?.isSameAddress}
                             value={
-                              defaultState ? defaultState : states?.find(item => (item as any)?.code === field?.value)
+                              postalStates.length > 0
+                                ? postalStates.find((item: any) => item?.code === field?.value) || null
+                                : null
                             }
                             getOptionLabel={(option: any) => option?.name || ''}
                             onChange={(event, data: any) => {
-                              setDefaultState('')
                               field.onChange(data?.code)
                             }}
                             renderInput={params => (

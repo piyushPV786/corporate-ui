@@ -68,7 +68,10 @@ const ProjectInformation = ({ projectDetailsOpen, handleCloseProjectDetails, pro
                   />
                 </ListItem>
                 <ListItem>
-                  <ListItemText primary='No of Students' secondary={project?.noOfStudent == 0 ? '-' : project?.noOfStudent} />
+                  <ListItemText
+                    primary='No of Students'
+                    secondary={project?.noOfStudent == 0 ? '-' : project?.noOfStudent}
+                  />
                 </ListItem>
               </List>
             </Grid>

@@ -206,7 +206,7 @@ const InstallmentDetail = ({
               </Grid>
               <Grid item sm={6} xs={12}>
                 <TextField
-                  inputProps={{ min: 0 }}
+                  inputProps={{ min: 0, max: 1000000 }}
                   {...register('dueAmount')}
                   fullWidth
                   type='number'

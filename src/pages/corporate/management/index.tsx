@@ -587,7 +587,7 @@ const StudentList = () => {
                     control={control}
                     name='companyType'
                     options={companyTypes ?? []}
-                    renderInput={params => <TextField {...params} label= {<RequiredLabel label='Company Type'/>}/>}
+                    renderInput={params => <TextField {...params} label={<RequiredLabel label='Company Type'/>}/>}
                   />
                 </Grid>
                 <Grid item xs={6}>

@@ -105,7 +105,7 @@ const schema = yup.object().shape({
   name: yup.string().required('Group name is required'),
   code: yup
     .string()
-    .matches(/^[\w@.-]*$/, `Code must be without space; you can use dash (-) instead`)
+    .matches(/^[\w@.-]*$/, `special characters are not allowed`)
     .required('Group code is required'),
   projectsId: yup
     .object()

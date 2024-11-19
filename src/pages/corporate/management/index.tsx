@@ -490,7 +490,7 @@ const StudentList = () => {
     setValue('isSameAddress', isSameAddress)
     setLoadingStates(false)
   }
-  
+
   const isChange = () => {
     return (
       watch('name') !== corporateFormData?.name ||
@@ -507,7 +507,7 @@ const StudentList = () => {
       watch('physicalCountry') !== corporateFormData?.physicalCountry ||
       watch('physicalState') !== corporateFormData?.physicalState ||
       watch('physicalPincode') !== corporateFormData?.physicalPincode ||
-      watch('isActive') !== corporateFormData?.isActive 
+      watch('isActive') !== corporateFormData?.isActive
     )
   }
 
@@ -702,7 +702,7 @@ const StudentList = () => {
                             getOptionLabel={option => option?.name || ''}
                             onChange={(event, data) => {
                               field.onChange(data?.code)
-                              watch('country') == undefined && setValue('country', '')  
+                              watch('country') == undefined && setValue('country', '')
                             }}
                             renderInput={params => (
                               <TextField
@@ -938,19 +938,19 @@ const StudentList = () => {
                 )}
               </Grid>
               <Grid container display='flex' justifyContent='center'>
-              <Grid item xs={7.3}>
-                {formValue && isChange() && openEdit?.actionType !== 'Add' ? (
-                  <AlertBox
-                    sx={{ mb: 6 }}
-                    color='warning'
-                    variant={'filled ' as any}
-                    header='Unsaved Changes'
-                    message='You have made changes. Do you want to save or discard them?'
-                    severity='warning'
-                  />
-                ) : null}
+                <Grid item xs={7.3}>
+                  {formValue && isChange() && openEdit?.actionType !== 'Add' ? (
+                    <AlertBox
+                      sx={{ mb: 6 }}
+                      color='warning'
+                      variant={'filled ' as any}
+                      header='Unsaved Changes'
+                      message='You have made changes. Do you want to save or discard them?'
+                      severity='warning'
+                    />
+                  ) : null}
+                </Grid>
               </Grid>
-            </Grid>
             </DialogContent>
 
             <DialogActions sx={{ justifyContent: 'center', marginTop: 3 }}>

@@ -911,7 +911,7 @@ const StudentList = () => {
 
             <DialogActions sx={{ justifyContent: 'center', marginTop: 3 }}>
               <Button variant='outlined' color='secondary' onClick={handleModalOpenClose}>
-                Cancel
+              {openEdit?.actionType !== 'Add' ? 'discard' : 'cancel'}
               </Button>
               <Button type='submit' variant='contained' sx={{ mr: 1 }}>
                 {openEdit?.actionType !== 'Add' ? 'Save' : 'Add Corporate'}

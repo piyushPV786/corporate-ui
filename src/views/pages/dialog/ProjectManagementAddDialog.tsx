@@ -150,7 +150,6 @@ const ProjectManagementAddDialog = ({ isEdit, projectData, actions, commonList }
   }
 
   const onSubmit = async (data: FieldValues) => {
-    console.log(data)
     reset({}, { keepValues: true })
     let isDuplicateMsg: boolean | string = true
     isDuplicateMsg = await checkDuplicateProjectCode(data)
@@ -326,7 +325,7 @@ const ProjectManagementAddDialog = ({ isEdit, projectData, actions, commonList }
                       <FormControl component='fieldset'>
                         <FormLabel id='demo-controlled-radio-buttons-group'>Study Modes</FormLabel>
                         <Controller
-                          rules={{ required: 'Please select' }}
+                          rules={{ required: true }}
                           control={control}
                           name='studyMode'
                           render={({ field }) => (

@@ -1427,4 +1427,14 @@ export default class Dashboard {
     }
     nProgress.done()
   }
+  async corporateStudentChangeStatus(params: any) {
+    const endUrlName = `${this.baseUrl + apiEndPoints.corporateStudentChangeStatus}`
+    try {
+      const response = await this.apiServer.patch(endUrlName, { ...params })
+
+      return response
+    } catch (err: any) {
+      console.log('Error updating status ========>', err?.message)
+    }
+  }
 }

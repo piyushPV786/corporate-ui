@@ -9,8 +9,8 @@ import DeleteClientContact from 'src/views/pages/dialog/DeleteClientContact'
 import { IClientContact } from 'src/types/apps/invoiceTypes'
 import { DashboardService } from 'src/service'
 import { useEffect, useState } from 'react'
-import { clientcontactMessages } from 'src/context/common'
-import { successToast } from 'src/components/Toast'
+import { clientcontactMessages, messages } from 'src/context/common'
+import { errorToast, successToast } from 'src/components/Toast'
 import { status } from 'src/context/common'
 import { Typography } from '@mui/material'
 
@@ -63,6 +63,8 @@ const ContactDetailsList = ({ code }: propsType) => {
         projectCode: projectCode
       })
       successToast(clientcontactMessages.edit)
+    } else {
+      errorToast(response?.data?.message || messages.defaultErrorMessage)
     }
     setLoading(false)
   }
@@ -178,6 +180,8 @@ const ContactDetailsList = ({ code }: propsType) => {
         projectCode: projectCode
       })
       successToast(clientcontactMessages.add)
+    } else {
+      errorToast(response?.data?.message || messages.defaultErrorMessage)
     }
     setLoading(false)
   }

@@ -34,7 +34,7 @@ import { Controller, useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import { Autocomplete, Backdrop, Checkbox, CircularProgress, FormControlLabel, Stack, Switch } from '@mui/material'
-import { addressDetails, getStateList, minTwoDigits, serialNumber } from 'src/utils'
+import { addressDetails, getName, getStateList, minTwoDigits, serialNumber } from 'src/utils'
 import { errorToast, successToast } from 'src/components/Toast'
 import { ThemeColor } from 'src/@core/layouts/types'
 import Chip from 'src/@core/components/mui/chip'
@@ -167,7 +167,7 @@ const StudentList = () => {
   const [country, setCountry] = useState<Array<commonListTypes>>([])
   const [states, setStates] = useState<IAddressStateTypes[] | []>([])
   const [postalStates, setPostalStates] = useState<IAddressStateTypes[] | []>([])
-  const [loadingStates, setLoadingStates] = useState<boolean>(false)
+  const [loadingForm, setLoadingForm] = useState<boolean>(false)
 
   const {
     setValue,
@@ -198,7 +198,7 @@ const StudentList = () => {
     countryCode: string,
     setStates: React.Dispatch<React.SetStateAction<IAddressStateTypes[]>>
   ) => {
-    setLoadingStates(true)
+    setLoadingForm(true)
     if (countryCode) {
       const fetchedStates = await getStateList(countryCode)
       const FormattedData = fetchedStates.map((region: any) => {
@@ -211,7 +211,7 @@ const StudentList = () => {
     } else {
       setStates([])
     }
-    setLoadingStates(false)
+    setLoadingForm(false)
   }
 
   useEffect(() => {
@@ -272,7 +272,10 @@ const StudentList = () => {
       flex: 0.1,
       minWidth: 200,
       field: 'companyType',
-      headerName: 'Company Type'
+      headerName: 'Company Type',
+      renderCell: ({ row }: any) => {
+        return <Box>{getName(companyTypes, row?.companyType)}</Box>
+      }
     },
     {
       flex: 0.1,
@@ -280,7 +283,9 @@ const StudentList = () => {
       field: 'country',
       headerName: 'Country',
       renderCell: ({ row }: any) => {
-        return <Box>{addressDetails(row?.corporateAddress, 'country')}</Box>
+        const addressCountry = addressDetails(row?.corporateAddress, 'country')
+
+        return <Box>{addressCountry && addressCountry !== '-' ? getName(country, addressCountry) : '-'}</Box>
       }
     },
     {
@@ -435,6 +440,7 @@ const StudentList = () => {
   const { show, actionType } = { ...openEdit }
 
   const onSubmit = async (data: any) => {
+    setLoadingForm(true)
     reset({}, { keepValues: true })
     const duplicateName =
       actionType === 'Add'
@@ -485,10 +491,11 @@ const StudentList = () => {
         setError('code', { type: 'custom', message: response?.message })
       }
     }
+    setLoadingForm(false)
   }
 
   const handlePhysicalAddress = (event: any) => {
-    setLoadingStates(true)
+    setLoadingForm(true)
     const isSameAddress = event.target.checked
 
     if (isSameAddress) {
@@ -503,7 +510,7 @@ const StudentList = () => {
     }
 
     setValue('isSameAddress', isSameAddress)
-    setLoadingStates(false)
+    setLoadingForm(false)
   }
 
   return (
@@ -918,9 +925,9 @@ const StudentList = () => {
                     <Typography>Active</Typography>
                   </Stack>
                 </Grid>
-                {loadingStates && (
+                {loadingForm && (
                   <Backdrop
-                    open={loadingStates}
+                    open={loadingForm}
                     sx={{ color: '#fff', zIndex: (theme: { zIndex: { drawer: number } }) => theme.zIndex.drawer + 1 }}
                   >
                     <CircularProgress color='inherit' />

@@ -236,8 +236,13 @@ export const addressDetails = (data: any, key: string) => {
   let result = '-'
 
   if (data?.length > 0) {
-    const address = data[0]
-    result = address[key]
+    const residentialAddress = data.find((address: any) => address.addressType === 'RESIDENTIAL')
+    if (residentialAddress) {
+      result = residentialAddress[key]
+    } else {
+      const address = data[0]
+      result = address[key]
+    }
   }
 
   return result

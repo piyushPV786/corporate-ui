@@ -148,6 +148,10 @@ const TabDetails = ({ projectData, fetchProject }: ITabDetail) => {
     )
   }
 
+  React.useEffect(() => {
+    setValue(initialTab)
+  }, [initialTab])
+
   return (
     <Box>
       <AppBar position='static' sx={{ backgroundColor: 'customColors.tableHeaderBg' }}>

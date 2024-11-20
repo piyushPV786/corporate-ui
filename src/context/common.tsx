@@ -161,7 +161,8 @@ export const messages = {
   generateInvoice: 'Invoice generated successfully.',
   nullData: 'User not found in Regenesys Database',
   quoteGenerated: 'quote will be downloaded in 2-3 mintues.',
-  assignIntake: 'Intake assigned successfully'
+  assignIntake: 'Intake assigned successfully',
+  defaultErrorMessage: 'Something went wrong. Please try again'
 }
 
 export const dataMessages = {

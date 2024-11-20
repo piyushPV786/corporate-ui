@@ -6,7 +6,7 @@ export const ModuleFeaturePermission = (feature: any, permission: any, module?: 
   console.log(module)
   const auth = useAuth()
   let currentModuleRoleFeatures: any = []
-  auth?.user?.roles.forEach((item: any) => {
+  auth?.user?.roles?.forEach((item: any) => {
     const feature = item?.roleFeaturePermission
     currentModuleRoleFeatures = [...currentModuleRoleFeatures, ...feature]
   })

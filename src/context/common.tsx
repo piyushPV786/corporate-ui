@@ -220,6 +220,7 @@ export const projectMessages = {
   projectManager: 'Please Select a Project Manager',
   accountManager: 'Please Select a Account Manager',
   program: 'Please Select a Qualification',
+  studyMode: 'Please Select Study Mode',
   courseType: 'Please Select a Module Type'
 }
 

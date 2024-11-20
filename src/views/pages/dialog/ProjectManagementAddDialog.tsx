@@ -8,6 +8,7 @@ import {
   DialogTitle,
   FormControl,
   FormControlLabel,
+  FormHelperText,
   FormLabel,
   Grid,
   IconButton,
@@ -52,13 +53,14 @@ const schema = yup.object().shape({
   name: yup.string().required(projectMessages.name),
   code: yup
     .string()
-    .matches(/^[\w@.-]*$/, `Code Must be without space you can use dash(-) instead`)
+    .matches(/^[\w@.-]*$/, `Special characters are not allowed in the Project Code`)
     .required(projectMessages.code),
   corporateEdCode: yup.string().required(projectMessages.corporateEdCode),
   projectManager: yup.string().required(projectMessages.projectManager),
   accountManager: yup.string().required(projectMessages.accountManager),
   program: yup.string().required(projectMessages.program),
   courseType: yup.string().required(projectMessages.courseType),
+  studyMode: yup.string().required(projectMessages.studyMode),
   isActive: yup.boolean().required()
 })
 const defaultValues = {
@@ -339,6 +341,9 @@ const ProjectManagementAddDialog = ({ isEdit, projectData, actions, commonList }
                             </RadioGroup>
                           )}
                         />
+                        {errors?.studyMode && (
+                          <FormHelperText error>{errors?.studyMode?.message as string | undefined}</FormHelperText>
+                        )}
                       </FormControl>
                     </Grid>
                   )}

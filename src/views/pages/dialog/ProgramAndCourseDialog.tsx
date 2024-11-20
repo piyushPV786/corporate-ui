@@ -42,7 +42,10 @@ const validationSchema = Yup.object({
   courseType: Yup.string().required('Course Type is required'),
   program: Yup.string().required('Program is required'),
   startDate: Yup.date().required('Start Date is required'),
-  duration: Yup.number().required('Duration is required'),
+  duration: Yup.number()
+    .transform((value, originalValue) => (originalValue === '' ? undefined : value))
+    .max(120, 'Duration Cannot be more than 120 months')
+    .required('This Field is required'),
   noOfStudent: Yup.number().required('Number of Students is required'),
   facilitator: Yup.array().min(1, 'At least one facilitator is required').required('Facilitator is required'),
   assessmentRequired: Yup.boolean().required('Assessment Required is required'),
@@ -234,7 +237,7 @@ const ProgramAndCourseDialog = ({
                 />
                 {errors.duration && (
                   <FormHelperText sx={{ color: 'error.main' }} id='duration'>
-                    This field is required
+                    {errors.duration.message as string}
                   </FormHelperText>
                 )}
               </FormControl>

@@ -20,11 +20,9 @@ type params = {
 }
 
 const ProjectStudentListDialog = ({ open, handleCloseStudentListPopup, selectedProject }: params) => {
-  console.log(selectedProject)
-
   const [pageSize, setPageSize] = useState<number>(10)
   const [pageNumber, setPageNumber] = useState<number>(1)
-  const [projectStudentListData, setProjectStudentListData] = useState<IStudent>()
+  const [projectStudentListData, setProjectStudentListData] = useState<IStudent | null>()
   const [loading, setIsLoading] = useState<boolean>(false)
 
   const getStudentList = async (param: DataParams) => {
@@ -36,6 +34,13 @@ const ProjectStudentListDialog = ({ open, handleCloseStudentListPopup, selectedP
       setProjectStudentListData(response?.data?.data)
     }
     setIsLoading(false)
+  }
+
+  const handleClose = () => {
+    handleCloseStudentListPopup()
+    setProjectStudentListData(null)
+    setPageSize(10)
+    setPageNumber(1)
   }
 
   const RowArray = projectStudentListData?.data
@@ -173,7 +178,7 @@ const ProjectStudentListDialog = ({ open, handleCloseStudentListPopup, selectedP
     <Dialog
       open={open}
       onClose={(event: any, reason: string) => {
-        reason !== 'backdropClick' && handleCloseStudentListPopup()
+        reason !== 'backdropClick' && handleClose()
       }}
       fullWidth
       maxWidth='lg'
@@ -187,7 +192,7 @@ const ProjectStudentListDialog = ({ open, handleCloseStudentListPopup, selectedP
             </Typography>
           </Grid>
           <Grid item xs={1}>
-            <IconButton onClick={handleCloseStudentListPopup} color='primary'>
+            <IconButton onClick={handleClose} color='primary'>
               <Close fontSize='large' />
             </IconButton>
           </Grid>

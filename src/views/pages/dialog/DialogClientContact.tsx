@@ -289,7 +289,7 @@ const DialogClientContact = ({ title, data, createClientContact, handleEdit }: I
                       data && handleChange('mobileCountryCode', countryData?.dialCode)
                     }}
                     inputStyle={{
-                      borderColor: errors.mobileNumber ? 'red': 'initial',
+                      borderColor: errors.mobileNumber ? 'red' : 'initial',
                       borderRadius: '10px',
                       background: 'none',
                       width: '100%'
@@ -322,7 +322,7 @@ const DialogClientContact = ({ title, data, createClientContact, handleEdit }: I
                       data && handleChange('telephoneCountryCode', countryData?.dialCode)
                     }}
                     inputStyle={{
-                      borderColor: errors.telephoneNumber ? 'red': 'initial',
+                      borderColor: errors.telephoneNumber ? 'red' : 'initial',
                       borderRadius: '10px',
                       background: 'none',
                       width: '100%'

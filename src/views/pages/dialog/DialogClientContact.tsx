@@ -209,7 +209,7 @@ const DialogClientContact = ({ title, data, createClientContact, handleEdit }: I
           <DialogContent sx={{ pb: 8, px: { xs: 4, sm: 9 }, pt: { xs: 8, sm: 10.5 }, position: 'relative' }}>
             <Box sx={{ mb: 8, textAlign: 'center' }}>
               <Typography variant='h5' sx={{ mb: 3, lineHeight: '2rem' }}>
-                {title} Client Contact
+                {title} Contact
               </Typography>
             </Box>
             <Grid
@@ -289,6 +289,7 @@ const DialogClientContact = ({ title, data, createClientContact, handleEdit }: I
                       data && handleChange('mobileCountryCode', countryData?.dialCode)
                     }}
                     inputStyle={{
+                      borderColor: errors.mobileNumber ? 'red' : 'initial',
                       borderRadius: '10px',
                       background: 'none',
                       width: '100%'
@@ -321,6 +322,7 @@ const DialogClientContact = ({ title, data, createClientContact, handleEdit }: I
                       data && handleChange('telephoneCountryCode', countryData?.dialCode)
                     }}
                     inputStyle={{
+                      borderColor: errors.telephoneNumber ? 'red' : 'initial',
                       borderRadius: '10px',
                       background: 'none',
                       width: '100%'

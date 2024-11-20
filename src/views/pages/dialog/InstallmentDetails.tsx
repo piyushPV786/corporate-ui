@@ -49,7 +49,10 @@ interface IInstallmentDialogProps {
 const regex = /^[a-zA-Z_].*$/
 
 const schema = yup.object().shape({
-  name: yup.string().required(userInformationStatus.InstallmentNameRequired).matches(regex, addInstallmentMessage.installmentNameError),
+  name: yup
+    .string()
+    .required(userInformationStatus.InstallmentNameRequired)
+    .matches(regex, addInstallmentMessage.installmentNameError),
   currency: yup.string().required(userInformationStatus.CurrencyRequired),
   dueAmount: yup
     .number()

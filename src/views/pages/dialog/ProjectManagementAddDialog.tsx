@@ -8,6 +8,7 @@ import {
   DialogTitle,
   FormControl,
   FormControlLabel,
+  FormHelperText,
   FormLabel,
   Grid,
   IconButton,
@@ -20,11 +21,11 @@ import {
 } from '@mui/material'
 import { PencilOutline } from 'mdi-material-ui'
 import { Fragment, useMemo, useState } from 'react'
-import { Controller, FieldValues, useForm } from 'react-hook-form'
+import { Controller, FieldValues, useForm} from 'react-hook-form'
 import FallbackSpinner from 'src/@core/components/spinner'
 import ControlledAutocomplete from 'src/components/ControlledAutocomplete'
 import RequiredLabel from 'src/components/RequiredLabel'
-import { projectMessages, status } from 'src/context/common'
+import { projectMessages, status} from 'src/context/common'
 import AlertBox from 'src/layouts/components/Alert'
 import { AcademicService, StudentService } from 'src/service'
 import { ICommonParams } from 'src/types/apps/common'
@@ -52,13 +53,14 @@ const schema = yup.object().shape({
   name: yup.string().required(projectMessages.name),
   code: yup
     .string()
-    .matches(/^[\w@.-]*$/, `Code Must be without space you can use dash(-) instead`)
+    .matches(/^[\w@.-]*$/, `Special characters are not allowed in the Project Code`)
     .required(projectMessages.code),
   corporateEdCode: yup.string().required(projectMessages.corporateEdCode),
   projectManager: yup.string().required(projectMessages.projectManager),
   accountManager: yup.string().required(projectMessages.accountManager),
   program: yup.string().required(projectMessages.program),
   courseType: yup.string().required(projectMessages.courseType),
+  studyMode : yup.string().required(projectMessages.studyMode),
   isActive: yup.boolean().required()
 })
 const defaultValues = {
@@ -148,6 +150,7 @@ const ProjectManagementAddDialog = ({ isEdit, projectData, actions, commonList }
   }
 
   const onSubmit = async (data: FieldValues) => {
+    console.log(data);
     reset({}, { keepValues: true })
     let isDuplicateMsg: boolean | string = true
     isDuplicateMsg = await checkDuplicateProjectCode(data)
@@ -323,7 +326,7 @@ const ProjectManagementAddDialog = ({ isEdit, projectData, actions, commonList }
                       <FormControl component='fieldset'>
                         <FormLabel id='demo-controlled-radio-buttons-group'>Study Modes</FormLabel>
                         <Controller
-                          rules={{ required: true }}
+                          rules={{ required: "Please select" }}
                           control={control}
                           name='studyMode'
                           render={({ field }) => (
@@ -339,6 +342,11 @@ const ProjectManagementAddDialog = ({ isEdit, projectData, actions, commonList }
                             </RadioGroup>
                           )}
                         />
+                        {
+                          errors?.studyMode && (
+                            <FormHelperText error>{errors?.studyMode?.message as string | undefined}</FormHelperText>
+                          )
+                        }
                       </FormControl>
                     </Grid>
                   )}

@@ -1027,3 +1027,7 @@ export const studentApplicationSubStatus: IDynamicObject = {
   'SUB-DEFERRED-FEES_PENDING': 'FEES_PENDING',
   'SUB-CANCELLED-FEES_PENDING': 'FEES_PENDING'
 }
+
+export const addInstallmentMessage = {
+  installmentNameError: 'Name should start with character or underscore only.'
+}

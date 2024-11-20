@@ -197,7 +197,13 @@ const ProjectDetailsDialog = ({
                 <Controller
                   name='projectName'
                   control={control}
-                  rules={{ required: true }}
+                  rules={{
+                    required: true,
+                    pattern: {
+                      value: /^[_a-zA-Z].*$/,
+                      message: "Name must start with an underscore or an alphabet",
+                    },
+                  }}
                   render={({ field }) => (
                     <TextField
                       {...field}
@@ -210,7 +216,7 @@ const ProjectDetailsDialog = ({
                 />
                 {errors.projectName && (
                   <FormHelperText sx={{ color: 'error.main' }} id='projectName'>
-                    This field is required
+                    {errors.projectName.message || "This field is required"}
                   </FormHelperText>
                 )}
               </FormControl>
@@ -511,12 +517,12 @@ const ProjectDetailsDialog = ({
             (projectData?.name !== watch('projectName') ||
               projectData.code !== watch('projectCode') ||
               projectData?.projectManager !== watch('projectManager'))) ||
-          projectData?.accountManager !== watch('accountManager') ||
-          projectData?.projectDetails?.programBusinessUnit !== watch('programBusinessUnit') ||
-          projectData?.projectDetails?.typeOfNotificationReceived !== watch('typeOfNotificationReceived') ||
-          projectData?.projectDetails?.submission !== watch('approvedProposal') ||
-          projectData?.projectDetails?.varianceDetails !== watch('varianceDetails') ||
-          projectData?.projectDetails?.releaseOfNotificationApprovedBy !== watch('releaseOfNotification') ? (
+            projectData?.accountManager !== watch('accountManager') ||
+            projectData?.projectDetails?.programBusinessUnit !== watch('programBusinessUnit') ||
+            projectData?.projectDetails?.typeOfNotificationReceived !== watch('typeOfNotificationReceived') ||
+            projectData?.projectDetails?.submission !== watch('approvedProposal') ||
+            projectData?.projectDetails?.varianceDetails !== watch('varianceDetails') ||
+            projectData?.projectDetails?.releaseOfNotificationApprovedBy !== watch('releaseOfNotification') ? (
             <AlertBox
               sx={{ mb: 6 }}
               color='warning'

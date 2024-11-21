@@ -23,7 +23,7 @@ type params = {
 const ProjectStudentListDialog = ({ open, handleCloseStudentListPopup, selectedProject }: params) => {
   const [search, setSearch] = useState<string>('')
   const [pageSize, setPageSize] = useState<number>(10)
-  const [pageNumber, setPageNumber] = useState<number>(0)
+  const [pageNumber, setPageNumber] = useState<number>(1)
   const [projectStudentListData, setProjectStudentListData] = useState<IStudent | null>()
   const [loading, setIsLoading] = useState<boolean>(false)
 
@@ -40,7 +40,7 @@ const ProjectStudentListDialog = ({ open, handleCloseStudentListPopup, selectedP
 
   const handleFilterStudent = (val: string) => {
     setSearch(val)
-    setPageNumber(0)
+    setPageNumber(1)
     if (val.length > 3) {
       getStudentList({ pageNumber: 1, pageSize: pageSize, q: val })
     } else if (val.length === 0) {
@@ -52,7 +52,7 @@ const ProjectStudentListDialog = ({ open, handleCloseStudentListPopup, selectedP
     handleCloseStudentListPopup()
     setProjectStudentListData(null)
     setPageSize(10)
-    setPageNumber(0)
+    setPageNumber(1)
   }
 
   const RowArray = projectStudentListData?.data
@@ -223,7 +223,7 @@ const ProjectStudentListDialog = ({ open, handleCloseStudentListPopup, selectedP
             disableColumnSelector
             rows={RowArray?.map((item: ICorporateStudentRowContent | any, index: number) => ({
               ...item,
-              itemNumber: serialNumber(index, pageNumber + 1, pageSize)
+              itemNumber: serialNumber(index, pageNumber, pageSize)
             }))}
             rowCount={projectStudentListData?.count}
             columns={columns}
@@ -236,8 +236,8 @@ const ProjectStudentListDialog = ({ open, handleCloseStudentListPopup, selectedP
               '& .MuiDataGrid-columnHeaderTitle': { fontWeight: ' bold' }
             }}
             onPageSizeChange={newPageSize => setPageSize(newPageSize)}
-            onPageChange={newPage => setPageNumber(newPage)}
-            page={pageNumber}
+            onPageChange={newPage => setPageNumber(newPage + 1)}
+            page={pageNumber - 1}
           />
         ) : (
           <FallbackSpinner />

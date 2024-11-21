@@ -42,9 +42,9 @@ const ProjectStudentListDialog = ({ open, handleCloseStudentListPopup, selectedP
     setSearch(val)
     setPageNumber(1)
     if (val.length > 3) {
-      getStudentList({ pageNumber: 1, pageSize: pageSize, q: val })
+      getStudentList({ pageNumber: 1, pageSize: pageSize, search: val.trim() })
     } else if (val.length === 0) {
-      getStudentList({ pageNumber: 1, pageSize: pageSize, q: val })
+      getStudentList({ pageNumber: 1, pageSize: pageSize, search: val })
     }
   }
 

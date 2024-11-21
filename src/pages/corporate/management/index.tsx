@@ -43,7 +43,7 @@ import {
   Stack,
   Switch
 } from '@mui/material'
-import { addressDetails, getStateList, minTwoDigits, serialNumber } from 'src/utils'
+import { addressDetails, getName, getStateList, minTwoDigits, serialNumber } from 'src/utils'
 import { errorToast, successToast } from 'src/components/Toast'
 import { ThemeColor } from 'src/@core/layouts/types'
 import Chip from 'src/@core/components/mui/chip'
@@ -141,12 +141,19 @@ const defaultValues = {
 }
 
 const schema = yup.object().shape({
-  name: yup.string().required('required'),
+  name: yup
+    .string()
+    .required('required')
+    .matches(/^[A-Za-z0-9]+([ ]?[A-Za-z0-9]+)*$/, 'Name can only contain alphanumeric characters')
+    .test('not-only-numbers', 'Name cannot contain only numbers', (value: string | undefined) => {
+      return value ? /[a-zA-Z]/.test(value) : false
+    }),
   code: yup
     .string()
     .matches(/^[\w@.-]*$/, `Special characters are not allowed in the Company Code`)
     .required('required'),
-  phoneNumber: yup.string().min(8, 'Mobile number must be of 6 digit').required('required'),
+  email: yup.string().email('Please enter a valid email address').nullable().notRequired(),
+  phoneNumber: yup.string().min(6, 'Mobile number must be of 6 digit').required('required'),
   companyType: yup.string().required('required'),
   country: yup.string().required('required'),
   state: yup.string().required('required'),
@@ -172,9 +179,8 @@ const StudentList = () => {
   const [companyTypes, setCompanyTypes] = useState<Array<commonListTypes>>()
   const [country, setCountry] = useState<Array<commonListTypes>>([])
   const [states, setStates] = useState<IAddressStateTypes[] | []>([])
-  const [loadingStates, setLoadingStates] = useState<boolean>(false)
-  const [defaultCountry, setDefaultCountry] = useState({})
-  const [defaultState, setDefaultState] = useState({})
+  const [postalStates, setPostalStates] = useState<IAddressStateTypes[] | []>([])
+  const [loadingForm, setLoadingForm] = useState<boolean>(false)
 
   const {
     setValue,
@@ -193,6 +199,8 @@ const StudentList = () => {
     resolver: yupResolver(schema)
   })
   const countryWatch = watch('country')
+  const physicalCountryWatch = watch('physicalCountry')
+
   const getCountryLists = async () => {
     const response = await CommonService.getCountryLists()
     if (response?.status === status.successCode && response?.data?.data?.length) {
@@ -200,8 +208,11 @@ const StudentList = () => {
     }
   }
 
-  const fetchStates = async (countryCode: string) => {
-    setLoadingStates(true)
+  const fetchStates = async (
+    countryCode: string,
+    setStates: React.Dispatch<React.SetStateAction<IAddressStateTypes[]>>
+  ) => {
+    setLoadingForm(true)
     if (countryCode) {
       const fetchedStates = await getStateList(countryCode)
       const FormattedData = fetchedStates.map((region: any) => {
@@ -214,14 +225,21 @@ const StudentList = () => {
     } else {
       setStates([])
     }
-    setLoadingStates(false)
+    setLoadingForm(false)
   }
 
   useEffect(() => {
     if (countryWatch) {
-      fetchStates(countryWatch)
+      fetchStates(countryWatch, setStates)
     }
   }, [countryWatch])
+
+  useEffect(() => {
+    if (physicalCountryWatch) {
+      fetchStates(physicalCountryWatch, setPostalStates)
+    }
+  }, [physicalCountryWatch])
+
   const checkDuplicateCorporateCode = async (code: string, id?: number) => {
     const response = await DashboardService?.checkDuplicateCorporateCode(code, id)
     response?.message && setError('code', { type: 'custom', message: response?.message })
@@ -268,7 +286,10 @@ const StudentList = () => {
       flex: 0.1,
       minWidth: 200,
       field: 'companyType',
-      headerName: 'Company Type'
+      headerName: 'Company Type',
+      renderCell: ({ row }: any) => {
+        return <Box>{getName(companyTypes, row?.companyType)}</Box>
+      }
     },
     {
       flex: 0.1,
@@ -276,7 +297,9 @@ const StudentList = () => {
       field: 'country',
       headerName: 'Country',
       renderCell: ({ row }: any) => {
-        return <Box>{addressDetails(row?.corporateAddress, 'country')}</Box>
+        const addressCountry = addressDetails(row?.corporateAddress, 'country')
+
+        return <Box>{addressCountry && addressCountry !== '-' ? getName(country, addressCountry) : '-'}</Box>
       }
     },
     {
@@ -431,8 +454,7 @@ const StudentList = () => {
   const { show, actionType } = { ...openEdit }
 
   const onSubmit = async (data: any) => {
-    console.log(data)
-
+    setLoadingForm(true)
     reset({}, { keepValues: true })
     const duplicateName =
       actionType === 'Add'
@@ -483,6 +505,7 @@ const StudentList = () => {
         setError('code', { type: 'custom', message: response?.message })
       }
     }
+    setLoadingForm(false)
   }
 
   const countryCodeContact = (data: any, dialCode: string) => {
@@ -507,10 +530,8 @@ const StudentList = () => {
   }
 
   const handlePhysicalAddress = (event: any) => {
-    setLoadingStates(true)
+    setLoadingForm(true)
     const isSameAddress = event.target.checked
-    setDefaultCountry(country?.find(item => (item as any)?.code === watch('country')) ?? '')
-    setDefaultState(states?.find(item => (item as any)?.code === watch('state')) ?? '')
 
     if (isSameAddress) {
       const currentCountry = watch('country')
@@ -524,7 +545,7 @@ const StudentList = () => {
     }
 
     setValue('isSameAddress', isSameAddress)
-    setLoadingStates(false)
+    setLoadingForm(false)
   }
 
   const isChange = () => {
@@ -818,7 +839,9 @@ const StudentList = () => {
                             {...field}
                             options={states ?? []}
                             getOptionLabel={option => option?.name || ''}
-                            value={states?.find(item => (item as any)?.code === field?.value)}
+                            value={
+                              states.length > 0 ? states?.find(item => (item as any)?.code === field?.value) : null
+                            }
                             onChange={(event, data: any) => {
                               field.onChange(data?.code)
                               watch('state') == undefined && setValue('state', '')
@@ -930,16 +953,10 @@ const StudentList = () => {
                             {...field}
                             options={country ?? []}
                             disabled={formValue?.isSameAddress}
-                            value={
-                              defaultCountry
-                                ? defaultCountry
-                                : country?.find(item => (item as any)?.code === field?.value)
-                            }
+                            value={country?.find(item => (item as any)?.code === field?.value)}
                             getOptionLabel={(option: any) => option?.name || ''}
                             onChange={(event, data: any) => {
-                              setDefaultCountry('')
                               field.onChange(data?.code)
-                              fetchStates(data?.code)
                             }}
                             renderInput={params => (
                               <TextField
@@ -961,14 +978,15 @@ const StudentList = () => {
                         render={({ field }) => (
                           <Autocomplete
                             {...field}
-                            options={states ?? []}
+                            options={postalStates ?? []}
                             disabled={formValue?.isSameAddress}
                             value={
-                              defaultState ? defaultState : states?.find(item => (item as any)?.code === field?.value)
+                              postalStates.length > 0
+                                ? postalStates.find((item: any) => item?.code === field?.value) || null
+                                : null
                             }
                             getOptionLabel={(option: any) => option?.name || ''}
                             onChange={(event, data: any) => {
-                              setDefaultState('')
                               field.onChange(data?.code)
                             }}
                             renderInput={params => (
@@ -1020,9 +1038,9 @@ const StudentList = () => {
                     <Typography>Active</Typography>
                   </Stack>
                 </Grid>
-                {loadingStates && (
+                {loadingForm && (
                   <Backdrop
-                    open={loadingStates}
+                    open={loadingForm}
                     sx={{ color: '#fff', zIndex: (theme: { zIndex: { drawer: number } }) => theme.zIndex.drawer + 1 }}
                   >
                     <CircularProgress color='inherit' />

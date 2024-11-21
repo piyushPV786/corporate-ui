@@ -1,13 +1,14 @@
 import React, { useState } from 'react'
 import { Button, Grid, TextField, Typography, Divider, CardContent, Card, Tabs, Tab, Box, Tooltip } from '@mui/material'
 import { CommentMultipleOutline } from 'mdi-material-ui'
-import EcommerceActivityTimeline from '../ecommerce/EcommerceActivityTimeline'
+
+// import EcommerceActivityTimeline from '../ecommerce/EcommerceActivityTimeline'
 import { useAuth } from 'src/hooks/useAuth'
 import { AggregatorService } from 'src/service'
 import { status } from 'src/context/common'
 import { successToast } from 'src/components/Toast'
 
-const CommentComponent = ({ data, getStudentDetailById }: any) => {
+const CommentComponent = ({ data, getCorporateStudentsDetailById }: any) => {
   const [newComment, setNewComment] = useState('')
   const { user } = useAuth()
   const formatDateTime = (date: string | any) => {
@@ -19,13 +20,14 @@ const CommentComponent = ({ data, getStudentDetailById }: any) => {
   }
 
   const handleAddComment = async () => {
+    console.log(data)
     const trimmedComment = newComment.trim()
     if (trimmedComment.length <= 250) {
-      const response = await AggregatorService.addComment(data?.application?.applicationCode, trimmedComment)
+      const response = await AggregatorService.addComment(data?.applicationCode, trimmedComment)
       if (response?.status == status.successCodeOne) {
         setNewComment('')
         successToast('Comment Added')
-        getStudentDetailById()
+        getCorporateStudentsDetailById()
       }
     }
   }
@@ -81,7 +83,7 @@ const CommentComponent = ({ data, getStudentDetailById }: any) => {
       </form>
       <Divider style={{ marginTop: '32px' }} />
       <Box sx={{ mt: 4, maxHeight: '600px', overflowY: 'auto' }}>
-        {data?.application?.comments?.length === 0 ? (
+        {data?.comments?.length === 0 ? (
           <Box sx={{ textAlign: 'center', mt: 4 }}>
             <CommentMultipleOutline sx={{ height: 50 }} />
             <Typography variant='h6'>No comments Yet</Typography>
@@ -90,8 +92,8 @@ const CommentComponent = ({ data, getStudentDetailById }: any) => {
             </Typography>
           </Box>
         ) : (
-          data?.application?.comments &&
-          data?.application?.comments.map((comment: any) => (
+          data?.comments &&
+          data?.comments.map((comment: any) => (
             <Box
               key={comment.id}
               sx={{
@@ -142,7 +144,9 @@ const CommentComponent = ({ data, getStudentDetailById }: any) => {
 
 export default CommentComponent
 
-export const CommonActivityTab = ({ data, getStudentDetailById }: any) => {
+export const CommonActivityTab = ({ data, getCorporateStudentsDetailById }: any) => {
+  console.log(data)
+
   const [tabValue, setTabValue] = useState(0)
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -158,14 +162,14 @@ export const CommonActivityTab = ({ data, getStudentDetailById }: any) => {
       <CardContent>
         {tabValue === 0 && (
           <Box>
-            <CommentComponent data={data} getStudentDetailById={getStudentDetailById} />
+            <CommentComponent data={data} getCorporateStudentsDetailById={getCorporateStudentsDetailById} />
           </Box>
         )}
-        {tabValue === 1 && (
+        {/* {tabValue === 1 && (
           <Box>
             <EcommerceActivityTimeline data={data} />
           </Box>
-        )}
+        )} */}
       </CardContent>
     </Card>
   )

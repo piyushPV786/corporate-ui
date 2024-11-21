@@ -13,11 +13,9 @@ import VenueLogisticsDetail from 'src/views/pages/dialog/VenueLogistics'
 import InstallmentDetail from 'src/views/pages/dialog/InstallmentDetails'
 import { successToast } from '../../../../components/Toast'
 import { messages } from '../../../../context/common'
-import CustomChip from 'src/@core/components/mui/chip'
 
 // ** Third Party Styles Imports
 import 'react-datepicker/dist/react-datepicker.css'
-import { ThemeColor } from 'src/@core/layouts/types'
 import {
   IAddVenueTypes,
   IPayloadTypes,
@@ -36,17 +34,8 @@ interface CellType {
   row: InvoiceInstallmentType
 }
 
-interface ColorsType {
-  [key: string]: ThemeColor
-}
-
 interface propsType {
   code: string
-}
-const statusColors: ColorsType = {
-  paid: 'success',
-  pending: 'warning',
-  upcoming: 'secondary'
 }
 
 const CostContract = ({ code }: propsType) => {
@@ -195,33 +184,6 @@ const CostContract = ({ code }: propsType) => {
       field: 'dueDate',
       headerName: 'Due Date',
       renderCell: ({ row }: any) => <Box>{row.dueDate ? DDMMYYYDateFormat(row.dueDate) : '-'}</Box>
-    },
-    {
-      flex: 0.1,
-      minWidth: 200,
-      field: 'status',
-      headerName: 'Status',
-      renderCell: ({ row }: CellType) => (
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Tooltip title='View'>
-            <Box>
-              <CustomChip
-                skin='light'
-                size='small'
-                label={row.status}
-                color={statusColors[row.status]}
-                sx={{
-                  height: 20,
-                  fontSize: '0.75rem',
-                  fontWeight: 500,
-                  borderRadius: '5px',
-                  textTransform: 'capitalize'
-                }}
-              />
-            </Box>
-          </Tooltip>
-        </Box>
-      )
     },
     {
       flex: 0.1,

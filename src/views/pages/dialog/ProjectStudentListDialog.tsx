@@ -12,6 +12,7 @@ import { IDynamicObject } from 'src/types/apps/corporatTypes'
 import { ICorporateStudentRowContent } from 'src/types/apps/invoiceTypes'
 import { serialNumber } from 'src/utils'
 import { IStudent } from 'src/views/apps/project/Preview'
+import StudentPopUpheader from './StudentPopUpheader'
 
 type params = {
   open: boolean
@@ -20,6 +21,7 @@ type params = {
 }
 
 const ProjectStudentListDialog = ({ open, handleCloseStudentListPopup, selectedProject }: params) => {
+  const [search, setSearch] = useState<string>('')
   const [pageSize, setPageSize] = useState<number>(10)
   const [pageNumber, setPageNumber] = useState<number>(1)
   const [projectStudentListData, setProjectStudentListData] = useState<IStudent | null>()
@@ -34,6 +36,16 @@ const ProjectStudentListDialog = ({ open, handleCloseStudentListPopup, selectedP
       setProjectStudentListData(response?.data?.data)
     }
     setIsLoading(false)
+  }
+
+  const handleFilterStudent = (val: string) => {
+    setSearch(val)
+    setPageNumber(1)
+    if (val.length > 3) {
+      getStudentList({ pageNumber: 1, pageSize: pageSize, search: val.trim() })
+    } else if (val.length === 0) {
+      getStudentList({ pageNumber: 1, pageSize: pageSize, search: val })
+    }
   }
 
   const handleClose = () => {
@@ -198,7 +210,7 @@ const ProjectStudentListDialog = ({ open, handleCloseStudentListPopup, selectedP
           </Grid>
         </Grid>
       </DialogTitle>
-
+      <StudentPopUpheader value={search} handleFilter={handleFilterStudent} />
       <DialogContent>
         {RowArray ? (
           <DataGrid
@@ -225,6 +237,7 @@ const ProjectStudentListDialog = ({ open, handleCloseStudentListPopup, selectedP
             }}
             onPageSizeChange={newPageSize => setPageSize(newPageSize)}
             onPageChange={newPage => setPageNumber(newPage + 1)}
+            page={pageNumber - 1}
           />
         ) : (
           <FallbackSpinner />

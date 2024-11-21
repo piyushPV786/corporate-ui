@@ -146,7 +146,7 @@ const schema = yup.object().shape({
     .string()
     .matches(/^[\w@.-]*$/, `Special characters are not allowed in the Company Code`)
     .required('required'),
-  phoneNumber: yup.string().min(6, 'Mobile number must be of 6 digit').required('required'),
+  phoneNumber: yup.string().min(8, 'Mobile number must be of 6 digit').required('required'),
   companyType: yup.string().required('required'),
   country: yup.string().required('required'),
   state: yup.string().required('required'),

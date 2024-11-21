@@ -16,16 +16,38 @@ import { commonListTypes } from 'src/types/apps/dataTypes'
 import { errorToast, successToast } from 'src/components/Toast'
 import axios from 'axios'
 
+interface IIndex {
+  api: {
+    getRowIndex: (arg0: number) => number
+  }
+  row: {
+    id: number
+  }
+}
+
 const defaultColumns = [
   {
     flex: 0.5,
     field: 'id',
-    headerName: '#'
+    headerName: '#',
+    renderCell: (index: IIndex) => <Typography>{index.api.getRowIndex(index.row.id) + 1}</Typography>
   },
   {
-    flex: 1,
+    flex: 3,
     field: 'name',
-    headerName: 'File Name'
+    headerName: 'File Name',
+    renderCell: ({ row }: GridRenderCellParams) => (
+      <Typography
+        sx={{
+          p: 0,
+          whiteSpace: 'normal', // Allow text to wrap
+          wordWrap: 'break-word', // Break long words
+          overflow: 'visible' // Ensure visibility
+        }}
+      >
+        {row.name}
+      </Typography>
+    )
   }
 ]
 const isLoadingInitialState = {
@@ -43,6 +65,8 @@ const Documents = ({ projectCode }: { projectCode: string }) => {
     const response = await StudentService.getProjectDocuments(projectCode)
     if (response) {
       setDocumentList(response.data)
+      console.log(response.data)
+
       setIsLoading(prev => ({ ...prev, listLoading: false }))
       response?.data?.map((item: IDocumentListResponseTypes) =>
         setViewFileLoader(prev => ({ ...prev, [item.code]: false }))
@@ -51,6 +75,9 @@ const Documents = ({ projectCode }: { projectCode: string }) => {
   }
   const getDocumentTypeList = async () => {
     const response = await CommonService.getProjectDocumentTypeList()
+
+    // console.log(response.data);
+
     if (response) {
       setDocumentTypeList(response.data)
     }
@@ -118,7 +145,7 @@ const Documents = ({ projectCode }: { projectCode: string }) => {
     {
       flex: 1,
       field: 'date',
-      headerName: 'Upload Date',
+      headerName: 'Uploaded Date',
       renderCell: ({ row }: GridRenderCellParams) => (
         <Typography>{row?.createdAt ? DateFormat(row?.createdAt) : '-'}</Typography>
       )

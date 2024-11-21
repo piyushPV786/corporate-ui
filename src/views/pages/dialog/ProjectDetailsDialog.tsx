@@ -131,6 +131,7 @@ const ProjectDetailsDialog = ({
   } = useForm<FormInputs>({ defaultValues })
   const handleClose = () => {
     onClose()
+    reset()
   }
 
   const onSubmit = async (data: any) => {
@@ -376,7 +377,12 @@ const ProjectDetailsDialog = ({
                   name='typeOfNotificationReceived'
                   control={control}
                   defaultValue={projectData?.programDetails?.typeOfNotificationReceived}
-                  rules={{ required: true }}
+                  rules={{ required: true,
+                    pattern:{
+                    value: /^[a-zA-Z0-9 ]*$/,
+                    message: 'Special characters are not allowed',
+                  } 
+                }}
                   render={({ field }) => (
                     <TextField
                       {...field}
@@ -388,7 +394,7 @@ const ProjectDetailsDialog = ({
                 />
                 {errors.typeOfNotificationReceived && (
                   <FormHelperText sx={{ color: 'error.main' }} id='typeOfNotificationReceived'>
-                    This field is required
+                    {errors.typeOfNotificationReceived.message !== ''? errors.typeOfNotificationReceived.message : 'This field is required'}
                   </FormHelperText>
                 )}
               </FormControl>
@@ -396,7 +402,7 @@ const ProjectDetailsDialog = ({
             <Grid item xs={12} sm={4} mb={5}>
               <FormControl error={Boolean(errors.approvedProposal)}>
                 <FormLabel sx={{ fontSize: '12px' }}>
-                  <RequiredLabel label='Variation form original approved Proposal / Submission label=' />
+                  <RequiredLabel label='Variation form original approved Proposal / Submission label' />
                 </FormLabel>
                 <Controller
                   name='approvedProposal'
@@ -456,7 +462,12 @@ const ProjectDetailsDialog = ({
                 <Controller
                   name='releaseOfNotification'
                   control={control}
-                  rules={{ required: true }}
+                  rules={{ required: true,
+                    pattern:{
+                      value: /^[a-zA-Z0-9 ]*$/,
+                      message: 'Special characters are not allowed',
+                    } 
+                   }}
                   render={({ field }) => (
                     <TextField
                       {...field}
@@ -469,7 +480,7 @@ const ProjectDetailsDialog = ({
                 />
                 {errors.releaseOfNotification && (
                   <FormHelperText sx={{ color: 'error.main' }} id='releaseOfNotification'>
-                    This field is required
+                    {errors.releaseOfNotification.message !== ''? errors.releaseOfNotification.message : 'This field is required'}
                   </FormHelperText>
                 )}
               </FormControl>

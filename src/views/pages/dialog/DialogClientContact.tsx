@@ -70,10 +70,10 @@ const DialogClientContact = ({ title, data, createClientContact, handleEdit }: I
       .string()
       .required(ClientContactDetails.MobileRequired)
       .test('is-valid-telephone', ClientContactDetails.mobileNumberLength, function (value) {
-        const { telephoneCountryCode } = this.parent
-        const telephoneNumberWithoutCode = value?.replace(telephoneCountryCode || '', '') || ''
+        const { mobileCountryCode } = this.parent
+        const mobileNumberWithoutCode = value?.replace(mobileCountryCode || '', '') || ''
 
-        return telephoneNumberWithoutCode.length >= 6
+        return mobileNumberWithoutCode.length >= 6
       }),
     mobileCountryCode: yup.string(),
     telephoneNumber: yup
@@ -87,7 +87,7 @@ const DialogClientContact = ({ title, data, createClientContact, handleEdit }: I
       }),
     telephoneCountryCode: yup.string(),
     email: yup.string().email().required(ClientContactDetails.EmailRequired),
-    department: yup.string().required(ClientContactDetails.DepartmentRequired),
+    department: yup.string().required(ClientContactDetails.DepartmentRequired).matches(/^[a-zA-Z0-9 ]*$/, ClientContactDetails.DepartmentError),
     designation: yup.string().required(ClientContactDetails.DesignationRequired),
     relationshipOwner: yup.string().required(ClientContactDetails.RelationshipRequired)
   })

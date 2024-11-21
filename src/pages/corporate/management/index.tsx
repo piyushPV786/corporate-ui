@@ -55,6 +55,8 @@ import RequiredLabel from 'src/components/RequiredLabel'
 import AlertBox from 'src/layouts/components/Alert'
 import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/material.css'
+import Filter from 'src/components/Filter'
+import { IDynamicObject } from 'src/types/apps/corporatTypes'
 
 interface CellType {
   row: InvoiceType
@@ -168,6 +170,7 @@ const schema = yup.object().shape({
 const StudentList = () => {
   // ** State
   const [value, setQuery] = useState<string>('')
+  const [filterData, setFilterData] = useState<IDynamicObject>()
   const [pageSize, setPageSize] = useState<number>(10)
   const [pageNumber, setPageNumber] = useState<number>(1)
   const [selectedRows, setSelectedRows] = useState<any[]>([])
@@ -180,6 +183,7 @@ const StudentList = () => {
   const [country, setCountry] = useState<Array<commonListTypes>>([])
   const [states, setStates] = useState<IAddressStateTypes[] | []>([])
   const [postalStates, setPostalStates] = useState<IAddressStateTypes[] | []>([])
+  const [filterCountry, setFilterCountry] = useState<string>('')
   const [loadingForm, setLoadingForm] = useState<boolean>(false)
 
   const {
@@ -235,6 +239,12 @@ const StudentList = () => {
   }, [countryWatch])
 
   useEffect(() => {
+    if (filterCountry) {
+      fetchStates(filterCountry, setStates)
+    }
+  }, [filterCountry])
+
+  useEffect(() => {
     if (physicalCountryWatch) {
       fetchStates(physicalCountryWatch, setPostalStates)
     }
@@ -246,6 +256,74 @@ const StudentList = () => {
 
     return response?.message
   }
+
+  const statusList = [{
+    name: ProjectStatusTypes.Active,
+    code: 'true'
+  },
+  {
+    name: ProjectStatusTypes.Inactive,
+    code: 'false'
+  },
+]
+
+const filterFields = [
+  {
+    id: 0,
+    name: 'name',
+    label: 'Company Name'
+  },
+  {
+    id: 1,
+    name: 'code',
+    label: 'Code'
+  },
+  {
+    id: 2,
+    name: 'companyType',
+    label: 'Company Type',
+    list: companyTypes
+  },
+  {
+    id: 3,
+    name: 'country',
+    label: 'Country',
+    list: country as any
+  },
+  {
+    id: 4,
+    name: 'state',
+    label: 'State / Province',
+    list: states as any
+  },
+  {
+    id: 5,
+    name: 'pincode',
+    label: 'Pincode'
+  },
+  {
+    id: 6,
+    name: 'isActive',
+    label: 'Status',
+    list: statusList
+  },
+]
+
+const defaultFilterFields = {
+  name: '',
+  code: '',
+  companyType: '',
+  country: '',
+  state: '',
+  pincode: '',
+  projectCount: '',
+  studentCount: '',
+  status: ''
+}
+
+const handleSort = (val: IDynamicObject) => {
+  setFilterData(val)
+}
   const formValue = watch()
   const router = useRouter()
   const columns = [
@@ -436,9 +514,10 @@ const StudentList = () => {
       q: value,
       pageSize: pageSize,
       pageNumber: pageNumber,
-      status: ''
+      status: '',
+      ...filterData
     })
-  }, [pageSize, pageNumber, value])
+  }, [pageSize, pageNumber, value, filterData])
   const handleModalOpenClose = () => {
     setOpenEdit(prevState => ({ ...prevState, show: !prevState?.show }))
     reset(defaultValues)
@@ -592,7 +671,23 @@ const StudentList = () => {
             handleCloseConfirmationPopup={handleCloseConfirmationPopup}
             selectedRows={selectedRows}
           />
-          <TableHeader value={value} selectedRows={selectedRows} handleFilter={handleFilter} />
+          <Grid container display='flex' justifyContent='space-between'>
+            <Grid item xs={6}>
+                <TableHeader value={value} selectedRows={selectedRows} handleFilter={handleFilter} />
+            </Grid>
+            <Grid item xs={6} display='flex' justifyContent='flex-end'>
+                <Box sx={{ p: 5 }}>
+                  <Filter
+                    studentData={response?.data}
+                    handleSort={handleSort}
+                    fields={filterFields}
+                    filterDefaultValues={defaultFilterFields}
+                    setSearchValue={setQuery}
+                    setFilterCountry={setFilterCountry}
+                  />
+                </Box>
+              </Grid>
+          </Grid>
           <DataGrid
             loading={loading}
             autoHeight

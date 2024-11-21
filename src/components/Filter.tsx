@@ -1,5 +1,5 @@
 // ** React Imports
-import { Fragment, useMemo, useState } from 'react'
+import { Fragment, useEffect, useMemo, useState } from 'react'
 
 // ** Third Party Imports
 import { Controller, useForm } from 'react-hook-form'
@@ -46,6 +46,7 @@ interface IFilterProps {
   allIntake?: IAllIntake[]
   getStudentList?: (() => void) | undefined
   filterSubStatus?: boolean
+  setFilterCountry?: any
 }
 
 const schema = yup.object().shape({
@@ -77,6 +78,7 @@ const Filter = ({
   setSearchValue,
   allIntake,
   getStudentList,
+  setFilterCountry,
   filterSubStatus = false
 }: IFilterProps) => {
   const [openDrawer, setOpenDrawer] = useState(false)
@@ -88,11 +90,16 @@ const Filter = ({
     reset,
     control,
     setValue,
+    watch,
     formState: { errors, touchedFields }
   } = useForm<IDynamicObject>({
     defaultValues: data,
     resolver: yupResolver(schema)
   })
+
+  useEffect(() => {
+    setFilterCountry(watch('country'))
+  }, [watch('country')])
 
   const corporateFilterFields = [
     {

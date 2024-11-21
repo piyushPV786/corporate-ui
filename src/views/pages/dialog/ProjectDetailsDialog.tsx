@@ -377,12 +377,13 @@ const ProjectDetailsDialog = ({
                   name='typeOfNotificationReceived'
                   control={control}
                   defaultValue={projectData?.programDetails?.typeOfNotificationReceived}
-                  rules={{ required: true,
-                    pattern:{
-                    value: /^[a-zA-Z0-9 ]*$/,
-                    message: 'Special characters are not allowed',
-                  } 
-                }}
+                  rules={{
+                    required: true,
+                    pattern: {
+                      value: /^[a-zA-Z0-9 ]*$/,
+                      message: 'Special characters are not allowed'
+                    }
+                  }}
                   render={({ field }) => (
                     <TextField
                       {...field}
@@ -394,7 +395,9 @@ const ProjectDetailsDialog = ({
                 />
                 {errors.typeOfNotificationReceived && (
                   <FormHelperText sx={{ color: 'error.main' }} id='typeOfNotificationReceived'>
-                    {errors.typeOfNotificationReceived.message !== ''? errors.typeOfNotificationReceived.message : 'This field is required'}
+                    {errors.typeOfNotificationReceived.message !== ''
+                      ? errors.typeOfNotificationReceived.message
+                      : 'This field is required'}
                   </FormHelperText>
                 )}
               </FormControl>
@@ -462,12 +465,13 @@ const ProjectDetailsDialog = ({
                 <Controller
                   name='releaseOfNotification'
                   control={control}
-                  rules={{ required: true,
-                    pattern:{
+                  rules={{
+                    required: true,
+                    pattern: {
                       value: /^[a-zA-Z0-9 ]*$/,
-                      message: 'Special characters are not allowed',
-                    } 
-                   }}
+                      message: 'Special characters are not allowed'
+                    }
+                  }}
                   render={({ field }) => (
                     <TextField
                       {...field}
@@ -480,7 +484,9 @@ const ProjectDetailsDialog = ({
                 />
                 {errors.releaseOfNotification && (
                   <FormHelperText sx={{ color: 'error.main' }} id='releaseOfNotification'>
-                    {errors.releaseOfNotification.message !== ''? errors.releaseOfNotification.message : 'This field is required'}
+                    {errors.releaseOfNotification.message !== ''
+                      ? errors.releaseOfNotification.message
+                      : 'This field is required'}
                   </FormHelperText>
                 )}
               </FormControl>

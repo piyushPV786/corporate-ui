@@ -87,7 +87,10 @@ const DialogClientContact = ({ title, data, createClientContact, handleEdit }: I
       }),
     telephoneCountryCode: yup.string(),
     email: yup.string().email().required(ClientContactDetails.EmailRequired),
-    department: yup.string().required(ClientContactDetails.DepartmentRequired).matches(/^[a-zA-Z0-9 ]*$/, ClientContactDetails.DepartmentError),
+    department: yup
+      .string()
+      .required(ClientContactDetails.DepartmentRequired)
+      .matches(/^[a-zA-Z0-9 ]*$/, ClientContactDetails.DepartmentError),
     designation: yup.string().required(ClientContactDetails.DesignationRequired),
     relationshipOwner: yup.string().required(ClientContactDetails.RelationshipRequired)
   })

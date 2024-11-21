@@ -108,6 +108,7 @@ const CorporateStudentPreview = ({ studentCode }: IPropsTypes) => {
       <Grid item xs={3}>
         <Box className='sticky-sidebar'>
           <PreviewActions
+            getCorporateStudentsDetailById={getCorporateStudentsDetailById}
             data={data}
             rejectStudent={rejectStudent}
             approveStudent={approveStudent}

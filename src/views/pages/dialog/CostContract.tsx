@@ -137,7 +137,14 @@ const CostContractDetail = ({
                 <TextField
                   inputProps={{ min: 0 }}
                   type='number'
-                  {...register('fullCost', { required: userInformationStatus.CostOfTrainingQuoteRequired })}
+                  {...register('fullCost', {
+                    required: userInformationStatus.CostOfTrainingQuoteRequired,
+                    validate: value => {
+                      if (value <= 0) {
+                        return 'Full cost must be greater than 0'
+                      }
+                    }
+                  })}
                   fullWidth
                   label={<RequiredLabel label='Full Cost of Training Quoted (in Rand)' />}
                   defaultValue={data?.fullCost}
@@ -153,7 +160,14 @@ const CostContractDetail = ({
                 <TextField
                   inputProps={{ min: 0 }}
                   type='number'
-                  {...register('contractCost', { required: userInformationStatus.ContractCostRequired })}
+                  {...register('contractCost', {
+                    required: userInformationStatus.ContractCostRequired,
+                    validate: value => {
+                      if (value <= 0) {
+                        return 'Contract cost must be greater than 0'
+                      }
+                    }
+                  })}
                   fullWidth
                   label={<RequiredLabel label='Contract Cost' />}
                   defaultValue={data?.contractCost}

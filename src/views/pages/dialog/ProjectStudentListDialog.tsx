@@ -12,6 +12,7 @@ import { IDynamicObject } from 'src/types/apps/corporatTypes'
 import { ICorporateStudentRowContent } from 'src/types/apps/invoiceTypes'
 import { serialNumber } from 'src/utils'
 import { IStudent } from 'src/views/apps/project/Preview'
+import StudentPopUpheader from './StudentPopUpheader'
 
 type params = {
   open: boolean
@@ -20,8 +21,9 @@ type params = {
 }
 
 const ProjectStudentListDialog = ({ open, handleCloseStudentListPopup, selectedProject }: params) => {
+  const [search, setSearch] = useState<string>('')
   const [pageSize, setPageSize] = useState<number>(10)
-  const [pageNumber, setPageNumber] = useState<number>(1)
+  const [pageNumber, setPageNumber] = useState<number>(0)
   const [projectStudentListData, setProjectStudentListData] = useState<IStudent | null>()
   const [loading, setIsLoading] = useState<boolean>(false)
 
@@ -36,11 +38,21 @@ const ProjectStudentListDialog = ({ open, handleCloseStudentListPopup, selectedP
     setIsLoading(false)
   }
 
+  const handleFilterStudent = (val: string) => {
+    setSearch(val)
+    setPageNumber(0)
+    if (val.length > 3) {
+      getStudentList({ pageNumber: 1, pageSize: pageSize, q: val })
+    } else if (val.length === 0) {
+      getStudentList({ pageNumber: 1, pageSize: pageSize, q: val })
+    }
+  }
+
   const handleClose = () => {
     handleCloseStudentListPopup()
     setProjectStudentListData(null)
     setPageSize(10)
-    setPageNumber(1)
+    setPageNumber(0)
   }
 
   const RowArray = projectStudentListData?.data
@@ -198,7 +210,7 @@ const ProjectStudentListDialog = ({ open, handleCloseStudentListPopup, selectedP
           </Grid>
         </Grid>
       </DialogTitle>
-
+      <StudentPopUpheader value={search} handleFilter={handleFilterStudent} />
       <DialogContent>
         {RowArray ? (
           <DataGrid
@@ -211,7 +223,7 @@ const ProjectStudentListDialog = ({ open, handleCloseStudentListPopup, selectedP
             disableColumnSelector
             rows={RowArray?.map((item: ICorporateStudentRowContent | any, index: number) => ({
               ...item,
-              itemNumber: serialNumber(index, pageNumber, pageSize)
+              itemNumber: serialNumber(index, pageNumber + 1, pageSize)
             }))}
             rowCount={projectStudentListData?.count}
             columns={columns}
@@ -224,7 +236,8 @@ const ProjectStudentListDialog = ({ open, handleCloseStudentListPopup, selectedP
               '& .MuiDataGrid-columnHeaderTitle': { fontWeight: ' bold' }
             }}
             onPageSizeChange={newPageSize => setPageSize(newPageSize)}
-            onPageChange={newPage => setPageNumber(newPage + 1)}
+            onPageChange={newPage => setPageNumber(newPage)}
+            page={pageNumber}
           />
         ) : (
           <FallbackSpinner />

@@ -139,12 +139,7 @@ const ProgramAndCourseDialog = ({
                   value={courseTypeList?.find((i: commonListTypes) => i.code === watch('courseType'))}
                   getOptionLabel={option => option.name}
                   renderInput={params => (
-                    <TextField
-                      {...params}
-                      label={<RequiredLabel label='Corporate Name' />}
-                      variant='outlined'
-                      fullWidth
-                    />
+                    <TextField {...params} label={<RequiredLabel label='Module Type' />} variant='outlined' fullWidth />
                   )}
                 />
 

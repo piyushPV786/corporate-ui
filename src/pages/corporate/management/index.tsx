@@ -33,7 +33,16 @@ import CorporateInformation from 'src/views/pages/dialog/CorporateInformation'
 import { Controller, useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
-import { Autocomplete, Backdrop, Checkbox, CircularProgress, FormControlLabel, Stack, Switch } from '@mui/material'
+import {
+  Autocomplete,
+  Backdrop,
+  Checkbox,
+  CircularProgress,
+  FormControlLabel,
+  FormHelperText,
+  Stack,
+  Switch
+} from '@mui/material'
 import { addressDetails, getName, getStateList, minTwoDigits, serialNumber } from 'src/utils'
 import { errorToast, successToast } from 'src/components/Toast'
 import { ThemeColor } from 'src/@core/layouts/types'
@@ -43,6 +52,9 @@ import { AxiosResponse } from 'axios'
 import ControlledAutocomplete from 'src/components/ControlledAutocomplete'
 import { IAddressStateTypes } from 'src/types/apps/admittedStudent'
 import RequiredLabel from 'src/components/RequiredLabel'
+import AlertBox from 'src/layouts/components/Alert'
+import PhoneInput from 'react-phone-input-2'
+import 'react-phone-input-2/lib/material.css'
 
 interface CellType {
   row: InvoiceType
@@ -138,9 +150,10 @@ const schema = yup.object().shape({
     }),
   code: yup
     .string()
-    .matches(/^[\w@.-]*$/, `Code Must be without space you can use dash(-) instead`)
+    .matches(/^[\w@.-]*$/, `Special characters are not allowed in the Company Code`)
     .required('required'),
   email: yup.string().email('Please enter a valid email address').nullable().notRequired(),
+  phoneNumber: yup.string().min(6, 'Mobile number must be of 6 digit').required('required'),
   companyType: yup.string().required('required'),
   country: yup.string().required('required'),
   state: yup.string().required('required'),
@@ -177,6 +190,7 @@ const StudentList = () => {
     reset,
     control,
     setError,
+    clearErrors,
     formState: { errors }
   } = useForm<any>({
     defaultValues: corporateFormData,
@@ -494,6 +508,27 @@ const StudentList = () => {
     setLoadingForm(false)
   }
 
+  const countryCodeContact = (data: any, dialCode: string) => {
+    data && setValue(`mobileCountryCode`, dialCode)
+  }
+
+  const checkDuplicateMobile = async (mobileNumber: string, mobileCountryCode: string) => {
+    const result = await DashboardService.reggieCheckDuplicateMobile(mobileNumber, mobileCountryCode)
+
+    if (result?.data?.existingRecord) {
+      setError('phoneNumber', {
+        type: 'manual',
+        message: 'Provided mobile number already exists'
+      })
+
+      return false
+    } else {
+      clearErrors('phoneNumber')
+
+      return true
+    }
+  }
+
   const handlePhysicalAddress = (event: any) => {
     setLoadingForm(true)
     const isSameAddress = event.target.checked
@@ -511,6 +546,26 @@ const StudentList = () => {
 
     setValue('isSameAddress', isSameAddress)
     setLoadingForm(false)
+  }
+
+  const isChange = () => {
+    return (
+      watch('name') !== corporateFormData?.name ||
+      watch('companyType') !== corporateFormData?.companyType ||
+      watch('email') !== corporateFormData?.email ||
+      watch('phoneNumber') !== corporateFormData?.phoneNumber ||
+      watch('address1') !== corporateFormData?.address1 ||
+      watch('address2') !== corporateFormData?.address2 ||
+      watch('country') !== corporateFormData?.country ||
+      watch('state') !== corporateFormData?.state ||
+      watch('pincode') !== corporateFormData?.pincode ||
+      watch('physicalAddress1') !== corporateFormData?.physicalAddress1 ||
+      watch('physicalAddress2') !== corporateFormData?.physicalAddress2 ||
+      watch('physicalCountry') !== corporateFormData?.physicalCountry ||
+      watch('physicalState') !== corporateFormData?.physicalState ||
+      watch('physicalPincode') !== corporateFormData?.physicalPincode ||
+      watch('isActive') !== corporateFormData?.isActive
+    )
   }
 
   return (
@@ -634,7 +689,7 @@ const StudentList = () => {
                     error={errors.email as any as any}
                   />
                 </Grid>
-                <Grid item xs={6}>
+                {/* <Grid item xs={6}>
                   <TextField
                     fullWidth
                     {...register('phoneNumber')}
@@ -645,6 +700,62 @@ const StudentList = () => {
                     type='number'
                     label='Contact Number (Optional)'
                     defaultValue={formValue?.phoneNumber}
+                  />
+                </Grid> */}
+                <Grid item xs={6}>
+                  <Controller
+                    name='phoneNumber'
+                    control={control}
+                    render={({ field }) => (
+                      <Box
+                        sx={{
+                          '& .country-list': { top: '-40px' },
+                          '& .form-control:focus': {
+                            borderColor: theme => theme.palette.primary.main,
+                            boxShadow: theme => `0 0 0 1px ${theme.palette.primary.main}`
+                          },
+                          '& input.form-control': { color: theme => `rgb(${theme.palette.customColors.main})` }
+                        }}
+                      >
+                        <PhoneInput
+                          {...field}
+                          countryCodeEditable={true}
+                          placeholder='Enter Contact Number'
+                          specialLabel='Contact Number (Optional)'
+                          value={watch('phoneNumber') || '+27'}
+                          {...register('phoneNumber')}
+                          onChange={(data, countryData: { dialCode: string }) => {
+                            countryCodeContact(data, countryData?.dialCode)
+                            data && setValue('phoneNumber', data)
+                            clearErrors('phoneNumber')
+                          }}
+                          onBlur={e => {
+                            const mobileNumber = e.target.value.replaceAll(' ', '').replace('+', '').replace('-', '')
+                            const mobileCheck = mobileNumber.slice(watch('mobileCountryCode')?.length)
+                            if (mobileCheck.length >= 6) {
+                              const studentCode = watch('studentCode')
+                              if (!studentCode) {
+                                checkDuplicateMobile(mobileCheck, watch('mobileCountryCode'))
+                              }
+                            }
+                          }}
+                          inputStyle={{
+                            borderRadius: '4px',
+                            background: 'none',
+                            width: '100%'
+                          }}
+                        />
+                        <FormHelperText error>
+                          {errors.phoneNumber && (errors.phoneNumber?.message as string | undefined)}
+                        </FormHelperText>
+                        <input
+                          type='hidden'
+                          {...register('mobileCountryCode')}
+                          value={field.value || ''}
+                          onChange={() => setValue('mobileCountryCode', field?.value)}
+                        />
+                      </Box>
+                    )}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -704,6 +815,7 @@ const StudentList = () => {
                             getOptionLabel={option => option?.name || ''}
                             onChange={(event, data) => {
                               field.onChange(data?.code)
+                              watch('country') == undefined && setValue('country', '')
                             }}
                             renderInput={params => (
                               <TextField
@@ -732,6 +844,7 @@ const StudentList = () => {
                             }
                             onChange={(event, data: any) => {
                               field.onChange(data?.code)
+                              watch('state') == undefined && setValue('state', '')
                             }}
                             renderInput={params => (
                               <TextField
@@ -933,6 +1046,20 @@ const StudentList = () => {
                     <CircularProgress color='inherit' />
                   </Backdrop>
                 )}
+              </Grid>
+              <Grid container display='flex' justifyContent='center'>
+                <Grid item xs={7.3}>
+                  {formValue && isChange() && openEdit?.actionType !== 'Add' ? (
+                    <AlertBox
+                      sx={{ mb: 6 }}
+                      color='warning'
+                      variant={'filled ' as any}
+                      header='Unsaved Changes'
+                      message='You have made changes. Do you want to save or discard them?'
+                      severity='warning'
+                    />
+                  ) : null}
+                </Grid>
               </Grid>
             </DialogContent>
 

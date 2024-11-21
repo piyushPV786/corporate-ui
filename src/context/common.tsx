@@ -161,7 +161,8 @@ export const messages = {
   generateInvoice: 'Invoice generated successfully.',
   nullData: 'User not found in Regenesys Database',
   quoteGenerated: 'quote will be downloaded in 2-3 mintues.',
-  assignIntake: 'Intake assigned successfully'
+  assignIntake: 'Intake assigned successfully',
+  defaultErrorMessage: 'Something went wrong. Please try again'
 }
 
 export const dataMessages = {
@@ -220,6 +221,7 @@ export const projectMessages = {
   projectManager: 'Please Select a Project Manager',
   accountManager: 'Please Select a Account Manager',
   program: 'Please Select a Qualification',
+  studyMode: 'Please Select Study Mode',
   courseType: 'Please Select a Module Type'
 }
 
@@ -525,7 +527,9 @@ export enum ClientContactDetails {
   TelephoneRequired = 'Telephone Number is Required',
   DepartmentRequired = 'Department is Required',
   DesignationRequired = 'Designation is Required',
-  RelationshipRequired = 'Relationship '
+  RelationshipRequired = 'Relationship ',
+  mobileNumberLength = 'Mobile number must be atleast 6 digits',
+  telephoneNumberLength = 'Telephone number must be atleast 6 digits'
 }
 
 interface UserStatusType {
@@ -1024,4 +1028,8 @@ export const callFunctionOn = {
 export const studentApplicationSubStatus: IDynamicObject = {
   'SUB-DEFERRED-FEES_PENDING': 'FEES_PENDING',
   'SUB-CANCELLED-FEES_PENDING': 'FEES_PENDING'
+}
+
+export const addInstallmentMessage = {
+  installmentNameError: 'Name should start with character or underscore only.'
 }

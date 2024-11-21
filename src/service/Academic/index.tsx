@@ -351,4 +351,17 @@ export default class Academic {
       nProgress.done()
     }
   }
+  async getInterestedQualificationList() {
+    nProgress.start()
+    const endUrlName = `${this.baseUrl}${apiEndPoints.interestedQualification}?project=false`
+    try {
+      const response = await this.apiServer.get(endUrlName)
+
+      return response
+    } catch (err: any) {
+      console.log('Error fetching interested qualification List ========>', err?.message)
+    } finally {
+      nProgress.done()
+    }
+  }
 }

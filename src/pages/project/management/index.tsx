@@ -25,6 +25,7 @@ import 'react-datepicker/dist/react-datepicker.css'
 import { FolderPlusOutline } from 'mdi-material-ui'
 import CustomChip from 'src/@core/components/mui/chip'
 import ProjectInformation from 'src/views/pages/dialog/ProjectInformation'
+import ProjectStudentListDialog from 'src/views/pages/dialog/ProjectStudentListDialog'
 
 interface CellType {
   row: InvoiceType
@@ -96,9 +97,16 @@ const ProjectManagement = () => {
   })
   const [selectedProjectDetails, setSelectedProjectDetails] = useState<any>()
   const [projectDetailsOpen, setProjectDetailsOpen] = useState<boolean>(false)
+  const [projectStudentListOpen, setProjectStudentListOpen] = useState<boolean>(false)
 
   const handleCloseProjectDetails = () => {
     setProjectDetailsOpen(false)
+    setSelectedProjectDetails(null)
+  }
+
+  const handleCloseProjectStudentList = () => {
+    setProjectStudentListOpen(false)
+    setSelectedProjectDetails(null)
   }
 
   const columns = [
@@ -142,7 +150,15 @@ const ProjectManagement = () => {
       field: 'corporateName',
       headerName: 'Corporate Name',
       colSize: 12,
-      renderCell: ({ row }: CellType) => row?.corporateEd?.name
+      renderCell: ({ row }: CellType) => {
+        return (
+          <Tooltip title={row?.corporateEd?.name}>
+            <Typography variant='body2' className='ellipsis-text'>
+              {row?.corporateEd?.name}
+            </Typography>
+          </Tooltip>
+        )
+      }
     },
 
     {
@@ -151,7 +167,17 @@ const ProjectManagement = () => {
       field: 'projectManager',
       headerName: 'Project Manager',
       colSize: 6,
-      renderCell: ({ row }: CellType) => getFullName(commonList.projectManagerList, row?.projectManager)
+      renderCell: ({ row }: CellType) => {
+        const projectManager = getFullName(commonList.projectManagerList, row?.projectManager)
+
+        return (
+          <Tooltip title={projectManager}>
+            <Typography variant='body2' className='ellipsis-text'>
+              {projectManager}
+            </Typography>
+          </Tooltip>
+        )
+      }
     },
     {
       flex: 0.1,
@@ -159,14 +185,34 @@ const ProjectManagement = () => {
       field: 'accountManager',
       headerName: 'Account Manager',
       colSize: 6,
-      renderCell: ({ row }: CellType) => getFullName(commonList.accountManagerList, row?.accountManager)
+      renderCell: ({ row }: CellType) => {
+        const accountManager = getFullName(commonList.accountManagerList, row?.accountManager)
+
+        return (
+          <Tooltip title={accountManager}>
+            <Typography variant='body2' className='ellipsis-text'>
+              {accountManager}
+            </Typography>
+          </Tooltip>
+        )
+      }
     },
     {
       flex: 0.1,
       minWidth: 200,
       field: 'program',
       headerName: 'Qualification Name',
-      renderCell: ({ row }: CellType) => getName(commonList.programList, row?.program)
+      renderCell: ({ row }: CellType) => {
+        const qualification = getName(commonList.programList, row?.program)
+
+        return (
+          <Tooltip title={qualification}>
+            <Typography variant='body2' className='ellipsis-text'>
+              {qualification}
+            </Typography>
+          </Tooltip>
+        )
+      }
     },
 
     {
@@ -181,7 +227,24 @@ const ProjectManagement = () => {
       minWidth: 200,
       field: 'noOfStudent',
       headerName: 'No of Students',
-      renderCell: ({ row }: CellType) => (row.noOfStudent ? row.noOfStudent : '-')
+      renderCell: ({ row }: CellType) => (
+        <>
+          {row?.noOfStudent ? (
+            <Box>
+              <StyledLink
+                onClick={() => {
+                  setSelectedProjectDetails(row)
+                  setProjectStudentListOpen(true)
+                }}
+              >
+                {row.noOfStudent}
+              </StyledLink>
+            </Box>
+          ) : (
+            '-'
+          )}
+        </>
+      )
     },
     {
       flex: 0.1,
@@ -386,6 +449,11 @@ const ProjectManagement = () => {
             handleCloseProjectDetails={handleCloseProjectDetails}
             project={selectedProjectDetails}
             commonList={commonList}
+          />
+          <ProjectStudentListDialog
+            open={projectStudentListOpen}
+            handleCloseStudentListPopup={handleCloseProjectStudentList}
+            selectedProject={selectedProjectDetails}
           />
         </Card>
       </Grid>

@@ -10,20 +10,21 @@ import DialogPersonalInfo from 'src/views/pages/dialog/StudentPresonalInfo'
 import EducationDialog from 'src/views/pages/dialog/StudentEducationInfo'
 import AddressDialogue from 'src/views/pages/dialog/StudentAddressInfo'
 import ContactDialog from 'src/views/pages/dialog/StudentContactInfo'
-import { CommonService } from 'src/service'
-import { status } from 'src/context/common'
+import { AcademicService, CommonService, DashboardService } from 'src/service'
+import { applicationStatusColor, status, studentApplicationAllStatus } from 'src/context/common'
 import { useState, useEffect } from 'react'
-import { AccountDetails, CardAccountDetailsOutline, SchoolOutline } from 'mdi-material-ui'
-import { Accordion, AccordionDetails, AccordionSummary } from '@mui/material'
+import { AccountDetails, CardAccountDetailsOutline, ChartBoxOutline, SchoolOutline } from 'mdi-material-ui'
+import { Accordion, AccordionDetails, AccordionSummary, Chip, Theme } from '@mui/material'
 import { GridExpandMoreIcon } from '@mui/x-data-grid'
 import FallbackSpinner from 'src/@core/components/spinner'
 
 //import { DocumentDetail } from '../addstudent/documentDetails'
 //import { IdocumentDataType } from 'src/types/apps/invoiceTypes'
-import { commonListTypes, IListOfCommonTypes } from 'src/types/apps/dataTypes'
-import { getName } from 'src/utils'
+import { commonListTypes, IAccountManagerList, IListOfCommonTypes, IProjectManagerList } from 'src/types/apps/dataTypes'
+import { getFullName, getName } from 'src/utils'
 import { IProjectStudentTypes } from 'src/types/apps/projectTypes'
 import { formateDate } from '../components/ProgramAndCourseDetail'
+import { corporateConstant } from 'src/context/corporateData'
 
 type Props = {
   studentId: number | string
@@ -34,6 +35,7 @@ type Props = {
 }
 
 const PreviewCard = ({ studentId, studentDetail, getStudentDetailById }: Props) => {
+  const [projectInfoExpand, setProjectInfoExpand] = useState<boolean>(true)
   const [studentInfoExpand, setStudentInfoExpand] = useState<boolean>(true)
   const [educationInfoExpand, setEducationInfoExpand] = useState<boolean>(true)
   const [addressInfoExpand, setAddressInfoExpand] = useState<boolean>(true)
@@ -53,7 +55,10 @@ const PreviewCard = ({ studentId, studentDetail, getStudentDetailById }: Props) 
     idType: [],
     year: []
   })
-  const [stateList, setStateList] = useState<any>([])
+  const [stateList, setStateList] = useState<any[]>([])
+  const [programList, setProgramList] = useState<any[]>([])
+  const [accountManagerList, setAccountManagerList] = useState<IAccountManagerList[]>([])
+  const [projectManagerList, setProjectManagerList] = useState<IProjectManagerList[]>([])
 
   const getCommonList = async () => {
     const response = await Promise.all([
@@ -88,6 +93,24 @@ const PreviewCard = ({ studentId, studentDetail, getStudentDetailById }: Props) 
           code: state.isoCode || state.code
         }))
       )
+    }
+  }
+  const getProgramList = async () => {
+    const response = await AcademicService.getAllProgramList()
+    if (response?.status === status?.successCode && response?.data?.data?.length) {
+      setProgramList(response.data.data)
+    }
+  }
+  const getProjectManagerList = async () => {
+    const response = await DashboardService.getCorporateProjectManagerList()
+    if (response?.status === status?.successCode && response?.data?.data?.length) {
+      setProjectManagerList(response.data.data)
+    }
+  }
+  const getAccountManagerList = async () => {
+    const response = await DashboardService.getCorporateAccountManagerList()
+    if (response?.status === status?.successCode && response?.data?.data?.length) {
+      setAccountManagerList(response.data.data)
     }
   }
   const getQualificationData = async () => {
@@ -146,6 +169,9 @@ const PreviewCard = ({ studentId, studentDetail, getStudentDetailById }: Props) 
   useEffect(() => {
     if (studentId) {
       getCommonList()
+      getProgramList()
+      getProjectManagerList()
+      getAccountManagerList()
       getQualificationData()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -160,9 +186,9 @@ const PreviewCard = ({ studentId, studentDetail, getStudentDetailById }: Props) 
     return (
       <Box>
         <Grid container rowSpacing={10}>
-          <Grid item xs={6}>
+          <Grid item xs={12}>
             <Typography className='page-header'>
-              <Box sx={{ pl: 3, pb: 5 }}>
+              <Box sx={{ pb: 2 }}>
                 <Typography variant='h5' gutterBottom>
                   View/Manage Student
                 </Typography>
@@ -174,13 +200,91 @@ const PreviewCard = ({ studentId, studentDetail, getStudentDetailById }: Props) 
                     }
                   }}
                 >
-                  <span className='breadcrumb'>Dashboard /Project Management / MMl: FLP 2023</span> /
-                  {`${studentDetail?.lead?.firstName} ${studentDetail?.lead?.lastName}`}
+                  <span className='breadcrumb'>Dashboard / Project Management</span> / Preview
                 </Typography>
               </Box>
             </Typography>
+            <Typography className='page-header'>
+              Student ID: {studentDetail?.lead?.studentCode}
+              <Chip
+                size='small'
+                label={
+                  !!corporateConstant[studentDetail?.status]
+                    ? corporateConstant[studentDetail?.status]
+                    : studentApplicationAllStatus[studentDetail?.status]
+                      ? studentApplicationAllStatus[studentDetail?.status]
+                      : studentDetail?.status
+                }
+                color={applicationStatusColor[studentDetail?.status]}
+                sx={{ textTransform: 'capitalize', ml: 1 }}
+              />
+            </Typography>
           </Grid>
         </Grid>
+
+        <Accordion
+          expanded={projectInfoExpand}
+          sx={{
+            backgroundColor: theme => theme.palette.primary.dark,
+            borderRadius: 1,
+            '& .MuiAccordionSummary-content': {
+              alignItems: 'center'
+            },
+            mt: 4.5,
+            mb: 0
+          }}
+        >
+          <AccordionSummary
+            onClick={() => {
+              setProjectInfoExpand(!projectInfoExpand)
+            }}
+            expandIcon={
+              <h1>
+                <GridExpandMoreIcon sx={{ color: (theme: Theme) => theme.palette.common.white }} />
+              </h1>
+            }
+          >
+            <ChartBoxOutline
+              fontSize='large'
+              color='primary'
+              sx={{ color: (theme: Theme) => theme.palette.common.white, mr: 2 }}
+            />
+            <Typography variant='h5' sx={{ color: theme => theme.palette.common.white }}>
+              Project Details
+            </Typography>
+          </AccordionSummary>
+          <AccordionDetails sx={{ color: '#ffffff' }}>
+            <Grid container rowSpacing={10}>
+              <Grid item xs={4}>
+                <label>Project Name</label>
+                <Typography sx={{ color: '#ffffff' }}>{studentDetail?.project?.name}</Typography>
+              </Grid>
+              <Grid item xs={4}>
+                <label>Project Code</label>
+                <Typography sx={{ color: '#ffffff' }}>{studentDetail?.project?.code || '-'}</Typography>
+              </Grid>
+              <Grid item xs={4}>
+                <label>Qualification</label>
+                <Typography sx={{ color: '#ffffff' }}>
+                  {getName(programList, studentDetail?.project?.program)}
+                </Typography>
+              </Grid>
+              <Grid item xs={4}>
+                <label>Project Manager</label>
+                <Typography sx={{ color: '#ffffff' }}>
+                  {getFullName(projectManagerList, studentDetail?.project?.projectManager)}
+                </Typography>
+              </Grid>
+              <Grid item xs={4}>
+                <label>Account Manager</label>
+                <Typography sx={{ color: '#ffffff' }}>
+                  {getFullName(accountManagerList, studentDetail?.project.accountManager)}
+                </Typography>
+              </Grid>
+            </Grid>
+          </AccordionDetails>
+        </Accordion>
+
         <Card sx={{ mt: 4.5, mb: 0 }}>
           <Accordion expanded={studentInfoExpand}>
             <AccordionSummary

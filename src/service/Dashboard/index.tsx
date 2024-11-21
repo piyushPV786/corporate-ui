@@ -769,7 +769,9 @@ export default class Dashboard {
 
       return response
     } catch (err: any) {
-      console.log('Error fetching Client Contact ========>', err?.message)
+      console.log('Error fetching Client Contact ========>', err)
+
+      return err
     }
   }
 
@@ -780,7 +782,9 @@ export default class Dashboard {
 
       return response
     } catch (err: any) {
-      console.log('Error fetching edit Client Contact details ========>', err?.message)
+      console.log('Error fetching edit Client Contact details ========>', err)
+
+      return err
     }
   }
   async deleteClientContact(id?: number) {
@@ -1422,5 +1426,15 @@ export default class Dashboard {
       nProgress.done()
     }
     nProgress.done()
+  }
+  async corporateStudentChangeStatus(params: any) {
+    const endUrlName = `${this.baseUrl + apiEndPoints.corporateStudentChangeStatus}`
+    try {
+      const response = await this.apiServer.patch(endUrlName, { ...params })
+
+      return response
+    } catch (err: any) {
+      console.log('Error updating status ========>', err?.message)
+    }
   }
 }

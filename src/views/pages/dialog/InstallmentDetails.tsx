@@ -27,6 +27,7 @@ import { PencilOutline } from 'mdi-material-ui'
 import { InvoiceEditInstallmentType, ICurrencyList } from 'src/types/apps/invoiceTypes'
 import { formatDate } from 'src/utils'
 import RequiredLabel from 'src/components/RequiredLabel'
+import { addInstallmentMessage } from 'src/context/common'
 
 const Transition = forwardRef(function Transition(
   props: FadeProps & { children?: ReactElement<any, any> },
@@ -45,8 +46,13 @@ interface IInstallmentDialogProps {
   currencyList: ICurrencyList[]
 }
 
+const regex = /^[a-zA-Z_].*$/
+
 const schema = yup.object().shape({
-  name: yup.string().required(userInformationStatus.InstallmentNameRequired),
+  name: yup
+    .string()
+    .required(userInformationStatus.InstallmentNameRequired)
+    .matches(regex, addInstallmentMessage.installmentNameError),
   currency: yup.string().required(userInformationStatus.CurrencyRequired),
   dueAmount: yup
     .number()
@@ -206,7 +212,7 @@ const InstallmentDetail = ({
               </Grid>
               <Grid item sm={6} xs={12}>
                 <TextField
-                  inputProps={{ min: 0 }}
+                  inputProps={{ min: 0, max: 1000000 }}
                   {...register('dueAmount')}
                   fullWidth
                   type='number'

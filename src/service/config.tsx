@@ -22,6 +22,7 @@ export const apiEndPoints = {
   allIntake: 'intake/all',
   addressList: 'common/address-type',
   qualification: 'common/qualification',
+  interestedQualification: 'programs/all',
   studyMode: 'common/study-mode',
   socialMedia: 'common/social-media',
   agent: 'common/agent',
@@ -176,7 +177,9 @@ export const apiEndPoints = {
   corporateManager: 'corporate-managers',
   corporateProjectManagerList: 'corporate-managers/all/manager/CE_Project_Manager',
   corporateAccountManagerList: 'corporate-managers/all/manager/CE_Account_Manager',
-  paymentTypes: 'project/paymentTypes/all'
+  paymentTypes: 'project/paymentTypes/all',
+  salesAgentList: 'user/role/Sales',
+  corporateStudentChangeStatus: 'corporate-student/change-status'
 }
 
 export const allowedDocsForCreditVetting = ['SMARTID', 'PASSPORT']

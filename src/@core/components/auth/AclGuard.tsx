@@ -48,7 +48,7 @@ const AclGuard = (props: AclGuardProps) => {
   const routePath = router.route.split('/')[1]
 
   auth.user &&
-    auth.user.roles.map(item =>
+    auth.user.roles?.map(item =>
       item.roleFeaturePermission.map(data => {
         if (data.feature.code === UrlToModule[routePath]) {
           permission = ModuleFeaturePermission(data.feature.code, [PermissionsCodes.view, PermissionsCodes.full])

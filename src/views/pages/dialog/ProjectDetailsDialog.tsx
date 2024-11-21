@@ -188,7 +188,7 @@ const ProjectDetailsDialog = ({
       fullWidth={true}
       maxWidth={'md'}
     >
-      <DialogTitle textAlign={'center'}>Manage Project Details</DialogTitle>
+      <DialogTitle textAlign={'center'}>Add or Edit Project Details</DialogTitle>
       <form onSubmit={handleSubmit(onSubmit)}>
         <DialogContent>
           <Grid container spacing={5}>
@@ -197,7 +197,13 @@ const ProjectDetailsDialog = ({
                 <Controller
                   name='projectName'
                   control={control}
-                  rules={{ required: true }}
+                  rules={{
+                    required: true,
+                    pattern: {
+                      value: /^[_a-zA-Z].*$/,
+                      message: 'Name must start with an underscore or an alphabet'
+                    }
+                  }}
                   render={({ field }) => (
                     <TextField
                       {...field}
@@ -210,7 +216,7 @@ const ProjectDetailsDialog = ({
                 />
                 {errors.projectName && (
                   <FormHelperText sx={{ color: 'error.main' }} id='projectName'>
-                    This field is required
+                    {errors.projectName.message || 'This field is required'}
                   </FormHelperText>
                 )}
               </FormControl>

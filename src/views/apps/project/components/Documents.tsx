@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 
 // ** Material Ui Imports
 import { Card, CircularProgress, Grid, IconButton, Tooltip, Typography } from '@mui/material'
-import { DataGrid, GridRenderCellParams} from '@mui/x-data-grid'
+import { DataGrid, GridRenderCellParams } from '@mui/x-data-grid'
 import { DeleteCircleOutline, EyeCircleOutline } from 'mdi-material-ui'
 
 // ** Custom Components and services
@@ -25,29 +25,28 @@ interface IIndex {
   }
 }
 
-
 const defaultColumns = [
   {
     flex: 0.5,
     field: 'id',
     headerName: '#',
-    renderCell: ( index : IIndex) => (
-      <Typography>{index.api.getRowIndex(index.row.id) + 1}</Typography>
-    )
+    renderCell: (index: IIndex) => <Typography>{index.api.getRowIndex(index.row.id) + 1}</Typography>
   },
   {
     flex: 3,
     field: 'name',
     headerName: 'File Name',
-    renderCell : ({row} : GridRenderCellParams) =>(
+    renderCell: ({ row }: GridRenderCellParams) => (
       <Typography
-      sx={{
-        p:0,
-        whiteSpace: 'normal', // Allow text to wrap
-        wordWrap: 'break-word', // Break long words
-        overflow: 'visible',   // Ensure visibility
-      }}
-      >{row.name}</Typography>
+        sx={{
+          p: 0,
+          whiteSpace: 'normal', // Allow text to wrap
+          wordWrap: 'break-word', // Break long words
+          overflow: 'visible' // Ensure visibility
+        }}
+      >
+        {row.name}
+      </Typography>
     )
   }
 ]
@@ -66,8 +65,8 @@ const Documents = ({ projectCode }: { projectCode: string }) => {
     const response = await StudentService.getProjectDocuments(projectCode)
     if (response) {
       setDocumentList(response.data)
-      console.log(response.data);
-      
+      console.log(response.data)
+
       setIsLoading(prev => ({ ...prev, listLoading: false }))
       response?.data?.map((item: IDocumentListResponseTypes) =>
         setViewFileLoader(prev => ({ ...prev, [item.code]: false }))
@@ -78,7 +77,7 @@ const Documents = ({ projectCode }: { projectCode: string }) => {
     const response = await CommonService.getProjectDocumentTypeList()
 
     // console.log(response.data);
-    
+
     if (response) {
       setDocumentTypeList(response.data)
     }
@@ -205,8 +204,7 @@ const Documents = ({ projectCode }: { projectCode: string }) => {
       </Grid>
       <Grid container my={5} rowSpacing={10}>
         {documentList && (
-          <DataGrid 
-          loading={isLoading.listLoading} autoHeight rows={documentList} columns={columns} hideFooter />
+          <DataGrid loading={isLoading.listLoading} autoHeight rows={documentList} columns={columns} hideFooter />
         )}
       </Grid>
     </Card>

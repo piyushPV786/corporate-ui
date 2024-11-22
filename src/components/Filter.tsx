@@ -98,7 +98,9 @@ const Filter = ({
   })
 
   useEffect(() => {
-    setFilterCountry(watch('country'))
+    if (setFilterCountry) {
+      setFilterCountry(watch('country'))
+    }
   }, [watch('country')])
 
   const corporateFilterFields = [

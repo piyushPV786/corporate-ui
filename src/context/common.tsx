@@ -405,7 +405,7 @@ export enum userInformationStatus {
   PaymentTypeRequired = 'Payment Type is required',
   InstallmentNameRequired = 'InstallmentName is required',
   CurrencyRequired = 'Currency is required',
-  DueAmountRequired = 'DueAmount is required',
+  DueAmountRequired = 'Due Amount is required',
   DueDateRequired = 'Due Date is required',
   DateRequired = 'Date is required',
   AccommodationRequired = 'Accommodation  is required',

@@ -142,6 +142,8 @@ const CostContractDetail = ({
                     validate: value => {
                       if (value <= 0) {
                         return 'Full cost must be greater than 0'
+                      } else if (value > 1000000) {
+                        return 'Full cost must not exceed 1000000'
                       }
                     }
                   })}
@@ -150,7 +152,11 @@ const CostContractDetail = ({
                   defaultValue={data?.fullCost}
                   error={!!errors?.fullCost}
                   onChange={e => {
-                    setValue('fullCost', e.target.value)
+                    const value = parseFloat(e.target.value)
+                    setValue('fullCost', value)
+                    if (value > 0 && value <= 1000000) {
+                      clearErrors('fullCost')
+                    }
                   }}
                   helperText={errors.fullCost && (errors.fullCost?.message as string | undefined)}
                 />
@@ -165,6 +171,8 @@ const CostContractDetail = ({
                     validate: value => {
                       if (value <= 0) {
                         return 'Contract cost must be greater than 0'
+                      } else if (value > 1000000) {
+                        return 'Contract cost must not exceed 1000000'
                       }
                     }
                   })}
@@ -173,7 +181,11 @@ const CostContractDetail = ({
                   defaultValue={data?.contractCost}
                   error={!!errors?.contractCost}
                   onChange={e => {
-                    setValue('contractCost', e.target.value)
+                    const value = parseFloat(e.target.value)
+                    setValue('contractCost', value)
+                    if (value > 0 && value <= 1000000) {
+                      clearErrors('contractCost')
+                    }
                   }}
                   helperText={errors.contractCost && (errors.contractCost?.message as string | undefined)}
                 />

@@ -55,6 +55,11 @@ export const getExemptCourseName = (list: Array<IAcademicApi> = [], code: string
 export const getStateName = (list: Array<IAddressStateTypes> = [], code: string) =>
   list?.length > 0 ? (list?.find(state => state.isoCode === code)?.name ?? code) : code
 
+export const getStateNameWithCountryCode = (list: Array<IAddressStateTypes> = [], code: string, countryCode: string) =>
+  list?.length > 0
+    ? (list?.find(state => state.isoCode === code && state.countryCode === countryCode)?.name ?? code)
+    : code
+
 export const getSymbol = (list: Array<commonListTypes>, code: string) => {
   if (list?.length > 0) {
     return list?.find(item => item.code === code)?.symbol ?? code
@@ -211,7 +216,16 @@ export const DDMMYYYDateFormat = (date: Date) => {
 }
 
 export const formatDate = (date: Date | string, dateFormat = 'dd-MM-yyyy'): string => {
+  if (!date) {
+    return 'Invalid Date'
+  }
+
   const parsedDate = new Date(date)
+
+  // Check if the parsed date is invalid
+  if (isNaN(parsedDate.getTime())) {
+    return 'Invalid Date'
+  }
 
   return format(parsedDate, dateFormat)
 }

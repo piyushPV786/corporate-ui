@@ -8,7 +8,7 @@ import Tooltip from '@mui/material/Tooltip'
 import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Typography } from '@mui/material'
 import FileUploadComponent from './FileUpload'
 import { FileDownloadOutline, PencilOutline, SchoolOutline } from 'mdi-material-ui'
-import { DashboardService } from 'src/service'
+import { CommonService, DashboardService } from 'src/service'
 import { status, Download, intakeStatue, studentApplicationAllStatus, applicationStatusColor } from 'src/context/common'
 import { errorToast, successToast } from 'src/components/Toast'
 import { IStudent } from '../Preview'
@@ -17,12 +17,14 @@ import ExcelJS from 'exceljs'
 import Link from 'next/link'
 import { projectStudentType } from 'src/types/apps/invoiceTypes'
 import { DataParams } from 'src/service/Dashboard'
-import { formatDate, removeDuplicates, serialNumber } from 'src/utils'
+import { formatDate, getName, getStateNameWithCountryCode, removeDuplicates, serialNumber } from 'src/utils'
 import { IDynamicObject } from 'src/types/apps/corporatTypes'
 import { TypographyEllipsis } from 'src/styles/style'
 import { ModuleFeaturePermission } from 'src/components/common'
 import { FeatureCodes, moduleKeys, PermissionsCodes } from 'src/components/common/featureData'
 import BulkIntake from './BulkIntake'
+import { commonListTypes } from 'src/types/apps/dataTypes'
+import { IAddressStateTypes } from 'src/types/apps/admittedStudent'
 
 interface IStudentProps {
   projectCode: string
@@ -122,6 +124,14 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
   const [uploadedFile, setUploadedFile] = useState<CustomFileType | null>()
   const [missingData, setMissingData] = useState<IMissingDataTypes | null>()
   const [selectedRow, setSelectedRow] = useState<GridSelectionModel>([])
+  const [gender, setGender] = useState<Array<commonListTypes>>([])
+  const [nationality, setNationality] = useState<Array<commonListTypes>>([])
+  const [race, setRace] = useState<Array<commonListTypes>>([])
+  const [language, setLanguage] = useState<Array<commonListTypes>>([])
+  const [identificationDocumentType, setIdentificationDocumentType] = useState<Array<commonListTypes>>([])
+  const [country, setCountry] = useState<Array<commonListTypes>>([])
+  const [states, setStates] = useState<Array<IAddressStateTypes>>([])
+
   const fullPermission = ModuleFeaturePermission(
     FeatureCodes.EMS.projectManagement,
     PermissionsCodes.full,
@@ -135,6 +145,55 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
     }
     setIsLoading(false)
   }
+  const getGenderList = async () => {
+    const response = await CommonService?.getGenderList()
+    if (response?.data?.data?.length > 0) {
+      setGender(response?.data?.data)
+    }
+  }
+
+  const getNationalityList = async () => {
+    const nationalResponse = await CommonService?.getNationalityList()
+    if (nationalResponse?.data?.data?.length > 0) {
+      setNationality(nationalResponse?.data?.data)
+    }
+  }
+
+  const getRaceList = async () => {
+    const raceResponse = await CommonService?.getRace()
+    if (raceResponse?.data?.data?.length > 0) {
+      setRace(raceResponse?.data?.data)
+    }
+  }
+
+  const getLanguageList = async () => {
+    const languageResponse = await CommonService?.getLanguage()
+    if (languageResponse?.data?.data?.length > 0) {
+      setLanguage(languageResponse?.data?.data)
+    }
+  }
+
+  const getIdentificationTypeList = async () => {
+    const raceResponse = await CommonService.identificationType({ projectIdentificationType: true })
+    if (raceResponse?.data?.data?.length > 0) {
+      setIdentificationDocumentType(raceResponse?.data?.data)
+    }
+  }
+
+  const getCountryList = async () => {
+    const response = await CommonService.getCountryLists()
+    if (response?.status === status.successCode && response?.data?.data?.length) {
+      setCountry(response.data.data)
+    }
+  }
+
+  const getStateList = async () => {
+    const response = await CommonService.getStatesByCountry()
+    if (response?.statusCode === status.successCode && response?.data?.length) {
+      setStates(response.data)
+    }
+  }
+
   const downloadStudent = async (projectCode: string) => {
     setIsLoading(true)
 
@@ -161,18 +220,25 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
             'Mobile Number': lead.mobileNumber || '',
             Regno: lead.studentCode || '',
             'Application Code': student.applicationCode || '',
-            Gender: lead.gender || '',
+            Gender: lead.gender ? getName(gender, lead.gender) : '',
             'Date Of Birth': lead.dateOfBirth ? formatDate(lead.dateOfBirth) : '',
-            'Home Language': lead.language || '',
-            Race: lead.race || '',
-            Nationality: lead.nationality || '',
-            'Identification Document Type': lead.identificationDocumentType || '',
+            'Home Language': lead.language ? getName(language, lead.language) : '',
+            Race: lead.race ? getName(race, lead.race) : '',
+            Nationality: lead.nationality ? getName(nationality, lead.nationality) : '',
+            'Identification Document Type': lead.identificationDocumentType
+              ? getName(identificationDocumentType, lead.identificationDocumentType)
+              : '',
             'Identification Number': lead.identificationNumber || '',
-            country: lead.country || '',
-            city: lead.city || '',
+            country: lead.address?.[0]?.country ? getName(country, lead.address?.[0]?.country) : '',
+            state:
+              lead.address?.[0]?.country && lead.address?.[0]?.state
+                ? getStateNameWithCountryCode(states, lead.address?.[0]?.state, lead.address?.[0]?.country)
+                : '',
+            city: lead.address?.[0]?.city || '',
+            'Zip Code': lead.address?.[0]?.zipcode || '',
             'Highest Qualification': lead.highestQualification || '',
             'Enrolment Date': student?.enrolment?.enrolmentDate ? formatDate(student.enrolment.enrolmentDate) : '',
-            Status: student.status || ''
+            Status: student?.status ? studentApplicationAllStatus[student.status] || student.status : ''
           }
         })
 
@@ -574,6 +640,17 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectCode, pageNumber, pageSize])
+
+  useEffect(() => {
+    getGenderList()
+    getNationalityList()
+    getRaceList()
+    getLanguageList()
+    getIdentificationTypeList()
+    getCountryList()
+    getStateList()
+  }, [])
+
   useEffect(() => {
     tableData()
 

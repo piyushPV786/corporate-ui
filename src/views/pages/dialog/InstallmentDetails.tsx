@@ -56,7 +56,7 @@ const schema = yup.object().shape({
   currency: yup.string().required(userInformationStatus.CurrencyRequired),
   dueAmount: yup
     .number()
-    .positive()
+    .positive(userInformationStatus.DueAmountPositiveError)
     .required(userInformationStatus.DueAmountRequired)
     .typeError(userInformationStatus.DueAmountRequiredError),
   dueDate: yup
@@ -116,6 +116,11 @@ const InstallmentDetail = ({
     setShow(false)
 
     type === 'add' ? handleClickSuccess && handleClickSuccess() : handleEditClick && handleEditClick()
+    reset()
+  }
+
+  const handleCancel = () => {
+    setShow(false)
     reset()
   }
 
@@ -251,7 +256,7 @@ const InstallmentDetail = ({
             </Grid>
           </DialogContent>
           <DialogActions sx={{ pb: { xs: 8, sm: 12.5 }, justifyContent: 'center' }}>
-            <Button variant='outlined' color='secondary' onClick={() => setShow(false)}>
+            <Button variant='outlined' color='secondary' onClick={handleCancel}>
               cancel
             </Button>
             <Button variant='contained' sx={{ mr: 2 }} type='submit'>

@@ -425,9 +425,9 @@ export default class Common {
     nProgress.done()
   }
 
-  async getStatesByCountry(countryCode: string) {
+  async getStatesByCountry(countryCode?: string) {
     nProgress.start()
-    const endUrlName = `${this.baseUrl + apiEndPoints.stateByCountry}/${countryCode}`
+    const endUrlName = `${this.baseUrl + apiEndPoints.stateByCountry}/${countryCode ? countryCode : ''}`
 
     try {
       const response = await this.apiServer.get(endUrlName)

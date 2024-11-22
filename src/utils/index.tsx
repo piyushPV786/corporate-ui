@@ -211,7 +211,16 @@ export const DDMMYYYDateFormat = (date: Date) => {
 }
 
 export const formatDate = (date: Date | string, dateFormat = 'dd-MM-yyyy'): string => {
+  if (!date) {
+    return 'Invalid Date'
+  }
+
   const parsedDate = new Date(date)
+
+  // Check if the parsed date is invalid
+  if (isNaN(parsedDate.getTime())) {
+    return 'Invalid Date'
+  }
 
   return format(parsedDate, dateFormat)
 }

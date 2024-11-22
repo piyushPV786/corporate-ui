@@ -19,7 +19,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { schema } from './schema'
 import { IDynamicObject } from 'src/types/apps/corporatTypes'
-import { formatDate, formatDateYMD } from 'src/utils'
+import { formatDateYMD } from 'src/utils'
 
 const intialState = {
   firstName: '',
@@ -151,7 +151,7 @@ const AddStudentPreview = ({ projectCode }: IstudentPreview) => {
       email: data.email,
       mobileNumber: data.mobileNumber.slice(data.mobileNumberCountryCode.length),
       mobileCountryCode: data.mobileNumberCountryCode,
-      dateOfBirth: data.dateOfBirth ? formatDate(data.dateOfBirth) : '',
+      dateOfBirth: data.dateOfBirth ? formatDateYMD(data.dateOfBirth) : '',
       nationalityStatus: data.nationalityStatus,
       permenantResident: data.permanentResident,
       identificationNumber: data.identificationNumber,

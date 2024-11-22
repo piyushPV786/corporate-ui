@@ -362,7 +362,7 @@ export const PersonalInformationDetail = ({ errors, setValue, watch, control }: 
                             )}
                           />
                         </Grid>
-                        {watch('identificationDocumentType') === 'PASSPORT' && (
+                        {watch('identificationDocumentType') === 'PASPORT' && (
                           <Grid item sm={6}>
                             <Controller
                               name='passportExpiryDate'

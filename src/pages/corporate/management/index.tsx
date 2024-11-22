@@ -257,73 +257,74 @@ const StudentList = () => {
     return response?.message
   }
 
-  const statusList = [{
-    name: ProjectStatusTypes.Active,
-    code: 'true'
-  },
-  {
-    name: ProjectStatusTypes.Inactive,
-    code: 'false'
-  },
-]
+  const statusList = [
+    {
+      name: ProjectStatusTypes.Active,
+      code: 'true'
+    },
+    {
+      name: ProjectStatusTypes.Inactive,
+      code: 'false'
+    }
+  ]
 
-const filterFields = [
-  {
-    id: 0,
-    name: 'name',
-    label: 'Company Name'
-  },
-  {
-    id: 1,
-    name: 'code',
-    label: 'Code'
-  },
-  {
-    id: 2,
-    name: 'companyType',
-    label: 'Company Type',
-    list: companyTypes
-  },
-  {
-    id: 3,
-    name: 'country',
-    label: 'Country',
-    list: country as any
-  },
-  {
-    id: 4,
-    name: 'state',
-    label: 'State / Province',
-    list: states as any
-  },
-  {
-    id: 5,
-    name: 'pincode',
-    label: 'Pincode'
-  },
-  {
-    id: 6,
-    name: 'isActive',
-    label: 'Status',
-    list: statusList
-  },
-]
+  const filterFields = [
+    {
+      id: 0,
+      name: 'name',
+      label: 'Company Name'
+    },
+    {
+      id: 1,
+      name: 'code',
+      label: 'Code'
+    },
+    {
+      id: 2,
+      name: 'companyType',
+      label: 'Company Type',
+      list: companyTypes
+    },
+    {
+      id: 3,
+      name: 'country',
+      label: 'Country',
+      list: country as any
+    },
+    {
+      id: 4,
+      name: 'state',
+      label: 'State / Province',
+      list: states as any
+    },
+    {
+      id: 5,
+      name: 'pincode',
+      label: 'Pincode'
+    },
+    {
+      id: 6,
+      name: 'isActive',
+      label: 'Status',
+      list: statusList
+    }
+  ]
 
-const defaultFilterFields = {
-  name: '',
-  code: '',
-  companyType: '',
-  country: '',
-  state: '',
-  pincode: '',
-  projectCount: '',
-  studentCount: '',
-  status: ''
-}
+  const defaultFilterFields = {
+    name: '',
+    code: '',
+    companyType: '',
+    country: '',
+    state: '',
+    pincode: '',
+    projectCount: '',
+    studentCount: '',
+    status: ''
+  }
 
-const handleSort = (val: IDynamicObject) => {
-  setFilterData(val)
-}
+  const handleSort = (val: IDynamicObject) => {
+    setFilterData(val)
+  }
   const formValue = watch()
   const router = useRouter()
   const columns = [
@@ -673,20 +674,20 @@ const handleSort = (val: IDynamicObject) => {
           />
           <Grid container display='flex' justifyContent='space-between'>
             <Grid item xs={6}>
-                <TableHeader value={value} selectedRows={selectedRows} handleFilter={handleFilter} />
+              <TableHeader value={value} selectedRows={selectedRows} handleFilter={handleFilter} />
             </Grid>
             <Grid item xs={6} display='flex' justifyContent='flex-end'>
-                <Box sx={{ p: 5 }}>
-                  <Filter
-                    studentData={response?.data}
-                    handleSort={handleSort}
-                    fields={filterFields}
-                    filterDefaultValues={defaultFilterFields}
-                    setSearchValue={setQuery}
-                    setFilterCountry={setFilterCountry}
-                  />
-                </Box>
-              </Grid>
+              <Box sx={{ p: 5 }}>
+                <Filter
+                  studentData={response?.data}
+                  handleSort={handleSort}
+                  fields={filterFields}
+                  filterDefaultValues={defaultFilterFields}
+                  setSearchValue={setQuery}
+                  setFilterCountry={setFilterCountry}
+                />
+              </Box>
+            </Grid>
           </Grid>
           <DataGrid
             loading={loading}

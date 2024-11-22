@@ -309,12 +309,12 @@ export default class Dashboard {
     }`
     if (params?.isActive) endUrlName = `${endUrlName}&isActive=${params?.isActive}`
     if (params?.q) endUrlName = `${endUrlName}&search=${params?.q}`
-    if(params?.companyType) endUrlName = `${endUrlName}&companyType=${params?.companyType}`
-    if(params?.code) endUrlName = `${endUrlName}&code=${params?.code}`
-    if(params?.name) endUrlName = `${endUrlName}&name=${params?.name}`
-    if(params?.country) endUrlName = `${endUrlName}&country=${params?.country}`
-    if(params?.state) endUrlName = `${endUrlName}&state=${params?.state}`
-    if(params?.pincode) endUrlName = `${endUrlName}&pincode=${params?.pincode}`
+    if (params?.companyType) endUrlName = `${endUrlName}&companyType=${params?.companyType}`
+    if (params?.code) endUrlName = `${endUrlName}&code=${params?.code}`
+    if (params?.name) endUrlName = `${endUrlName}&name=${params?.name}`
+    if (params?.country) endUrlName = `${endUrlName}&country=${params?.country}`
+    if (params?.state) endUrlName = `${endUrlName}&state=${params?.state}`
+    if (params?.pincode) endUrlName = `${endUrlName}&pincode=${params?.pincode}`
     try {
       const response = await this.apiServer.get<any>(endUrlName)
 

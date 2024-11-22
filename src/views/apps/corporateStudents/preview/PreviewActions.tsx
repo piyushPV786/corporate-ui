@@ -13,18 +13,9 @@ import ArrowLeft from 'mdi-material-ui/ArrowLeft'
 
 import { Fragment } from 'react'
 
-// import { IDynamicObject } from 'src/types/apps/corporatTypes'
 import { CommonActivityTab } from 'src/views/dashboards/comments/CommentComponenet'
 import EnrollToRetail from './EnrollToRetail'
 import { applicationStatus, cancelledApplicationStatus } from 'src/context/common'
-
-// interface IPropsTypes {
-//   rejectStudent: (comments: string) => void
-//   approveStudent: () => void
-//   data: IDynamicObject
-//   disableApprove: boolean
-//   disableReject: boolean
-// }
 
 const PreviewActions = ({ data, getCorporateStudentsDetailById }: any) => {
   return (

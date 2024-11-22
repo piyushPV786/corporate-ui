@@ -17,13 +17,14 @@ import ExcelJS from 'exceljs'
 import Link from 'next/link'
 import { projectStudentType } from 'src/types/apps/invoiceTypes'
 import { DataParams } from 'src/service/Dashboard'
-import { formatDate, getName, removeDuplicates, serialNumber } from 'src/utils'
+import { formatDate, getName, getStateNameWithCountryCode, removeDuplicates, serialNumber } from 'src/utils'
 import { IDynamicObject } from 'src/types/apps/corporatTypes'
 import { TypographyEllipsis } from 'src/styles/style'
 import { ModuleFeaturePermission } from 'src/components/common'
 import { FeatureCodes, moduleKeys, PermissionsCodes } from 'src/components/common/featureData'
 import BulkIntake from './BulkIntake'
 import { commonListTypes } from 'src/types/apps/dataTypes'
+import { IAddressStateTypes } from 'src/types/apps/admittedStudent'
 
 interface IStudentProps {
   projectCode: string
@@ -128,6 +129,8 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
   const [race, setRace] = useState<Array<commonListTypes>>([])
   const [language, setLanguage] = useState<Array<commonListTypes>>([])
   const [identificationDocumentType, setIdentificationDocumentType] = useState<Array<commonListTypes>>([])
+  const [country, setCountry] = useState<Array<commonListTypes>>([])
+  const [states, setStates] = useState<Array<IAddressStateTypes>>([])
 
   const fullPermission = ModuleFeaturePermission(
     FeatureCodes.EMS.projectManagement,
@@ -176,6 +179,21 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
       setIdentificationDocumentType(raceResponse?.data?.data)
     }
   }
+
+  const getCountryList = async () => {
+    const response = await CommonService.getCountryLists()
+    if (response?.status === status.successCode && response?.data?.data?.length) {
+      setCountry(response.data.data)
+    }
+  }
+
+  const getStateList = async () => {
+    const response = await CommonService.getStatesByCountry()
+    if (response?.statusCode === status.successCode && response?.data?.length) {
+      setStates(response.data)
+    }
+  }
+
   const downloadStudent = async (projectCode: string) => {
     setIsLoading(true)
 
@@ -211,8 +229,11 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
               ? getName(identificationDocumentType, lead.identificationDocumentType)
               : '',
             'Identification Number': lead.identificationNumber || '',
-            country: lead.address?.[0]?.country ? lead.address?.[0]?.country : '',
-            state: lead.address?.[0]?.state || '',
+            country: lead.address?.[0]?.country ? getName(country, lead.address?.[0]?.country) : '',
+            state:
+              lead.address?.[0]?.country && lead.address?.[0]?.state
+                ? getStateNameWithCountryCode(states, lead.address?.[0]?.state, lead.address?.[0]?.country)
+                : '',
             city: lead.address?.[0]?.city || '',
             'Zip Code': lead.address?.[0]?.zipcode || '',
             'Highest Qualification': lead.highestQualification || '',
@@ -626,6 +647,8 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
     getRaceList()
     getLanguageList()
     getIdentificationTypeList()
+    getCountryList()
+    getStateList()
   }, [])
 
   useEffect(() => {

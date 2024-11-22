@@ -192,6 +192,7 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
 
         const extractedStudentData = students.map((student: any) => {
           const lead = student.lead || {}
+
           return {
             'First Name': lead.firstName || '',
             'Middle Name': lead.middleName || '',

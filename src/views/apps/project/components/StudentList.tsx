@@ -624,7 +624,7 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
             onClick={uploadBulkDocument}
             disabled={!uploadedFile || uploadedFile?.error}
           >
-            APPLY TEMPLATE
+            UPLOAD FILE
           </Button>
         </DialogActions>
       </Dialog>

@@ -86,6 +86,12 @@ const CostContractDetail = ({
     createCostContract(payload)
     setShow(false)
     !!data ? handleEditSuccess() : handleClickSuccess()
+    reset()
+  }
+
+  const handleCancel = () => {
+    setShow(false)
+    reset()
   }
 
   function handleClick(value: string) {
@@ -268,7 +274,7 @@ const CostContractDetail = ({
             </Grid>
           </DialogContent>
           <DialogActions sx={{ pb: { xs: 8, sm: 12.5 }, justifyContent: 'center' }}>
-            <Button variant='outlined' color='secondary' onClick={() => setShow(false)}>
+            <Button variant='outlined' color='secondary' onClick={handleCancel}>
               cancel
             </Button>
             <Button variant='contained' sx={{ mr: 2 }} type='submit'>

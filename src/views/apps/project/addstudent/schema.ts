@@ -18,7 +18,7 @@ export const schema = yup.object().shape({
   nationality: yup.string().required(AddStudentMessages.nationalityRequired),
   identificationDocumentType: yup.string().required(AddStudentMessages.documentTypeRequired),
   passportExpiryDate: yup.string().when('identificationDocumentType', {
-    is: 'PASSPORT',
+    is: 'PASPORT',
     then: yup.string().required(AddStudentMessages.expiryDateRequired),
     otherwise: yup.string().notRequired()
   }),

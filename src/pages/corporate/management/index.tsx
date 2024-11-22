@@ -155,7 +155,22 @@ const schema = yup.object().shape({
     .matches(/^[\w@.-]*$/, `Special characters are not allowed in the Company Code`)
     .required('required'),
   email: yup.string().email('Please enter a valid email address').nullable().notRequired(),
-  phoneNumber: yup.string().min(6, 'Mobile number must be of 6 digit').required('required'),
+  mobileCountryCode: yup.string().notRequired(),
+  phoneNumber: yup.string().when('mobileCountryCode', {
+    is: (mobileCountryCode: string) => mobileCountryCode !== '',
+    then: yup
+      .string()
+      .test('phoneNumber-validation', 'Mobile number must be a minimum of 6 digits', (value: any, context: any) => {
+        const { mobileCountryCode } = context.parent
+
+        if (value && value.trim() === mobileCountryCode.trim()) {
+          return true
+        }
+
+        return value && value.trim().length >= 6
+      }),
+    otherwise: yup.string().notRequired()
+  }),
   companyType: yup.string().required('required'),
   country: yup.string().required('required'),
   state: yup.string().required('required'),
@@ -542,7 +557,8 @@ const StudentList = () => {
         : await checkDuplicateCorporateCode(data?.code, openEdit?.data?.id)
 
     if (duplicateName === undefined) {
-      const { name, code, companyType, email, phoneNumber, isSameAddress, isActive } = data
+      const { name, code, companyType, email, mobileCountryCode, phoneNumber, isSameAddress, isActive } = data
+
       let res: AxiosResponse | undefined
       const { address1 = '', address2 = '', country = '', state = '', pincode = '', ...postalAddress } = { ...data }
 
@@ -565,6 +581,10 @@ const StudentList = () => {
       const payload = { name, code, companyType, email, phoneNumber, isSameAddress, isActive, address }
 
       if (openEdit?.actionType === 'Add') {
+        const isNotValidPhoneNumber = phoneNumber === mobileCountryCode
+        if (isNotValidPhoneNumber) {
+          delete payload.phoneNumber
+        }
         res = await DashboardService?.addCorporate(payload)
       } else {
         res = await DashboardService?.updateCorporate(code, payload)
@@ -577,9 +597,7 @@ const StudentList = () => {
           status: ''
         })
         setOpenEdit(prevState => ({ ...prevState, show: false, data: null, actionType: 'Add' }))
-        successToast(
-          `${payload.name} ${openEdit?.actionType === 'Add' ? messages.corporateAdded : messages.corporateEdited}`
-        )
+        successToast(`${openEdit?.actionType === 'Add' ? messages.corporateAdded : messages.corporateEdited}`)
       } else {
         errorToast(messages.error)
         setError('code', { type: 'custom', message: response?.message })
@@ -590,23 +608,6 @@ const StudentList = () => {
 
   const countryCodeContact = (data: any, dialCode: string) => {
     data && setValue(`mobileCountryCode`, dialCode)
-  }
-
-  const checkDuplicateMobile = async (mobileNumber: string, mobileCountryCode: string) => {
-    const result = await DashboardService.reggieCheckDuplicateMobile(mobileNumber, mobileCountryCode)
-
-    if (result?.data?.existingRecord) {
-      setError('phoneNumber', {
-        type: 'manual',
-        message: 'Provided mobile number already exists'
-      })
-
-      return false
-    } else {
-      clearErrors('phoneNumber')
-
-      return true
-    }
   }
 
   const handlePhysicalAddress = (event: any) => {
@@ -815,7 +816,7 @@ const StudentList = () => {
                       >
                         <PhoneInput
                           {...field}
-                          countryCodeEditable={true}
+                          countryCodeEditable={false}
                           placeholder='Enter Contact Number'
                           specialLabel='Contact Number (Optional)'
                           value={watch('phoneNumber') || '+27'}
@@ -824,16 +825,6 @@ const StudentList = () => {
                             countryCodeContact(data, countryData?.dialCode)
                             data && setValue('phoneNumber', data)
                             clearErrors('phoneNumber')
-                          }}
-                          onBlur={e => {
-                            const mobileNumber = e.target.value.replaceAll(' ', '').replace('+', '').replace('-', '')
-                            const mobileCheck = mobileNumber.slice(watch('mobileCountryCode')?.length)
-                            if (mobileCheck.length >= 6) {
-                              const studentCode = watch('studentCode')
-                              if (!studentCode) {
-                                checkDuplicateMobile(mobileCheck, watch('mobileCountryCode'))
-                              }
-                            }
                           }}
                           inputStyle={{
                             borderRadius: '4px',

@@ -35,6 +35,7 @@ const maxDate = new Date(today)
 maxDate.setFullYear(today.getFullYear() - MIN_AGE)
 const minDate = new Date(today)
 minDate.setFullYear(today.getFullYear() - MAX_AGE)
+minDate.setMonth(0, 1)
 
 const currentDate = new Date()
 
@@ -362,7 +363,7 @@ export const PersonalInformationDetail = ({ errors, setValue, watch, control }: 
                             )}
                           />
                         </Grid>
-                        {watch('identificationDocumentType') === 'PASSPORT' && (
+                        {watch('identificationDocumentType') === 'PASPORT' && (
                           <Grid item sm={6}>
                             <Controller
                               name='passportExpiryDate'

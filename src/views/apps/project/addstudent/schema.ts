@@ -25,7 +25,7 @@ export const schema = yup.object().shape({
   identificationNumber: yup
     .string()
     .required(AddStudentMessages.identificationNumberRequired)
-    .test('identificationDocumentType', AddStudentMessages.passportLengthError, value => {
+    .test('identificationDocumentType', AddStudentMessages.identificationNumberLengthError, value => {
       const idLength = value?.length ?? 0
 
       return idLength >= 8 && idLength <= 13

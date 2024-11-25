@@ -423,6 +423,7 @@ const StudentList = () => {
       renderCell: ({ row }: any) => {
         const addressState = addressDetails(row?.corporateAddress, 'state')
         const addressCountry = addressDetails(row?.corporateAddress, 'country')
+
         return (
           <Box>
             {addressState && addressState !== '-'

@@ -14,7 +14,7 @@ import { IIntakeCommonLists, IdocumentDataType } from 'src/types/apps/invoiceTyp
 
 export const getName = (list: Array<commonListTypes | any> = [], code: string) => {
   if (list?.length > 0) {
-    return list.find(item => item.code === code)?.name
+    return list.find(item => item.code === code)?.name || code
   }
 
   return code

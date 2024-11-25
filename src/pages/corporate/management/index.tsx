@@ -43,7 +43,14 @@ import {
   Stack,
   Switch
 } from '@mui/material'
-import { addressDetails, getName, getStateList, minTwoDigits, serialNumber } from 'src/utils'
+import {
+  addressDetails,
+  getName,
+  getStateList,
+  getStateNameWithCountryCode,
+  minTwoDigits,
+  serialNumber
+} from 'src/utils'
 import { errorToast, successToast } from 'src/components/Toast'
 import { ThemeColor } from 'src/@core/layouts/types'
 import Chip from 'src/@core/components/mui/chip'
@@ -202,6 +209,7 @@ const StudentList = () => {
   const [country, setCountry] = useState<Array<commonListTypes>>([])
   const [states, setStates] = useState<IAddressStateTypes[] | []>([])
   const [postalStates, setPostalStates] = useState<IAddressStateTypes[] | []>([])
+  const [allStates, setAllStates] = useState<IAddressStateTypes[] | []>([])
   const [filterCountry, setFilterCountry] = useState<string>('')
   const [loadingForm, setLoadingForm] = useState<boolean>(false)
 
@@ -228,6 +236,13 @@ const StudentList = () => {
     const response = await CommonService.getCountryLists()
     if (response?.status === status.successCode && response?.data?.data?.length) {
       setCountry(response.data.data)
+    }
+  }
+
+  const getAllStateList = async () => {
+    const response = await CommonService.getStatesByCountry()
+    if (response?.statusCode === status.successCode && response?.data?.length) {
+      setAllStates(response.data)
     }
   }
 
@@ -406,7 +421,16 @@ const StudentList = () => {
       field: 'state',
       headerName: 'Province/ State',
       renderCell: ({ row }: any) => {
-        return <Box>{addressDetails(row?.corporateAddress, 'state')}</Box>
+        const addressState = addressDetails(row?.corporateAddress, 'state')
+        const addressCountry = addressDetails(row?.corporateAddress, 'country')
+
+        return (
+          <Box>
+            {addressState && addressState !== '-'
+              ? getStateNameWithCountryCode(allStates, addressState, addressCountry)
+              : '-'}{' '}
+          </Box>
+        )
       }
     },
     {
@@ -530,6 +554,7 @@ const StudentList = () => {
     register('isActive')
     getCompanyTypeList()
     getCountryLists()
+    getAllStateList()
   }, [])
   useEffect(() => {
     getCorporateList({
@@ -691,6 +716,8 @@ const StudentList = () => {
             conformationOpen={conformationOpen}
             handleCloseConfirmationPopup={handleCloseConfirmationPopup}
             selectedRows={selectedRows}
+            countryList={country}
+            statesList={allStates}
           />
           <Grid container display='flex' justifyContent='space-between'>
             <Grid item xs={6}>
@@ -946,7 +973,7 @@ const StudentList = () => {
                             options={states ?? []}
                             getOptionLabel={option => option?.name || ''}
                             value={
-                              states.length > 0 ? states?.find(item => (item as any)?.code === field?.value) : null
+                              states.length > 0 ? states.find((item: any) => item?.code === field?.value) || null : null
                             }
                             onChange={(event, data: any) => {
                               field.onChange(data?.code)

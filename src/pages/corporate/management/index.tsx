@@ -511,22 +511,22 @@ const StudentList = () => {
     const residential = data?.corporateAddress?.find(item => item.addressType === 'RESIDENTIAL') ?? defaultValues
     const postal = data?.corporateAddress?.find(item => item.addressType === 'POSTAL') ?? defaultValues
     const rowValues = {
-      email: data.email,
+      email: data.email ?? '',
       name: data.name,
       code: data.code,
       companyType: data.companyType,
-      phoneNumber: data.phoneNumber,
+      phoneNumber: data.phoneNumber || '',
       country: residential.country,
       state: residential.state,
-      city: residential.city,
+      city: residential.city ?? '',
       address1: residential.address1,
       pincode: residential.pincode,
-      address2: residential.address2,
+      address2: residential.address2 ?? '',
       physicalCountry: postal.country,
       physicalState: postal.state,
-      physicalCity: postal.city,
+      physicalCity: postal.city ?? '',
       physicalAddress1: postal.address1,
-      physicalAddress2: postal.address2,
+      physicalAddress2: postal.address2 ?? '',
       physicalPincode: postal.pincode,
       isActive: data.isActive,
       isSameAddress: data.isSameAddress
@@ -627,6 +627,9 @@ const StudentList = () => {
         }
         res = await DashboardService?.addCorporate(payload)
       } else {
+        if (!phoneNumber) {
+          delete payload.phoneNumber
+        }
         res = await DashboardService?.updateCorporate(code, payload)
       }
       if (res?.data?.statusCode === status?.successCodeOne || res?.data?.statusCode === status?.successCode) {
@@ -1100,7 +1103,7 @@ const StudentList = () => {
                             {...field}
                             options={country ?? []}
                             disabled={formValue?.isSameAddress}
-                            value={country?.find(item => (item as any)?.code === field?.value)}
+                            value={country?.find(item => (item as any)?.code === field?.value) || null}
                             getOptionLabel={(option: any) => option?.name || ''}
                             onChange={(event, data: any) => {
                               field.onChange(data?.code)

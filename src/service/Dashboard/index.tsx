@@ -611,7 +611,7 @@ export default class Dashboard {
 
       return response
     } catch (err: any) {
-      console.log('Error fetching venue ========>', err?.message)
+      return err
     }
   }
 

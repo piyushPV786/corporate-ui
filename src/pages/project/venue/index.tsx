@@ -17,12 +17,12 @@ import { IVenueType } from 'src/types/apps/invoiceTypes'
 
 // ** Third Party Styles Imports
 
-import { DashboardService } from 'src/service'
+import { AcademicService, DashboardService } from 'src/service'
 import { Typography } from '@mui/material'
-import { successToast } from 'src/components/Toast'
-import { status, venueMessages } from 'src/context/common'
+import { errorToast, successToast } from 'src/components/Toast'
+import { messages, status, venueMessages } from 'src/context/common'
 import VenueDetailsDialog from 'src/views/pages/dialog/VenueDetails'
-import { DateFormat } from 'src/utils'
+import { DateFormat, formatDateYMD, getName } from 'src/utils'
 
 interface CellType {
   row: IVenueType
@@ -61,6 +61,14 @@ const VenueDetails = ({ code }: propsType) => {
   const [pageNumber, setPageNumber] = useState<number>(1)
   const [response, setResponse] = useState<any>(initialState)
   const [loading, setLoading] = useState<boolean>(false)
+  const [facilitatorList, setFacilitatorList] = useState<any[]>([])
+
+  const getFacilitator = async () => {
+    const response = await AcademicService.getFacilitator()
+    if (response?.status === status?.successCode && response?.data?.data?.length) {
+      setFacilitatorList(response?.data?.data)
+    }
+  }
 
   const handleEdit = async (params: any, id: number) => {
     setLoading(true)
@@ -90,7 +98,7 @@ const VenueDetails = ({ code }: propsType) => {
       renderCell: (index: any) => index.api.getRowIndex(index.row.id) + 1
     },
     {
-      flex: 0.1,
+      flex: 0.2,
       field: 'name',
       minWidth: 200,
       headerName: 'Venue'
@@ -99,13 +107,14 @@ const VenueDetails = ({ code }: propsType) => {
       flex: 0.25,
       field: 'facilitator',
       minWidth: 200,
-      headerName: 'Facilitator'
+      headerName: 'Facilitator',
+      renderCell: ({ row }: CellType) => <Typography>{getName(facilitatorList, row?.facilitator)}</Typography>
     },
     {
-      flex: 0.1,
+      flex: 0.2,
       minWidth: 150,
       field: 'date',
-      headerName: 'Select Date',
+      headerName: 'Date',
       renderCell: ({ row }: CellType) => <Typography>{DateFormat(row?.date)}</Typography>
     },
     {
@@ -116,7 +125,7 @@ const VenueDetails = ({ code }: propsType) => {
       renderCell: ({ row }: CellType) => (
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Tooltip title='Edit'>
-            <VenueDetailsDialog title='Edit' data={row} handleEdit={handleEdit} />
+            <VenueDetailsDialog title='Edit' data={row} handleEdit={handleEdit} facilitatorList={facilitatorList} />
           </Tooltip>
         </Box>
       )
@@ -136,10 +145,9 @@ const VenueDetails = ({ code }: propsType) => {
     const payload = {
       ...params,
       projectCode: projectCode,
-      date: new Date(params.date)
+      date: formatDateYMD(params.date)
     }
     const response = await DashboardService?.createVenue(payload)
-
     if (response?.status === status.successCodeOne) {
       getVenueList({
         q: value,
@@ -148,6 +156,22 @@ const VenueDetails = ({ code }: propsType) => {
         projectCode: projectCode
       })
       successToast(venueMessages.add)
+    } else if (response?.data?.message) {
+      const errorMessage = response.data.message
+      const regex = /FACI\d{9}/
+      const match = errorMessage.match(regex)
+
+      if (match) {
+        const facilitatorCode = match[0]
+        const facilitatorName = getName(facilitatorList, facilitatorCode)
+        const replaceRegex = new RegExp(`\\(${facilitatorCode}\\)`, 'g')
+        const updatedErrorMessage = errorMessage.replace(replaceRegex, `(${facilitatorName})`)
+        errorToast(updatedErrorMessage)
+      } else {
+        errorToast(errorMessage)
+      }
+    } else {
+      errorToast(messages.defaultErrorMessage)
     }
     setLoading(false)
   }
@@ -160,6 +184,10 @@ const VenueDetails = ({ code }: propsType) => {
       projectCode: projectCode
     })
   }, [pageSize, pageNumber, value, projectCode])
+
+  useEffect(() => {
+    getFacilitator()
+  }, [])
 
   return (
     <Grid container sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -180,7 +208,7 @@ const VenueDetails = ({ code }: propsType) => {
             <Box sx={{ mb: 2 }}>
               <Typography variant='h5'>Venue Details</Typography>
             </Box>
-            <VenueDetailsDialog title='Add' createVenue={createVenue} />
+            <VenueDetailsDialog title='Add' createVenue={createVenue} facilitatorList={facilitatorList} />
           </Grid>
           <DataGrid
             loading={loading}

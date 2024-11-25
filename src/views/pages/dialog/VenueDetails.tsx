@@ -30,8 +30,6 @@ import {
 } from '@mui/material'
 import * as yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
-import { AcademicService } from 'src/service'
-import { status } from 'src/context/common'
 import RequiredLabel from 'src/components/RequiredLabel'
 
 const schema = yup.object().shape({
@@ -40,29 +38,15 @@ const schema = yup.object().shape({
   date: yup.string().nullable().required('Date is required')
 })
 
-const VenueDetailsDialog = ({ title, data, createVenue, handleEdit }: any) => {
+const VenueDetailsDialog = ({ title, data, createVenue, handleEdit, facilitatorList }: any) => {
   // ** State
   const [show, setShow] = useState<boolean>(false)
-  const [facilitatorList, setFacilitatorList] = useState<any[]>([])
-
-  const getFacilitator = async () => {
-    const response = await AcademicService.getFacilitator()
-    if (response?.status === status?.successCode && response?.data?.data?.length) {
-      setFacilitatorList(response?.data?.data)
-    }
-  }
 
   const handleAddVenueDetails = async () => {
-    if (facilitatorList.length === 0) {
-      await getFacilitator()
-    }
     setShow(true)
   }
 
   const handleEditClick = async () => {
-    if (facilitatorList.length === 0) {
-      await getFacilitator()
-    }
     setShow(true)
   }
 
@@ -158,10 +142,10 @@ const VenueDetailsDialog = ({ title, data, createVenue, handleEdit }: any) => {
                       style={{ width: '100%' }}
                       options={facilitatorList}
                       onChange={(_, value) => {
-                        value && setValue('facilitator', value.name)
+                        value && setValue('facilitator', value.code)
                         clearErrors('facilitator')
                       }}
-                      value={facilitatorList?.find((i: any) => i.name === watch('facilitator'))}
+                      value={facilitatorList?.find((i: any) => i.code === watch('facilitator'))}
                       getOptionLabel={option => option.name}
                       renderInput={params => (
                         <TextField

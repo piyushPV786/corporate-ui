@@ -115,7 +115,12 @@ const ContactDetailsList = ({ code }: propsType) => {
       headerName: 'Telephone',
       renderCell: ({ row }: CellType) => (
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography>{`+${row.telephoneCountryCode} ${row.telephoneNumber}`}</Typography>
+          {
+            row?.telephoneNumber?.length > 0 ? 
+            <Typography>{`+${row?.telephoneCountryCode} ${row?.telephoneNumber}`}</Typography>
+            : '-'
+          }
+          
         </Box>
       )
     },

@@ -15,19 +15,16 @@ interface IContactTypes {
   getStudentDetailById: any
 }
 
-type ValidContactNumberFieldNames = 'contactNumber' | 'whatsappNumber'
+type ValidContactNumberFieldNames = 'contactNumber'
 
 const EditContactDetails = ({ studentData, getStudentDetailById }: IContactTypes) => {
   const defaultValues = {
     email: studentData?.lead?.email,
     contactNumberCountryCode: studentData?.lead?.mobileCountryCode,
-    contactNumber: studentData?.lead?.mobileCountryCode + studentData?.lead?.mobileNumber,
-    whatsappNumber: studentData?.lead?.whatAsppNumber ?? '',
-    whatsappNumberCountryCode: ''
+    contactNumber: studentData?.lead?.mobileCountryCode + studentData?.lead?.mobileNumber
   }
   const {
     handleSubmit,
-    watch,
     control,
     setValue,
     reset,
@@ -45,18 +42,7 @@ const EditContactDetails = ({ studentData, getStudentDetailById }: IContactTypes
     const payload = {
       email: data?.email,
       mobileCountryCode: data?.contactNumberCountryCode,
-      mobileNumber: data.contactNumber.slice(data.contactNumberCountryCode.length),
-      alternativeContactCountryCode: data?.alternativeContactCountryCode,
-      alternativeContact: data?.alternativeContact,
-      whatAsppNumber: data?.whatsappNumber,
-      homePhone: data?.homePhone
-    }
-    if (
-      !data?.whatsappNumberCountryCode ||
-      !data?.whatsappNumber ||
-      data.whatsappNumber.slice(data.whatsappNumberCountryCode.length).length === 0
-    ) {
-      delete payload.whatAsppNumber
+      mobileNumber: data.contactNumber.slice(data.contactNumberCountryCode.length)
     }
 
     const response = await DashboardService.addUpdateStudentContactInfo(payload, studentData?.applicationCode)
@@ -211,45 +197,6 @@ const EditContactDetails = ({ studentData, getStudentDetailById }: IContactTypes
                   )}
                 />
               </Grid> */}
-              <Grid item sm={4} xs={12}>
-                <Controller
-                  name='whatsappNumber'
-                  control={control}
-                  render={({ field }) => (
-                    <Box
-                      sx={{
-                        '& .country-list': { top: '-40px' },
-                        '& .form-control:focus': {
-                          borderColor: theme => theme.palette.primary.main,
-                          boxShadow: theme => `0 0 0 1px ${theme.palette.primary.main}`
-                        },
-                        '& input.form-control': { color: theme => `rgb(${theme.palette.customColors.main})` }
-                      }}
-                    >
-                      <PhoneInput
-                        {...field}
-                        onChange={(data, countryData: { dialCode: string }) =>
-                          countryCodeContact('whatsappNumber', data, countryData?.dialCode)
-                        }
-                        value={watch('whatsappNumber')}
-                        country={'za'}
-                        countryCodeEditable={false}
-                        placeholder='Enter whatsapp number'
-                        specialLabel='Whatsapp Number'
-                        inputStyle={{
-                          borderRadius: '10px',
-                          background: 'none',
-                          width: '100%'
-                        }}
-                      />
-                    </Box>
-                  )}
-                />
-
-                <FormHelperText style={{ color: 'red' }}>
-                  {errors.whatsappNumber && (errors.whatsappNumber?.message as string | undefined)}
-                </FormHelperText>
-              </Grid>
             </Grid>
           </DialogContent>
           <DialogActions sx={{ pb: { xs: 8, sm: 12.5 }, justifyContent: 'center' }}>

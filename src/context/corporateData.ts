@@ -65,7 +65,7 @@ export const corporateStudentPreviewCardSections = [
     sectionIcon: BookEducation,
     sectionSubItems: {
       parentName: 'lead',
-      list: ['email', 'mobileNumber', 'whatAsppNumber']
+      list: ['email', 'mobileNumber']
     }
   },
   {

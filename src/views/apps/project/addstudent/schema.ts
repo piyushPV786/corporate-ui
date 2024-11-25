@@ -22,7 +22,11 @@ export const schema = yup.object().shape({
     then: yup.string().required(AddStudentMessages.expiryDateRequired),
     otherwise: yup.string().notRequired()
   }),
-  identificationNumber: yup.string().required(AddStudentMessages.identificationNumberRequired),
+  identificationNumber: yup.string().required(AddStudentMessages.identificationNumberRequired).test('identificationDocumentType', AddStudentMessages.passportLengthError, (value)=>{
+    const idLength = value?.length ?? 0
+    
+    return idLength >= 8 && idLength <= 13
+  }),
   race: yup.string().required(AddStudentMessages.raceRequired),
   homeLanguage: yup.string().required(AddStudentMessages.homelanguageRequired),
   mobileNumber: yup.string().required(AddStudentMessages.contactRequired),

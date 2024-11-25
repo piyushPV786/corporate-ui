@@ -196,7 +196,7 @@ const CorporateStudents = () => {
         return (
           <Grid container>
             <Grid item xs={12}>
-              <Tooltip title='Project Name' placement='top'>
+              <Tooltip title={project?.name} placement='top'>
                 <Typography noWrap variant='body1'>
                   {project?.name ? project.name : '-'}
                 </Typography>
@@ -221,7 +221,7 @@ const CorporateStudents = () => {
       renderCell: ({ row }: any) => (
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Tooltip title='Group Name'>
+            <Tooltip title={row?.enrolment?.corporateGroup?.name}>
               <Typography
                 variant='body2'
                 sx={{ color: 'text.primary', fontWeight: 500, lineHeight: '22px', letterSpacing: '.1px' }}
@@ -241,13 +241,14 @@ const CorporateStudents = () => {
       headerName: 'Module or Qualification Name / Type',
       renderCell: ({ row }: CellType) => {
         const { project } = row
+        const qualification = project?.program ? getName(programList, project.program) : '-'
 
         return (
           <Grid container>
             <Grid item xs={12}>
-              <Tooltip title='Qualification/Module Name'>
+              <Tooltip title={qualification} placement='top'>
                 <Typography noWrap variant='body1'>
-                  {project?.program ? getName(programList, project.program) : '-'}
+                  {qualification}
                 </Typography>
               </Tooltip>
             </Grid>

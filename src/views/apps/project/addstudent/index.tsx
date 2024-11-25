@@ -255,7 +255,7 @@ const AddStudentPreview = ({ projectCode }: IstudentPreview) => {
                   }
                 }}
               >
-                <span className='breadcrumb'>Dashboard /Project Management / MMl: FLP 2023</span> / Add Student
+                <span className='breadcrumb'>Dashboard /Project Management</span> / Add Student
               </Typography>
             </Box>
           </Grid>

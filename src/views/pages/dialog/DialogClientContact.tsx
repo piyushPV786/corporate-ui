@@ -81,9 +81,9 @@ const DialogClientContact = ({ title, data, createClientContact, handleEdit }: I
       .test('is-valid-telephone', ClientContactDetails.telephoneNumberLength, function (value) {
         const { telephoneCountryCode } = this.parent
         const telephoneNumberWithoutCode = value?.replace(telephoneCountryCode || '', '') || ''
-        if(telephoneNumberWithoutCode.length === 0){
+        if (telephoneNumberWithoutCode.length === 0) {
           return true
-        }else{
+        } else {
           return telephoneNumberWithoutCode.length >= 6
         }
       }),

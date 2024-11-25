@@ -566,7 +566,15 @@ const StudentList = () => {
       const { name, code, companyType, email, mobileCountryCode, phoneNumber, isSameAddress, isActive } = data
 
       let res: AxiosResponse | undefined
-      const { address1 = '', address2 = '', country = '', state = '', city= '', pincode = '', ...postalAddress } = { ...data }
+      const {
+        address1 = '',
+        address2 = '',
+        country = '',
+        state = '',
+        city = '',
+        pincode = '',
+        ...postalAddress
+      } = { ...data }
 
       const postalAddr = {
         address1: postalAddress?.physicalAddress1,
@@ -1125,9 +1133,7 @@ const StudentList = () => {
                         label={<RequiredLabel label='City' />}
                         value={formValue?.physicalCity}
                         defaultValue={formValue?.physicalCity}
-                        helperText={
-                          errors?.physicalCity && (errors?.physicalCity?.message as string | undefined)
-                        }
+                        helperText={errors?.physicalCity && (errors?.physicalCity?.message as string | undefined)}
                         error={errors.physicalCity as any}
                       />
                     </Grid>

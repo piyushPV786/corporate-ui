@@ -78,12 +78,14 @@ const DialogClientContact = ({ title, data, createClientContact, handleEdit }: I
     mobileCountryCode: yup.string(),
     telephoneNumber: yup
       .string()
-      .required(ClientContactDetails.TelephoneRequired)
       .test('is-valid-telephone', ClientContactDetails.telephoneNumberLength, function (value) {
         const { telephoneCountryCode } = this.parent
         const telephoneNumberWithoutCode = value?.replace(telephoneCountryCode || '', '') || ''
-
-        return telephoneNumberWithoutCode.length >= 6
+        if (telephoneNumberWithoutCode.length === 0) {
+          return true
+        } else {
+          return telephoneNumberWithoutCode.length >= 6
+        }
       }),
     telephoneCountryCode: yup.string(),
     email: yup.string().email().required(ClientContactDetails.EmailRequired),

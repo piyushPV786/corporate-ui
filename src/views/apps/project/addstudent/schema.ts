@@ -40,6 +40,8 @@ export const schema = yup.object().shape({
   zipCode: yup
     .number()
     .positive()
+    .nullable()
+    .transform((value, originalValue) => (originalValue === '' ? null : value))
     .required(AddStudentMessages.zipCodeRequired)
     .min(10000, AddStudentMessages.zipCodeMaxError)
     .max(999999, AddStudentMessages.zipCodeMaxError),

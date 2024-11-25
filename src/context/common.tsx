@@ -362,7 +362,7 @@ export const AddStudentMessages = {
   cityRequired: 'City is required',
   zipCodeRequired: 'ZipCode is required',
   zipCodeError: 'Must be only digits',
-  zipCodeMaxError: 'Must be exactly 5 digits',
+  zipCodeMaxError: 'Min length should be 4 or Max length should be 6.',
   identificationNumberLengthError: 'Min length should be 8 or Max length should be 13',
   idTypeRequired: 'Id Type is required',
   idNoRequired: 'Id Number is required',

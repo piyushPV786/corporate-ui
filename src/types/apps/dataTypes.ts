@@ -224,11 +224,6 @@ export interface IUpdateStudentContactInfo {
   email: string
   mobileCountryCode: string
   mobileNumber: string
-  alternativeContactCountryCode: string
-  alternativeContact: string
-  homePhone: string
-  whatsappNumberCountryCode?: string
-  whatAsppNumber?: string
 }
 export interface IUpdateStudentAddressInfo {
   street: string

@@ -458,20 +458,6 @@ const PreviewCard = ({ studentId, studentDetail, getStudentDetailById }: Props) 
                     +{studentDetail?.lead?.mobileCountryCode} {studentDetail?.lead?.mobileNumber}
                   </Typography>
                 </Grid>
-                {/* <Grid item xs={4}>
-                  <label>Alternative Number</label>
-                  <Typography>{studentDetail?.alternativeContact ?? '-'}</Typography>
-                </Grid> */}
-
-                {/* <Grid item xs={4}>
-                  <label>Home Phone</label>
-                  <Typography>{studentDetail?.homePhone ?? '-'}</Typography>
-                </Grid> */}
-
-                <Grid item xs={4}>
-                  <label>WhatsApp Number</label>
-                  <Typography>{studentDetail?.lead?.whatAsppNumber ?? '-'}</Typography>
-                </Grid>
               </Grid>
             </AccordionDetails>
           </Accordion>

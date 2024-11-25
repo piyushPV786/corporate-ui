@@ -634,6 +634,7 @@ export interface ICorporateAddressTypes {
   address2: string
   country: string
   state: string
+  city: string
   pincode: string
   addressType: string
 }

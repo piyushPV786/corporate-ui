@@ -130,11 +130,13 @@ const defaultValues = {
   phoneNumber: '',
   country: '',
   state: '',
+  city: '',
   address1: '',
   pincode: '',
   address2: '',
   physicalCountry: '',
   physicalState: '',
+  physicalCity: '',
   physicalAddress1: '',
   physicalAddress2: '',
   physicalPincode: '',
@@ -159,10 +161,12 @@ const schema = yup.object().shape({
   companyType: yup.string().required('required'),
   country: yup.string().required('required'),
   state: yup.string().required('required'),
+  city: yup.string().required('reuired'),
   address1: yup.string().required('required'),
   pincode: yup.string().required('required').min(5).max(6),
   physicalCountry: yup.string().required('required'),
   physicalState: yup.string().required('required'),
+  physicalCity: yup.string().required('required'),
   physicalAddress1: yup.string().required('required'),
   physicalPincode: yup.string().required('required').min(5).max(6)
 })
@@ -475,11 +479,13 @@ const StudentList = () => {
       phoneNumber: data.phoneNumber,
       country: residential.country,
       state: residential.state,
+      city: residential.city,
       address1: residential.address1,
       pincode: residential.pincode,
       address2: residential.address2,
       physicalCountry: postal.country,
       physicalState: postal.state,
+      physicalCity: postal.city,
       physicalAddress1: postal.address1,
       physicalAddress2: postal.address2,
       physicalPincode: postal.pincode,
@@ -544,18 +550,19 @@ const StudentList = () => {
     if (duplicateName === undefined) {
       const { name, code, companyType, email, phoneNumber, isSameAddress, isActive } = data
       let res: AxiosResponse | undefined
-      const { address1 = '', address2 = '', country = '', state = '', pincode = '', ...postalAddress } = { ...data }
+      const { address1 = '', address2 = '', country = '', state = '', city= '', pincode = '', ...postalAddress } = { ...data }
 
       const postalAddr = {
         address1: postalAddress?.physicalAddress1,
         address2: postalAddress?.physicalAddress2,
         country: postalAddress?.physicalCountry,
         state: postalAddress?.physicalState,
+        city: postalAddress?.physicalCity,
         pincode: postalAddress?.physicalPincode,
         addressType: 'POSTAL'
       }
       const address = [
-        { address1, address2, country, state, pincode, addressType: 'RESIDENTIAL' },
+        { address1, address2, country, state, city, pincode, addressType: 'RESIDENTIAL' },
         {
           ...postalAddr,
           addressType: 'POSTAL'
@@ -616,9 +623,11 @@ const StudentList = () => {
     if (isSameAddress) {
       const currentCountry = watch('country')
       const currentState = watch('state')
+      const currentCity = watch('city')
 
       setValue('physicalCountry', currentCountry, { shouldDirty: true, shouldValidate: true })
       setValue('physicalState', currentState, { shouldDirty: true, shouldValidate: true })
+      setValue('physicalCity', currentCity, { shouldDirty: true, shouldValidate: true })
       setValue('physicalAddress1', watch('address1'), { shouldDirty: true, shouldValidate: true })
       setValue('physicalAddress2', watch('address2'), { shouldDirty: true, shouldValidate: true })
       setValue('physicalPincode', watch('pincode'), { shouldDirty: true, shouldValidate: true })
@@ -638,11 +647,13 @@ const StudentList = () => {
       watch('address2') !== corporateFormData?.address2 ||
       watch('country') !== corporateFormData?.country ||
       watch('state') !== corporateFormData?.state ||
+      watch('city') !== corporateFormData?.city ||
       watch('pincode') !== corporateFormData?.pincode ||
       watch('physicalAddress1') !== corporateFormData?.physicalAddress1 ||
       watch('physicalAddress2') !== corporateFormData?.physicalAddress2 ||
       watch('physicalCountry') !== corporateFormData?.physicalCountry ||
       watch('physicalState') !== corporateFormData?.physicalState ||
+      watch('physicalCity') !== corporateFormData?.physicalCity ||
       watch('physicalPincode') !== corporateFormData?.physicalPincode ||
       watch('isActive') !== corporateFormData?.isActive
     )
@@ -957,6 +968,20 @@ const StudentList = () => {
                     </Grid>
                     <Grid item xs={4}>
                       <TextField
+                        {...register('city')}
+                        fullWidth
+                        onChange={(e: any) => {
+                          setValue(e.target.name, e.target.value)
+                        }}
+                        type='string'
+                        label={<RequiredLabel label='City' />}
+                        defaultValue={formValue?.city}
+                        helperText={errors?.city && (errors?.city?.message as string | undefined)}
+                        error={errors.city as any}
+                      />
+                    </Grid>
+                    <Grid item xs={4}>
+                      <TextField
                         {...register('pincode')}
                         fullWidth
                         onChange={(e: any) => {
@@ -1096,6 +1121,23 @@ const StudentList = () => {
                             )}
                           />
                         )}
+                      />
+                    </Grid>
+                    <Grid item xs={4}>
+                      <TextField
+                        {...register('physicalCity')}
+                        onChange={(e: any) => {
+                          setValue(e.target.name, e.target.value)
+                        }}
+                        fullWidth
+                        disabled={formValue?.isSameAddress}
+                        label={<RequiredLabel label='City' />}
+                        value={formValue?.physicalCity}
+                        defaultValue={formValue?.physicalCity}
+                        helperText={
+                          errors?.physicalCity && (errors?.physicalCity?.message as string | undefined)
+                        }
+                        error={errors.physicalCity as any}
                       />
                     </Grid>
                     <Grid item xs={4}>

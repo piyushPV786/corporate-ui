@@ -19,8 +19,8 @@ import { IVenueType } from 'src/types/apps/invoiceTypes'
 
 import { AcademicService, DashboardService } from 'src/service'
 import { Typography } from '@mui/material'
-import { successToast } from 'src/components/Toast'
-import { status, venueMessages } from 'src/context/common'
+import { errorToast, successToast } from 'src/components/Toast'
+import { messages, status, venueMessages } from 'src/context/common'
 import VenueDetailsDialog from 'src/views/pages/dialog/VenueDetails'
 import { DateFormat, formatDateYMD, getName } from 'src/utils'
 
@@ -114,7 +114,7 @@ const VenueDetails = ({ code }: propsType) => {
       flex: 0.2,
       minWidth: 150,
       field: 'date',
-      headerName: 'Select Date',
+      headerName: 'Date',
       renderCell: ({ row }: CellType) => <Typography>{DateFormat(row?.date)}</Typography>
     },
     {
@@ -148,7 +148,6 @@ const VenueDetails = ({ code }: propsType) => {
       date: formatDateYMD(params.date)
     }
     const response = await DashboardService?.createVenue(payload)
-
     if (response?.status === status.successCodeOne) {
       getVenueList({
         q: value,
@@ -157,6 +156,22 @@ const VenueDetails = ({ code }: propsType) => {
         projectCode: projectCode
       })
       successToast(venueMessages.add)
+    } else if (response?.data?.message) {
+      const errorMessage = response.data.message
+      const regex = /FACI\d{9}/
+      const match = errorMessage.match(regex)
+
+      if (match) {
+        const facilitatorCode = match[0]
+        const facilitatorName = getName(facilitatorList, facilitatorCode)
+        const replaceRegex = new RegExp(`\\(${facilitatorCode}\\)`, 'g')
+        const updatedErrorMessage = errorMessage.replace(replaceRegex, `(${facilitatorName})`)
+        errorToast(updatedErrorMessage)
+      } else {
+        errorToast(errorMessage)
+      }
+    } else {
+      errorToast(messages.defaultErrorMessage)
     }
     setLoading(false)
   }

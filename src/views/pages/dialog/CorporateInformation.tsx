@@ -47,7 +47,7 @@ const CorporateInformation = ({ conformationOpen, handleCloseConfirmationPopup, 
                   <ListItemText primary='Company Code' secondary={selectedRows?.code} />
                 </ListItem>
                 <ListItem>
-                  <ListItemText primary='Email' secondary={selectedRows?.email} />
+                  <ListItemText primary='Email' secondary={selectedRows?.email || '-'} />
                 </ListItem>
               </List>
             </Grid>
@@ -57,7 +57,7 @@ const CorporateInformation = ({ conformationOpen, handleCloseConfirmationPopup, 
                   <ListItemText primary='Company Type' secondary={selectedRows?.companyType} />
                 </ListItem>
                 <ListItem>
-                  <ListItemText primary='Contact Number' secondary={selectedRows?.phoneNumber} />
+                  <ListItemText primary='Contact Number' secondary={selectedRows?.phoneNumber || '-'} />
                 </ListItem>
               </List>
             </Grid>

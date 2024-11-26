@@ -346,6 +346,7 @@ export const AddStudentMessages = {
   disabilityRequired: 'Disability is required',
   medicalIssueRequired: 'Medical Issue  is required',
   emailRequired: 'Email  is required',
+  contactMinError: 'Contact number must be atleast 6 digits',
   contactRequired: 'contact number is required',
   contactMaxError: 'max home phone 12 digit',
   alternateContactRequired: ' Alternate contact number is required',

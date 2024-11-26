@@ -43,7 +43,7 @@ export const schema = yup.object().shape({
     .nullable()
     .transform((value, originalValue) => (originalValue === '' ? null : value))
     .required(AddStudentMessages.zipCodeRequired)
-    .min(10000, AddStudentMessages.zipCodeMaxError)
+    .min(1000, AddStudentMessages.zipCodeMaxError)
     .max(999999, AddStudentMessages.zipCodeMaxError),
   highestQualification: yup.string().required(AddStudentMessages.higerQualificationRequired),
   highSchoolName: yup.string().required(AddStudentMessages.highSchoolNameRequired),

@@ -298,7 +298,6 @@ const CostContract = ({ code }: propsType) => {
               columns={columns}
               disableSelectionOnClick
               pageSize={Number(pageSize)}
-              rowsPerPageOptions={[10, 25, 50]}
               sx={{ '& .MuiDataGrid-columnHeaders': { borderRadius: 0 } }}
               onPageSizeChange={newPageSize => setPageSize(newPageSize)}
               onPageChange={newPage => setPageNumber(newPage + 1)}

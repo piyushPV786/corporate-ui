@@ -185,12 +185,12 @@ const schema = yup.object().shape({
   state: yup.string().required('required'),
   city: yup.string().required('reuired'),
   address1: yup.string().required('required'),
-  pincode: yup.string().required('required').length(5, 'Maximum 5 characters allowed'),
+  pincode: yup.string().required('required').min(4, 'Minimum 4 characters required').max(6, 'Maximum 6 characters are allowed'),
   physicalCountry: yup.string().required('required'),
   physicalState: yup.string().required('required'),
   physicalCity: yup.string().required('required'),
   physicalAddress1: yup.string().required('required'),
-  physicalPincode: yup.string().required('required').length(5, 'Maximum 5 characters allowed')
+  physicalPincode: yup.string().required('required').min(4, 'Minimum 4 characters required').max(6, 'Maximum 6 characters are allowed')
 })
 
 const StudentList = () => {

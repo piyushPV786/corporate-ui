@@ -265,14 +265,34 @@ const CorporateStudents = () => {
     },
     {
       flex: 1.75,
-      minWidth: 200,
+      minWidth: 210,
       field: 'status',
       headerName: 'Status',
-      renderCell: ({ row }: CellType) => (
-        <CustomTooltip
-          color='error'
-          title={
-            row.status === status.reject ? (
+      renderCell: ({ row }: CellType) => {
+        const isRejected = row.status === status.reject
+        const statusLabel = !!corporateConstant[row.status]
+          ? corporateConstant[row.status]
+          : !!studentApplicationAllStatus[row.status]
+            ? studentApplicationAllStatus[row.status]
+            : row.status
+        const statusColor = userStatusObj[corporateConstant[row.status]] ?? applicationStatusColor[row.status]
+
+        const chip = (
+          <Typography>
+            <CustomChip
+              skin='light'
+              size='small'
+              label={statusLabel}
+              color={statusColor}
+              sx={{ textTransform: 'capitalize' }}
+            />
+          </Typography>
+        )
+
+        return isRejected ? (
+          <CustomTooltip
+            color='error'
+            title={
               <Fragment>
                 <Typography color='error' variant='subtitle1'>
                   <b>Reject Reason</b>
@@ -281,30 +301,18 @@ const CorporateStudents = () => {
                   {row.comments}
                 </Typography>
               </Fragment>
-            ) : (
-              ''
-            )
-          }
-          placement='top'
-          arrow
-        >
-          <Typography>
-            <CustomChip
-              skin='light'
-              size='small'
-              label={
-                !!corporateConstant[row.status]
-                  ? corporateConstant[row.status]
-                  : !!studentApplicationAllStatus[row.status]
-                    ? studentApplicationAllStatus[row.status]
-                    : row.status
-              }
-              color={userStatusObj[corporateConstant[row.status]] ?? applicationStatusColor[row.status]}
-              sx={{ textTransform: 'capitalize' }}
-            />
-          </Typography>
-        </CustomTooltip>
-      )
+            }
+            placement='top'
+            arrow
+          >
+            {chip}
+          </CustomTooltip>
+        ) : (
+          <Tooltip title={statusLabel} placement='top'>
+            {chip}
+          </Tooltip>
+        )
+      }
     },
     {
       minWidth: 100,

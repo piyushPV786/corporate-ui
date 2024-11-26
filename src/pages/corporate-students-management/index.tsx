@@ -245,9 +245,7 @@ const CorporateStudentManagement = () => {
       headerName: 'Intakes',
       renderCell: ({ row }: CellType) => (
         <Tooltip title={row?.intake?.name ?? '-'} placement='top'>
-          <TypographyEllipsis sx={{ height: 'auto', textWrap: 'wrap' }} variant='body2'>
-            {row?.intake?.name ?? '-'}
-          </TypographyEllipsis>
+          <TypographyEllipsis variant='body2'>{row?.intake?.name ?? '-'}</TypographyEllipsis>
         </Tooltip>
       )
     },

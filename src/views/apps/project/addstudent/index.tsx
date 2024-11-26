@@ -311,12 +311,7 @@ const AddStudentPreview = ({ projectCode }: IstudentPreview) => {
                     Save As Draft
                   </Button> */}
 
-                  <Button
-                    fullWidth
-                    variant='contained'
-                    type='submit'
-                    disabled={!isDirty || !isValid}
-                  >
+                  <Button fullWidth variant='contained' type='submit' disabled={!isDirty || !isValid}>
                     Submit
                   </Button>
                 </CardContent>

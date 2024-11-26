@@ -52,12 +52,7 @@ const ageValidator = (dateOfBirth: any) => {
   }
 }
 
-export const PersonalInformationDetail = ({
-  errors,
-  setValue,
-  watch,
-  control
-}: Ipersonal) => {
+export const PersonalInformationDetail = ({ errors, setValue, watch, control }: Ipersonal) => {
   const [birthDate, setBirthDate] = useState<Date | null | undefined>()
   const [gender, setGender] = useState<Array<commonListTypes>>([])
   const [nationalityStatus, setNationalityStatus] = useState<Array<commonListTypes>>([])
@@ -286,7 +281,7 @@ export const PersonalInformationDetail = ({
                     >
                       <PhoneInput
                         {...field}
-                        onChange={(data, countryData: { dialCode: string }) => 
+                        onChange={(data, countryData: { dialCode: string }) =>
                           countryCodeContact('mobileNumber', data, countryData?.dialCode)
                         }
                         country={'za'}

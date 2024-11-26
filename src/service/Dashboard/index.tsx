@@ -320,7 +320,18 @@ export default class Dashboard {
 
       return response
     } catch (err: any) {
-      console.log('Error fetching student list ========>', err?.message)
+      console.log('Error fetching corporate list ========>', err?.message)
+    }
+  }
+  async getCorporateListForDropdown() {
+    const endUrlName = `${this.baseUrl + apiEndPoints.corporateEdDropdownList}`
+
+    try {
+      const response = await this.apiServer.get<any>(endUrlName)
+
+      return response
+    } catch (err: any) {
+      console.log('Error fetching corporate list ========>', err?.message)
     }
   }
   async updateCorporate(code: any, params: any) {
@@ -330,7 +341,7 @@ export default class Dashboard {
 
       return response
     } catch (err: any) {
-      console.log('Error fetching student list ========>', err?.message)
+      console.log('Error updating corporate ========>', err?.message)
     }
   }
   async addCorporate(params: any) {
@@ -340,7 +351,7 @@ export default class Dashboard {
 
       return response
     } catch (err: any) {
-      console.log('Error fetching student list ========>', err?.message)
+      console.log('Error creating corporate ========>', err?.message)
     }
   }
 

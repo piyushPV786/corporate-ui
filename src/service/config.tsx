@@ -32,6 +32,7 @@ export const apiEndPoints = {
   individualDetails: 'finance/aggregate/',
   enrollIndividualDetails: 'enrolment/aggregate/',
   corporateEd: 'corporate-ed',
+  corporateEdDropdownList: 'corporate-ed/corporate-dropdown-list',
   projectList: 'project',
   projectDocumentDelete: 'project/projectCode/document',
   venueList: 'projectVenue',

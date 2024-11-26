@@ -338,13 +338,9 @@ const ProjectManagement = () => {
     }
   }
   const getCorporateList = async () => {
-    const params = {
-      pageSize: 100,
-      pageNumber: 1
-    }
-    const response = await DashboardService?.getCorporateList(params)
+    const response = await DashboardService?.getCorporateListForDropdown()
     if (response?.status === 200 && response?.data?.data) {
-      setCommonList(prev => ({ ...prev, corporateList: response?.data?.data?.data }))
+      setCommonList(prev => ({ ...prev, corporateList: response?.data?.data }))
     }
   }
   const createProject = async (params: any) => {

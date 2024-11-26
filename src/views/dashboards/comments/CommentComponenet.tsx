@@ -145,8 +145,6 @@ const CommentComponent = ({ data, getCorporateStudentsDetailById }: any) => {
 export default CommentComponent
 
 export const CommonActivityTab = ({ data, getCorporateStudentsDetailById }: any) => {
-  console.log(data)
-
   const [tabValue, setTabValue] = useState(0)
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -156,8 +154,8 @@ export const CommonActivityTab = ({ data, getCorporateStudentsDetailById }: any)
   return (
     <Card sx={{ mt: 2 }}>
       <Tabs value={tabValue} onChange={handleTabChange} aria-label='tabs'>
-        <Tab label='Comments' />
-        <Tab label='Activity Timeline' />
+        <Tab label='Comments' sx={{ width: '100%' }} />
+        {/* <Tab label='Activity Timeline' /> */}
       </Tabs>
       <CardContent>
         {tabValue === 0 && (

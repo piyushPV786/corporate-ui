@@ -43,13 +43,6 @@ interface FormInputs {
   proposalSubmissionDate: DateType
 }
 
-interface DataParams {
-  q: string
-  status: any
-  pageSize: number
-  pageNumber: number
-}
-
 interface CustomInputProps {
   value: DateType | any
   label: string | ReactNode
@@ -101,21 +94,16 @@ const ProjectDetailsDialog = ({
       setprogrammeBusinessUnit(response?.data)
     }
   }
-  const getCorporateList = async (params: DataParams) => {
-    const response = await DashboardService?.getCorporateList(params)
+  const getCorporateList = async () => {
+    const response = await DashboardService?.getCorporateListForDropdown()
     if (response?.status === 200 && response?.data?.data) {
-      setCorporateList(response?.data?.data?.data)
+      setCorporateList(response?.data?.data)
     }
   }
 
   useEffect(() => {
     getProgrammeBusinessUnit()
-    getCorporateList({
-      q: '',
-      pageSize: 100,
-      pageNumber: 1,
-      status: ''
-    })
+    getCorporateList()
   }, [])
 
   // ** Hooks

@@ -28,7 +28,7 @@ import { Typography } from '@mui/material'
 import { CommonService, DashboardService } from 'src/service'
 import { status } from 'src/context/common'
 import { CloseBox } from 'mdi-material-ui'
-import { DDMMYYYDateFormat } from 'src/utils'
+import { DDMMYYYDateFormat, minTwoDigits, serialNumber } from 'src/utils'
 
 interface CellType {
   row: InvoiceInstallmentType
@@ -40,6 +40,7 @@ interface propsType {
 
 const CostContract = ({ code }: propsType) => {
   const [pageSize, setPageSize] = useState<number>(10)
+  const [pageNumber, setPageNumber] = useState<number>(1)
   const [response, setResponse] = useState<any>()
   const [installmentList, setInstallmentList] = useState<any>()
   const [venueLogisticsList, setVenueLogisticsList] = useState<any>()
@@ -149,11 +150,15 @@ const CostContract = ({ code }: propsType) => {
     getCurrencyListDetails()
     getPaymentListDetails()
   }, [])
+
+  const installmentPaginatedData = installmentList?.slice((pageNumber - 1) * pageSize, pageNumber * pageSize) || []
+
   const columns = [
     {
       field: 'id',
       minWidth: 40,
-      headerName: '#'
+      headerName: '#',
+      renderCell: (index: any) => minTwoDigits(serialNumber(index.api.getRowIndex(index.row.id), pageNumber, pageSize))
     },
     {
       flex: 0.1,
@@ -288,13 +293,14 @@ const CostContract = ({ code }: propsType) => {
               disableColumnMenu
               disableColumnFilter
               disableColumnSelector
-              rows={installmentList}
+              rows={installmentPaginatedData}
+              rowCount={installmentList.length}
               columns={columns}
               disableSelectionOnClick
               pageSize={Number(pageSize)}
-              rowsPerPageOptions={[10, 25, 50]}
               sx={{ '& .MuiDataGrid-columnHeaders': { borderRadius: 0 } }}
               onPageSizeChange={newPageSize => setPageSize(newPageSize)}
+              onPageChange={newPage => setPageNumber(newPage + 1)}
             />
           </Grid>
         ) : (

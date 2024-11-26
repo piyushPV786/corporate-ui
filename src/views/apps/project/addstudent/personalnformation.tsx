@@ -55,7 +55,14 @@ const ageValidator = (dateOfBirth: any) => {
   }
 }
 
-export const PersonalInformationDetail = ({ errors, setValue, watch, control, setIsMobileValid, isMobileValid }: Ipersonal) => {
+export const PersonalInformationDetail = ({
+  errors,
+  setValue,
+  watch,
+  control,
+  setIsMobileValid,
+  isMobileValid
+}: Ipersonal) => {
   const [birthDate, setBirthDate] = useState<Date | null | undefined>()
   const [gender, setGender] = useState<Array<commonListTypes>>([])
   const [nationalityStatus, setNationalityStatus] = useState<Array<commonListTypes>>([])
@@ -113,13 +120,13 @@ export const PersonalInformationDetail = ({ errors, setValue, watch, control, se
     data && setValue(`${fieldName}CountryCode`, dialCode)
   }
 
-  const validateMobileNumber = (mobileNumber: string, countryCode: string) =>{
+  const validateMobileNumber = (mobileNumber: string, countryCode: string) => {
     const mobileNumberWithoutCode = mobileNumber.slice(countryCode.length)
-    if(mobileNumberWithoutCode.length <= 0){
+    if (mobileNumberWithoutCode.length <= 0) {
       setIsMobileValid(AddStudentMessages.contactRequired)
-    }else if(mobileNumberWithoutCode.length < 6){
+    } else if (mobileNumberWithoutCode.length < 6) {
       setIsMobileValid(AddStudentMessages.contactMinError)
-    }else{
+    } else {
       setIsMobileValid('')
     }
   }
@@ -295,11 +302,10 @@ export const PersonalInformationDetail = ({ errors, setValue, watch, control, se
                     >
                       <PhoneInput
                         {...field}
-                        onChange={(data, countryData: { dialCode: string }) =>{
-                            validateMobileNumber(data, countryData?.dialCode)
-                            countryCodeContact('mobileNumber', data, countryData?.dialCode)
-                          }
-                        }
+                        onChange={(data, countryData: { dialCode: string }) => {
+                          validateMobileNumber(data, countryData?.dialCode)
+                          countryCodeContact('mobileNumber', data, countryData?.dialCode)
+                        }}
                         country={'za'}
                         countryCodeEditable={false}
                         placeholder='Enter phone number'

@@ -32,7 +32,22 @@ export const schema = yup.object().shape({
     }),
   race: yup.string().required(AddStudentMessages.raceRequired),
   homeLanguage: yup.string().required(AddStudentMessages.homelanguageRequired),
-  mobileNumber: yup.string().required(AddStudentMessages.contactRequired),
+  mobileNumberCountryCode: yup.string().required(AddStudentMessages.contactRequired),
+  mobileNumber: yup
+    .string()
+    .required(AddStudentMessages.contactRequired)
+    .when('mobileNumberCountryCode', {
+      is: (mobileCountryCode: string) => mobileCountryCode !== '',
+      then: yup
+        .string()
+        .test('mobileNumber-validation', AddStudentMessages.contactMinError, (value: any, context: any) => {
+          const { mobileNumberCountryCode } = context.parent
+          const mobileNumberWithoutCode = value?.replace(mobileNumberCountryCode || '', '') || ''
+
+          return mobileNumberWithoutCode.length >= 6
+        }),
+      otherwise: yup.string().required(AddStudentMessages.contactRequired)
+    }),
   postalAddress: yup.string().required(AddStudentMessages.postalAddressRequired),
   country: yup.string().required(AddStudentMessages.countryRequired),
   state: yup.string().required(AddStudentMessages.stateRequired),
@@ -43,7 +58,7 @@ export const schema = yup.object().shape({
     .nullable()
     .transform((value, originalValue) => (originalValue === '' ? null : value))
     .required(AddStudentMessages.zipCodeRequired)
-    .min(10000, AddStudentMessages.zipCodeMaxError)
+    .min(1000, AddStudentMessages.zipCodeMaxError)
     .max(999999, AddStudentMessages.zipCodeMaxError),
   highestQualification: yup.string().required(AddStudentMessages.higerQualificationRequired),
   highSchoolName: yup.string().required(AddStudentMessages.highSchoolNameRequired),

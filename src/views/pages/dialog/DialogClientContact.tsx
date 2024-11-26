@@ -332,7 +332,6 @@ const DialogClientContact = ({ title, data, createClientContact, handleEdit }: I
                       background: 'none',
                       width: '100%'
                     }}
-                    containerClass='phone-number-required'
                   />
                   <FormHelperText error>
                     {errors.telephoneNumber && (errors.telephoneNumber?.message as string | undefined)}

@@ -127,9 +127,10 @@ interface ITabDetail {
   projectData: IProject
   code: string
   fetchProject: (id: string | number) => void
+  setLoading: (isLoading: boolean) => void
 }
 
-const TabDetails = ({ projectData, fetchProject }: ITabDetail) => {
+const TabDetails = ({ projectData, fetchProject, setLoading }: ITabDetail) => {
   const theme = useTheme()
   const router = useRouter()
   const { query } = router
@@ -225,7 +226,7 @@ const TabDetails = ({ projectData, fetchProject }: ITabDetail) => {
           <ProjectDetails fetchProject={fetchProject} projectData={projectData} />
         </TabPanel>
         <TabPanel value={value} index={1} dir={theme.direction}>
-          <CostContract code={projectData?.code} />
+          <CostContract code={projectData?.code} setLoading={setLoading} />
         </TabPanel>
         <TabPanel value={value} index={2} dir={theme.direction}>
           <ContactDetailsList code={projectData?.code} />

@@ -36,9 +36,10 @@ interface CellType {
 
 interface propsType {
   code: string
+  setLoading: (isLoading: boolean) => void
 }
 
-const CostContract = ({ code }: propsType) => {
+const CostContract = ({ code, setLoading }: propsType) => {
   const [pageSize, setPageSize] = useState<number>(10)
   const [pageNumber, setPageNumber] = useState<number>(1)
   const [response, setResponse] = useState<any>()
@@ -143,13 +144,22 @@ const CostContract = ({ code }: propsType) => {
   }
 
   useEffect(() => {
-    getCostContractList()
-    getInstallmentAll()
-    getInstallmentList()
-    getVenueLogisticsList()
-    getCurrencyListDetails()
-    getPaymentListDetails()
-  }, [])
+    const fetchData = async () => {
+      setLoading(true)
+      await Promise.all([
+        getCostContractList(),
+        getInstallmentAll(),
+        getInstallmentList(),
+        getVenueLogisticsList(),
+        getCurrencyListDetails(),
+        getPaymentListDetails()
+      ])
+      setLoading(false)
+    }
+    if (code) {
+      fetchData()
+    }
+  }, [code])
 
   const installmentPaginatedData = installmentList?.slice((pageNumber - 1) * pageSize, pageNumber * pageSize) || []
 

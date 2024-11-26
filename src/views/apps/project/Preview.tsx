@@ -3,6 +3,7 @@ import HeaderPreview from './HeaderPreview'
 import TabDetails, { IProject } from './TabDetails'
 import { useEffect, useState } from 'react'
 import { DashboardService } from 'src/service'
+import LoadingBackdrop from 'src/@core/components/loading-backdrop'
 
 interface propsType {
   code: string
@@ -39,6 +40,7 @@ export interface IStudent {
 
 const Preview = ({ code }: propsType) => {
   const [projectData, setProjectData] = useState<IProject | null>(null)
+  const [loading, setLoading] = useState<boolean>(false)
 
   const getProjectList = async (param: string | number) => {
     const response = await DashboardService?.getProject(param)
@@ -47,7 +49,14 @@ const Preview = ({ code }: propsType) => {
     }
   }
   useEffect(() => {
-    getProjectList(code)
+    const getProject = async () => {
+      setLoading(true)
+      await getProjectList(code)
+      setLoading(false)
+    }
+    if (code && !projectData) {
+      getProject()
+    }
   }, [code])
 
   return (
@@ -55,7 +64,8 @@ const Preview = ({ code }: propsType) => {
       <Grid mb={5}>
         <HeaderPreview {...projectData!} />
       </Grid>
-      <TabDetails fetchProject={getProjectList} projectData={projectData!} code={code} />
+      <TabDetails fetchProject={getProjectList} projectData={projectData!} code={code} setLoading={setLoading} />
+      <LoadingBackdrop open={loading} />
     </Box>
   )
 }

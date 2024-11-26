@@ -54,7 +54,6 @@ const AddStudentPreview = ({ projectCode }: IstudentPreview) => {
   const router: any = useRouter()
   const studentCode = router.query.studentId
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [isMobileValid, setIsMobileValid] = useState('')
   const [studentDetails, setStudentDetails] = useState<IProjectStudentDTOTypes>()
 
   const {
@@ -268,8 +267,6 @@ const AddStudentPreview = ({ projectCode }: IstudentPreview) => {
                 watch={watch}
                 clearErrors={clearErrors}
                 setValue={setValue}
-                isMobileValid={isMobileValid}
-                setIsMobileValid={setIsMobileValid}
                 control={control}
               />
               {/* <ContactDetail register={register} control={control} errors={errors} setValue={setValue} watch={watch} /> */}
@@ -318,7 +315,7 @@ const AddStudentPreview = ({ projectCode }: IstudentPreview) => {
                     fullWidth
                     variant='contained'
                     type='submit'
-                    disabled={(!isDirty || !isValid) && isMobileValid.length > 0}
+                    disabled={!isDirty || !isValid}
                   >
                     Submit
                   </Button>

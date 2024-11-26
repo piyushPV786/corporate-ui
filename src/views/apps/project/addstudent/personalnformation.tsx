@@ -17,12 +17,9 @@ import { commonListTypes } from 'src/types/apps/dataTypes'
 import ControlledAutocomplete from 'src/components/ControlledAutocomplete'
 import { nationalityStatusEnum } from 'src/constants/constants'
 import RequiredLabel from 'src/components/RequiredLabel'
-import { AddStudentMessages } from 'src/context/common'
 
 interface Ipersonal {
   errors: any
-  isMobileValid: any
-  setIsMobileValid: any
   watch: UseFormReturn['watch']
   register: UseFormReturn['register']
   clearErrors: UseFormReturn['clearErrors']
@@ -59,9 +56,7 @@ export const PersonalInformationDetail = ({
   errors,
   setValue,
   watch,
-  control,
-  setIsMobileValid,
-  isMobileValid
+  control
 }: Ipersonal) => {
   const [birthDate, setBirthDate] = useState<Date | null | undefined>()
   const [gender, setGender] = useState<Array<commonListTypes>>([])
@@ -118,17 +113,6 @@ export const PersonalInformationDetail = ({
   const countryCodeContact = (fieldName: string, data: any, dialCode: string) => {
     data && setValue(fieldName, data)
     data && setValue(`${fieldName}CountryCode`, dialCode)
-  }
-
-  const validateMobileNumber = (mobileNumber: string, countryCode: string) => {
-    const mobileNumberWithoutCode = mobileNumber.slice(countryCode.length)
-    if (mobileNumberWithoutCode.length <= 0) {
-      setIsMobileValid(AddStudentMessages.contactRequired)
-    } else if (mobileNumberWithoutCode.length < 6) {
-      setIsMobileValid(AddStudentMessages.contactMinError)
-    } else {
-      setIsMobileValid('')
-    }
   }
 
   useEffect(() => {
@@ -302,10 +286,9 @@ export const PersonalInformationDetail = ({
                     >
                       <PhoneInput
                         {...field}
-                        onChange={(data, countryData: { dialCode: string }) => {
-                          validateMobileNumber(data, countryData?.dialCode)
+                        onChange={(data, countryData: { dialCode: string }) => 
                           countryCodeContact('mobileNumber', data, countryData?.dialCode)
-                        }}
+                        }
                         country={'za'}
                         countryCodeEditable={false}
                         placeholder='Enter phone number'
@@ -317,7 +300,7 @@ export const PersonalInformationDetail = ({
                         containerClass='phone-number-required'
                       />
                       <FormHelperText style={{ color: 'red' }}>
-                        {isMobileValid ? isMobileValid : errors.mobileNumber?.message}
+                        {errors.mobileNumber && errors.mobileNumber?.message}
                       </FormHelperText>
                     </Box>
                   )}

@@ -81,7 +81,8 @@ export enum feeModeCode {
 
 export enum FileName {
   Template = 'student-template.xlsx',
-  List = 'student-List.xlsx'
+  List = 'student-List.xlsx',
+  StudentBulkUploadTemplate = 'student-bulk-upload-template.xlsx'
 }
 
 export const status: LoginParams = {

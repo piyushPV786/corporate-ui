@@ -9,7 +9,14 @@ import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconB
 import FileUploadComponent from './FileUpload'
 import { FileDownloadOutline, PencilOutline, SchoolOutline } from 'mdi-material-ui'
 import { CommonService, DashboardService } from 'src/service'
-import { status, Download, intakeStatue, studentApplicationAllStatus, applicationStatusColor } from 'src/context/common'
+import {
+  status,
+  Download,
+  intakeStatue,
+  studentApplicationAllStatus,
+  applicationStatusColor,
+  FileName
+} from 'src/context/common'
 import { errorToast, successToast } from 'src/components/Toast'
 import { IStudent } from '../Preview'
 import * as XLSX from 'xlsx'
@@ -256,37 +263,18 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
     }
   }
 
-  // const downloadTemplates = async (file: string) => {
-  // const response = await DashboardService.downloadStudentTemplate(file)
-
-  //   downloadStudentDetails('/files/Student_Bulk_Upload_Template.xlsx', Download.Template)
-  // }
-
   const downloadTemplates = async () => {
     try {
-      // Fetch the file (assume the file is served from the public directory)
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/files/Student_Bulk_Upload_Template.xlsx`)
-
-      // Check if the response is successful
-      if (!response.ok) {
-        throw new Error('Failed to fetch the file')
+      const response = await CommonService.getFileUrl(FileName.StudentBulkUploadTemplate)
+      if (response?.data?.statusCode === status?.successCode && response?.data?.data) {
+        const link = document.createElement('a')
+        link.href = response.data.data
+        link.download = 'student-bulk-upload-template.xlsx'
+        link.click()
+        handleSuccess(Download.Template)
+      } else {
+        errorToast('Failed to download the template. Please try again')
       }
-
-      // Get the file as a Blob
-      const blob = await response.blob()
-
-      const downloadLink = document.createElement('a')
-
-      // Provide a default filename if `pop()` returns undefined
-      const fileName = 'Student_Bulk_Upload_Template.xlsx'
-
-      downloadLink.href = URL.createObjectURL(blob)
-      downloadLink.download = fileName
-      downloadLink.click()
-
-      // Clean up the object URL
-      URL.revokeObjectURL(downloadLink.href)
-      handleSuccess(Download.Template)
     } catch (error) {
       console.error('Download error:', error)
     }
@@ -374,17 +362,6 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
 
     reader.readAsArrayBuffer(file)
   }
-
-  // const downloadStudentDetails = async (fileName: string, msg: string) => {
-  //   const blobFile = new Blob([fileName], { type: 'application/xlsx' })
-  //   const url = window.URL.createObjectURL(blobFile)
-  //   const a = document.createElement('a')
-  //   a.href = url
-  //   a.download = msg === Download.Template ? FileName.Template : FileName.List
-  //   a.click()
-  //   window.URL.revokeObjectURL(url)
-  //   setTimeout(handleSuccess, 3000, msg)
-  // }
 
   const handleSuccess = (msg: string) => {
     successToast(msg)
@@ -730,7 +707,7 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
               sx={{ mr: 2 }}
               size='small'
               variant='outlined'
-              onClick={() => downloadTemplates()}
+              onClick={downloadTemplates}
               startIcon={<FileDownloadOutline />}
             >
               Download Template

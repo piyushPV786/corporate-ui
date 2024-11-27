@@ -25,18 +25,16 @@ import ControlledAutocomplete from 'src/components/ControlledAutocomplete'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { validationQualificationSchema } from 'src/views/apps/project/projectstudent/schema'
 import { status } from 'src/context/common'
-import { getName } from 'src/utils'
 
 interface Ieducational {
   studentData: any
   getStudentDetailById: any
   listOf: IListOfCommonTypes
-  qualificationList: any
 }
 
-const EditEductionDetail = ({ studentData, getStudentDetailById, listOf, qualificationList }: Ieducational) => {
+const EditEductionDetail = ({ studentData, getStudentDetailById, listOf }: Ieducational) => {
   const defaultValues = {
-    highestQualification: getName(qualificationList, studentData?.education?.qualificationCode)
+    highestQualification: studentData?.education?.qualificationCode ?? ''
   }
   const {
     handleSubmit,
@@ -84,8 +82,9 @@ const EditEductionDetail = ({ studentData, getStudentDetailById, listOf, qualifi
         </Button>
       </Box>
       <Dialog
+        fullWidth
         open={show}
-        maxWidth='md'
+        maxWidth='sm'
         scroll='body'
         onClose={(event, reason) => {
           reason != 'backdropClick' && onClose()

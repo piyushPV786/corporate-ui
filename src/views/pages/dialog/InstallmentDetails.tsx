@@ -110,8 +110,8 @@ const InstallmentDetail = ({
       dueDate: formatDate(formData.dueDate, 'yyyy-MM-dd')
     }
 
-    type === 'add' ? AddInstallment && await AddInstallment(payload) : null
-    type === 'edit' ? EditInstallment && await EditInstallment(payload, data?.id) : null
+    type === 'add' ? AddInstallment && (await AddInstallment(payload)) : null
+    type === 'edit' ? EditInstallment && (await EditInstallment(payload, data?.id)) : null
 
     setShow(false)
 

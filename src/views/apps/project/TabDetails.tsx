@@ -241,10 +241,10 @@ const TabDetails = ({ projectData, fetchProject, setLoading }: ITabDetail) => {
           <Documents projectCode={projectData?.code} />
         </TabPanel>
         <TabPanel value={value} index={6} dir={theme.direction}>
-          <VenueDetails code={projectData?.code} setIsLoading={setLoading}/>
+          <VenueDetails code={projectData?.code} setIsLoading={setLoading} />
         </TabPanel>
         <TabPanel value={value} index={7} dir={theme.direction}>
-          <Notes projectData={projectData} setLoading={setLoading}/>
+          <Notes projectData={projectData} setLoading={setLoading} />
         </TabPanel>
       </AppBar>
     </Box>

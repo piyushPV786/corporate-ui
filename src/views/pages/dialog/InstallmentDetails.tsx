@@ -27,6 +27,7 @@ import { PencilOutline } from 'mdi-material-ui'
 import { InvoiceEditInstallmentType, ICurrencyList } from 'src/types/apps/invoiceTypes'
 import { formatDate } from 'src/utils'
 import RequiredLabel from 'src/components/RequiredLabel'
+import { addInstallmentMessage } from 'src/context/common'
 
 const Transition = forwardRef(function Transition(
   props: FadeProps & { children?: ReactElement<any, any> },
@@ -45,12 +46,17 @@ interface IInstallmentDialogProps {
   currencyList: ICurrencyList[]
 }
 
+const regex = /^[a-zA-Z_].*$/
+
 const schema = yup.object().shape({
-  name: yup.string().required(userInformationStatus.InstallmentNameRequired),
+  name: yup
+    .string()
+    .required(userInformationStatus.InstallmentNameRequired)
+    .matches(regex, addInstallmentMessage.installmentNameError),
   currency: yup.string().required(userInformationStatus.CurrencyRequired),
   dueAmount: yup
     .number()
-    .positive()
+    .positive(userInformationStatus.DueAmountPositiveError)
     .required(userInformationStatus.DueAmountRequired)
     .typeError(userInformationStatus.DueAmountRequiredError),
   dueDate: yup
@@ -110,6 +116,11 @@ const InstallmentDetail = ({
     setShow(false)
 
     type === 'add' ? handleClickSuccess && handleClickSuccess() : handleEditClick && handleEditClick()
+    reset()
+  }
+
+  const handleCancel = () => {
+    setShow(false)
     reset()
   }
 
@@ -206,7 +217,7 @@ const InstallmentDetail = ({
               </Grid>
               <Grid item sm={6} xs={12}>
                 <TextField
-                  inputProps={{ min: 0 }}
+                  inputProps={{ min: 0, max: 1000000 }}
                   {...register('dueAmount')}
                   fullWidth
                   type='number'
@@ -245,7 +256,7 @@ const InstallmentDetail = ({
             </Grid>
           </DialogContent>
           <DialogActions sx={{ pb: { xs: 8, sm: 12.5 }, justifyContent: 'center' }}>
-            <Button variant='outlined' color='secondary' onClick={() => setShow(false)}>
+            <Button variant='outlined' color='secondary' onClick={handleCancel}>
               cancel
             </Button>
             <Button variant='contained' sx={{ mr: 2 }} type='submit'>

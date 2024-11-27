@@ -193,11 +193,12 @@ const CorporateStudentManagement = () => {
     {
       flex: 1,
       field: 'name',
+      minWidth: 175,
       headerName: 'Group Details',
       renderCell: ({ row }: CellType) => (
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Tooltip title='Group Name'>
+            <Tooltip title={row?.name}>
               <Typography
                 variant='body2'
                 sx={{ color: 'text.primary', fontWeight: 500, lineHeight: '22px', letterSpacing: '.1px' }}
@@ -216,6 +217,7 @@ const CorporateStudentManagement = () => {
     {
       flex: 1,
       field: 'programName',
+      minWidth: 200,
       headerName: 'Qualification Details',
       renderCell: ({ row }: CellType) => {
         return (
@@ -239,18 +241,18 @@ const CorporateStudentManagement = () => {
     {
       flex: 1,
       field: 'intakes',
+      minWidth: 125,
       headerName: 'Intakes',
       renderCell: ({ row }: CellType) => (
         <Tooltip title={row?.intake?.name ?? '-'} placement='top'>
-          <TypographyEllipsis sx={{ height: 'auto', textWrap: 'wrap' }} variant='body2'>
-            {row?.intake?.name ?? '-'}
-          </TypographyEllipsis>
+          <TypographyEllipsis variant='body2'>{row?.intake?.name ?? '-'}</TypographyEllipsis>
         </Tooltip>
       )
     },
     {
       flex: 1,
       field: 'projectName',
+      minWidth: 200,
       headerName: 'Project Name / Code',
       renderCell: ({ row }: CellType) => {
         const { project } = row
@@ -258,9 +260,11 @@ const CorporateStudentManagement = () => {
         return (
           <Grid container>
             <Grid item xs={12}>
-              <Typography noWrap variant='body1'>
-                {project?.name ? project.name : '-'}
-              </Typography>
+              <Tooltip title={project?.name ? project.name : '-'} placement='top'>
+                <Typography noWrap variant='body1'>
+                  {project?.name ? project.name : '-'}
+                </Typography>
+              </Tooltip>
             </Grid>
             <Grid item xs={12}>
               <Typography noWrap variant='caption'>
@@ -274,6 +278,7 @@ const CorporateStudentManagement = () => {
     {
       flex: 0.5,
       field: 'studentCount',
+      minWidth: 150,
       headerName: 'No. of Students',
       renderCell: ({ row }: CellType) => (
         <Box>
@@ -290,6 +295,7 @@ const CorporateStudentManagement = () => {
     {
       flex: 1.25,
       field: 'status',
+      minWidth: 200,
       headerName: 'Status',
       renderCell: ({ row }: CellType) => (
         <Tooltip title={enrollGroupStatusTypes[row?.status] ?? row?.status} placement='top'>

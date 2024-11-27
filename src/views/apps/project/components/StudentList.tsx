@@ -8,27 +8,30 @@ import Tooltip from '@mui/material/Tooltip'
 import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Typography } from '@mui/material'
 import FileUploadComponent from './FileUpload'
 import { FileDownloadOutline, PencilOutline, SchoolOutline } from 'mdi-material-ui'
-import { DashboardService } from 'src/service'
+import { CommonService, DashboardService } from 'src/service'
 import {
   status,
   Download,
-  FileName,
   intakeStatue,
   studentApplicationAllStatus,
-  applicationStatusColor
+  applicationStatusColor,
+  FileName
 } from 'src/context/common'
 import { errorToast, successToast } from 'src/components/Toast'
 import { IStudent } from '../Preview'
 import * as XLSX from 'xlsx'
+import ExcelJS from 'exceljs'
 import Link from 'next/link'
 import { projectStudentType } from 'src/types/apps/invoiceTypes'
 import { DataParams } from 'src/service/Dashboard'
-import { formatDate, removeDuplicates, serialNumber } from 'src/utils'
+import { formatDate, getName, getStateNameWithCountryCode, removeDuplicates, serialNumber } from 'src/utils'
 import { IDynamicObject } from 'src/types/apps/corporatTypes'
 import { TypographyEllipsis } from 'src/styles/style'
 import { ModuleFeaturePermission } from 'src/components/common'
 import { FeatureCodes, moduleKeys, PermissionsCodes } from 'src/components/common/featureData'
 import BulkIntake from './BulkIntake'
+import { commonListTypes } from 'src/types/apps/dataTypes'
+import { IAddressStateTypes } from 'src/types/apps/admittedStudent'
 
 interface IStudentProps {
   projectCode: string
@@ -45,6 +48,12 @@ interface IKeysObject {
 interface IMissingDataTypes {
   column: (string | number)[]
   row: (string | number)[]
+}
+
+interface BulkUploadResponseType {
+  applicationExist: string
+  createdApplication: string
+  MissingRequiredFields: string
 }
 
 function transformKeys(keysArray: string[] | IKeysObject[]): any[] {
@@ -118,10 +127,18 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
   const [pageSize, setPageSize] = useState<number>(10)
   const [pageNumber, setPageNumber] = useState<number>(1)
   const [projectStudentListData, setProjectStudentListData] = useState<IStudent>()
-  const [studentList, setStudentList] = useState<Array<projectStudentType>>()
+  const [studentList, setStudentList] = useState<Array<any>>()
   const [uploadedFile, setUploadedFile] = useState<CustomFileType | null>()
   const [missingData, setMissingData] = useState<IMissingDataTypes | null>()
   const [selectedRow, setSelectedRow] = useState<GridSelectionModel>([])
+  const [gender, setGender] = useState<Array<commonListTypes>>([])
+  const [nationality, setNationality] = useState<Array<commonListTypes>>([])
+  const [race, setRace] = useState<Array<commonListTypes>>([])
+  const [language, setLanguage] = useState<Array<commonListTypes>>([])
+  const [identificationDocumentType, setIdentificationDocumentType] = useState<Array<commonListTypes>>([])
+  const [country, setCountry] = useState<Array<commonListTypes>>([])
+  const [states, setStates] = useState<Array<IAddressStateTypes>>([])
+
   const fullPermission = ModuleFeaturePermission(
     FeatureCodes.EMS.projectManagement,
     PermissionsCodes.full,
@@ -135,6 +152,55 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
     }
     setIsLoading(false)
   }
+  const getGenderList = async () => {
+    const response = await CommonService?.getGenderList()
+    if (response?.data?.data?.length > 0) {
+      setGender(response?.data?.data)
+    }
+  }
+
+  const getNationalityList = async () => {
+    const nationalResponse = await CommonService?.getNationalityList()
+    if (nationalResponse?.data?.data?.length > 0) {
+      setNationality(nationalResponse?.data?.data)
+    }
+  }
+
+  const getRaceList = async () => {
+    const raceResponse = await CommonService?.getRace()
+    if (raceResponse?.data?.data?.length > 0) {
+      setRace(raceResponse?.data?.data)
+    }
+  }
+
+  const getLanguageList = async () => {
+    const languageResponse = await CommonService?.getLanguage()
+    if (languageResponse?.data?.data?.length > 0) {
+      setLanguage(languageResponse?.data?.data)
+    }
+  }
+
+  const getIdentificationTypeList = async () => {
+    const raceResponse = await CommonService.identificationType({ projectIdentificationType: true })
+    if (raceResponse?.data?.data?.length > 0) {
+      setIdentificationDocumentType(raceResponse?.data?.data)
+    }
+  }
+
+  const getCountryList = async () => {
+    const response = await CommonService.getCountryLists()
+    if (response?.status === status.successCode && response?.data?.data?.length) {
+      setCountry(response.data.data)
+    }
+  }
+
+  const getStateList = async () => {
+    const response = await CommonService.getStatesByCountry()
+    if (response?.statusCode === status.successCode && response?.data?.length) {
+      setStates(response.data)
+    }
+  }
+
   const downloadStudent = async (projectCode: string) => {
     setIsLoading(true)
 
@@ -161,18 +227,25 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
             'Mobile Number': lead.mobileNumber || '',
             Regno: lead.studentCode || '',
             'Application Code': student.applicationCode || '',
-            Gender: lead.gender || '',
+            Gender: lead.gender ? getName(gender, lead.gender) : '',
             'Date Of Birth': lead.dateOfBirth ? formatDate(lead.dateOfBirth) : '',
-            'Home Language': lead.language || '',
-            Race: lead.race || '',
-            Nationality: lead.nationality || '',
-            'Identification Document Type': lead.identificationDocumentType || '',
+            'Home Language': lead.language ? getName(language, lead.language) : '',
+            Race: lead.race ? getName(race, lead.race) : '',
+            Nationality: lead.nationality ? getName(nationality, lead.nationality) : '',
+            'Identification Document Type': lead.identificationDocumentType
+              ? getName(identificationDocumentType, lead.identificationDocumentType)
+              : '',
             'Identification Number': lead.identificationNumber || '',
-            country: lead.country || '',
-            city: lead.city || '',
+            country: lead.address?.[0]?.country ? getName(country, lead.address?.[0]?.country) : '',
+            state:
+              lead.address?.[0]?.country && lead.address?.[0]?.state
+                ? getStateNameWithCountryCode(states, lead.address?.[0]?.state, lead.address?.[0]?.country)
+                : '',
+            city: lead.address?.[0]?.city || '',
+            'Zip Code': lead.address?.[0]?.zipcode || '',
             'Highest Qualification': lead.highestQualification || '',
             'Enrolment Date': student?.enrolment?.enrolmentDate ? formatDate(student.enrolment.enrolmentDate) : '',
-            Status: student.status || ''
+            Status: student?.status ? studentApplicationAllStatus[student.status] || student.status : ''
           }
         })
 
@@ -190,9 +263,21 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
     }
   }
 
-  const downloadTemplates = async (file: string) => {
-    const response = await DashboardService.downloadStudentTemplate(file)
-    downloadStudentDetails(response?.data, Download.Template)
+  const downloadTemplates = async () => {
+    try {
+      const response = await CommonService.getFileUrl(FileName.StudentBulkUploadTemplate)
+      if (response?.data?.statusCode === status?.successCode && response?.data?.data) {
+        const link = document.createElement('a')
+        link.href = response.data.data
+        link.download = 'student-bulk-upload-template.xlsx'
+        link.click()
+        handleSuccess(Download.Template)
+      } else {
+        errorToast('Failed to download the template. Please try again')
+      }
+    } catch (error) {
+      console.error('Download error:', error)
+    }
   }
 
   const bulkUploadStudent = async (projectCode: string, file: File) => {
@@ -201,56 +286,81 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
     //this demo api only for fileName once api ready this will remove
     const response = await DashboardService.uploadBulkStudent(projectCode, file)
     if (response?.data?.statusCode === status.successCodeOne && response?.data?.data) {
-      const existingStudents: string[] = []
-
-      response.data.data.flat().forEach((student: any) => {
-        if (student.applicationExist) {
-          existingStudents.push(student.applicationExist)
-        }
-      })
-
-      if (existingStudents.length > 0) {
-        const mobileNumbers: string[] = []
-        const emails: string[] = []
-
-        existingStudents.forEach(student => {
-          const mobileMatch = student.match(/mobileNumber (\d+)/)
-          const emailMatch = student.match(/email (\S+@\S+\.\S+)/)
-
-          if (mobileMatch) {
-            mobileNumbers.push(mobileMatch[1])
-          } else if (emailMatch) {
-            emails.push(emailMatch[1])
-          }
-        })
-
-        const combinedStudents = [...mobileNumbers, ...emails]
-        const maxDisplayCount = 10
-
-        const studentsToShow =
-          combinedStudents.length > maxDisplayCount
-            ? [...combinedStudents.slice(0, maxDisplayCount), '...']
-            : combinedStudents
-
-        errorToast(`${existingStudents.length} students already exist: ${studentsToShow.join(', ')}`)
-      } else {
-        successToast('File Uploaded Successfully')
-      }
-
+      downloadBulkUploadSuccessResponseData(response.data.data, file)
+      successToast('Your data has been processed successfully. Please find the attached Excel sheet.')
       setUploadedFile(null)
+    } else {
+      errorToast('There was an issue processing the file. Please try again.')
     }
     setIsLoading(true)
   }
 
-  const downloadStudentDetails = async (fileName: string, msg: string) => {
-    const blobFile = new Blob([fileName], { type: 'application/xlsx' })
-    const url = window.URL.createObjectURL(blobFile)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = msg === Download.Template ? FileName.Template : FileName.List
-    a.click()
-    window.URL.revokeObjectURL(url)
-    setTimeout(handleSuccess, 3000, msg)
+  const downloadBulkUploadSuccessResponseData = (response: BulkUploadResponseType[], file: File) => {
+    const reader = new FileReader()
+    reader.onload = async (e: any) => {
+      const arrayBuffer = e.target.result as ArrayBuffer
+      const workbook = new ExcelJS.Workbook()
+      await workbook.xlsx.load(arrayBuffer)
+
+      // Get the sheet
+      const sheet = workbook.worksheets[0]
+
+      // Add the "Upload_Status" header (add a new cell in the header row)
+      const headerRow = sheet.getRow(1) // Get the first row (header row)
+      headerRow.getCell(headerRow.cellCount + 1).value = 'Upload_Status' // Add new Upload_Status header
+      headerRow.getCell(headerRow.cellCount + 1).value = 'Message' // Add new Message header
+
+      // Process the rows and add status to the "Upload_Status" column
+      response.forEach((responseItem, index) => {
+        let status = ''
+        let message = ''
+        let fillColor = ''
+
+        if (responseItem.applicationExist) {
+          status = 'Application Exist'
+          message = responseItem.applicationExist
+          fillColor = 'FF0000' // Red for Application Exist
+        } else if (responseItem.createdApplication) {
+          status = 'Application Created'
+          message = responseItem.createdApplication
+          fillColor = '00FF00' // Green for Application Created
+        } else if (responseItem.MissingRequiredFields) {
+          status = 'Missing Required Fields'
+          message = responseItem.MissingRequiredFields
+          fillColor = 'FFFF00' // Yellow for Missing Fields
+        }
+
+        // Find the corresponding row (skip the header row, so start from index 2)
+        const row = sheet.getRow(index + 2)
+
+        // Set the value of the new "Upload_Status" column
+        const statusCell = row.getCell(headerRow.cellCount - 1) // This should be the second-to-last cell in the row (Upload_Status)
+        statusCell.value = status
+
+        // Set the value of the new "Message" column
+        const messageCell = row.getCell(headerRow.cellCount) // This should be the last cell in the row (Message)
+        messageCell.value = message
+
+        if (fillColor) {
+          statusCell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: fillColor }
+          }
+          statusCell.font = { bold: true, color: { argb: '000000' } }
+        }
+      })
+
+      // Save the workbook as a file and trigger download
+      const buffer = await workbook.xlsx.writeBuffer()
+      const blob = new Blob([buffer], { type: 'application/octet-stream' })
+      const link = document.createElement('a')
+      link.href = URL.createObjectURL(blob)
+      link.download = `${projectCode}_upload_student_status.xlsx`
+      link.click()
+    }
+
+    reader.readAsArrayBuffer(file)
   }
 
   const handleSuccess = (msg: string) => {
@@ -301,12 +411,14 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
       headerName: 'Email & Contact Details',
       renderCell: ({ row }: any) => {
         return (
-          <Box sx={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
+          <Box sx={{ display: 'flex', alignItems: 'start', flexDirection: 'column' }}>
             <Tooltip title={row?.lead?.email ?? ''}>
               <TypographyEllipsis variant='body1'>{row?.lead?.email ?? ''}</TypographyEllipsis>
             </Tooltip>
             <Tooltip title={row?.lead?.mobileNumber ?? ''}>
-              <TypographyEllipsis variant='body2'>{row?.lead?.mobileNumber ?? ''}</TypographyEllipsis>
+              <TypographyEllipsis variant='body2'>
+                {row?.lead?.mobileCountryCode ? `+${row?.lead?.mobileCountryCode}` : ''} {row?.lead?.mobileNumber ?? ''}
+              </TypographyEllipsis>
             </Tooltip>
           </Box>
         )
@@ -409,7 +521,7 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
             {row?.status === 'Draft' ? (
               <Tooltip title='Edit'>
                 <Box>
-                  <Link href={`/project/preview/${projectCode}/add-student?studentId=${row.id}`} passHref>
+                  <Link href={`/project/preview/${projectCode}/add-student?studentId=${row.applicationCode}`} passHref>
                     <IconButton
                       size='small'
                       component='a'
@@ -424,7 +536,7 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
             ) : (
               <Tooltip title='View'>
                 <Box textAlign='center'>
-                  <Link href={`/project/${projectCode}/student/${row.id}`} passHref>
+                  <Link href={`/project/${projectCode}/student/${row.applicationCode}`} passHref>
                     <IconButton
                       size='small'
                       component='a'
@@ -470,9 +582,7 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
 
   const setSelectedFiles = async (file: File & { error?: boolean; typeCode: string }) => {
     const result = await validateExcelForBulkUpload(file)
-    if (result) {
-      setUploadedFile(result)
-    }
+    setUploadedFile(result)
   }
   const uploadBulkDocument = () => {
     bulkUploadStudent(projectCode, uploadedFile!)
@@ -507,6 +617,17 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectCode, pageNumber, pageSize])
+
+  useEffect(() => {
+    getGenderList()
+    getNationalityList()
+    getRaceList()
+    getLanguageList()
+    getIdentificationTypeList()
+    getCountryList()
+    getStateList()
+  }, [])
+
   useEffect(() => {
     tableData()
 
@@ -537,7 +658,7 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
             </Alert>
           )}
           {!!missingData?.column?.length && (
-            <Alert variant='outlined' severity='error'>
+            <Alert variant='outlined' severity='error' sx={{ display: 'none' }}>
               Missing values in the columns '{missingData?.column.join(', ')}' in Rows-{' '}
               {missingData?.row?.length > 4
                 ? `${missingData?.row?.slice(0, 3)?.join(', ')}...`
@@ -555,9 +676,9 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
             type='submit'
             variant='contained'
             onClick={uploadBulkDocument}
-            disabled={!uploadedFile || uploadedFile?.error || !!missingData?.column?.length}
+            disabled={!uploadedFile || uploadedFile?.error}
           >
-            APPLY TEMPLATE
+            UPLOAD FILE
           </Button>
         </DialogActions>
       </Dialog>
@@ -586,7 +707,7 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
               sx={{ mr: 2 }}
               size='small'
               variant='outlined'
-              onClick={() => downloadTemplates(FileName.Template)}
+              onClick={downloadTemplates}
               startIcon={<FileDownloadOutline />}
             >
               Download Template

@@ -46,15 +46,20 @@ const ReadMore = ({ children }: { children: string }) => {
   const text = children
   const [isReadMore, setIsReadMore] = useState(true)
 
+  const truncatedText = text.length > 50 ? text.slice(0, 50) + '...' : text
+
   return (
     <Box>
-      {isReadMore ? text.slice(0, 180) : text}
-      <Button variant='text' size='small' onClick={() => setIsReadMore(!isReadMore)}>
-        <Typography sx={{ color: theme => theme.palette.primary.main, textDecoration: 'underline' }}>
-          {' '}
-          {isReadMore ? 'more ' : 'less'}
-        </Typography>
-      </Button>
+      {isReadMore ? truncatedText : text}
+
+      {text.length > 50 && (
+        <Button variant='text' size='small' onClick={() => setIsReadMore(!isReadMore)}>
+          <Typography sx={{ color: theme => theme.palette.primary.main, textDecoration: 'underline' }}>
+            {' '}
+            {isReadMore ? 'more ' : 'less'}
+          </Typography>
+        </Button>
+      )}
     </Box>
   )
 }

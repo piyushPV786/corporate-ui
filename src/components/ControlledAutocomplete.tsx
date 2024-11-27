@@ -11,7 +11,7 @@ type AutoCompleteFieldProps<T> = {
   ) => React.ReactNode
   renderInput: (params: AutocompleteRenderInputParams) => React.ReactNode
   name: InternalFieldName
-  control?: Control<FieldValues>
+  control?: Control<FieldValues> | any
   rules?: RegisterOptions
   defaultValue?: DefaultValues<FieldValues>
   groupBy?: (option: T) => string

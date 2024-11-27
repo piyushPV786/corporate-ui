@@ -303,18 +303,35 @@ export default class Dashboard {
       console.log('Error fetching student detail ========>', err?.message)
     }
   }
-  async getCorporateList(params?: DataParams) {
-    let endUrlName = `${this.baseUrl + apiEndPoints.corporateEd}?pageNumber=${params?.pageNumber}&&pageSize=${
+  async getCorporateList(params?: DataParams | any) {
+    let endUrlName = `${this.baseUrl + apiEndPoints.corporateEd}?pageNumber=${params?.pageNumber}&pageSize=${
       params?.pageSize
     }`
-    if (params?.status) endUrlName = `${endUrlName}&&status=${params?.status}`
-    if (params?.q) endUrlName = `${endUrlName}&&search=${params?.q}`
+    if (params?.isActive) endUrlName = `${endUrlName}&isActive=${params?.isActive}`
+    if (params?.q) endUrlName = `${endUrlName}&search=${params?.q}`
+    if (params?.companyType) endUrlName = `${endUrlName}&companyType=${params?.companyType}`
+    if (params?.code) endUrlName = `${endUrlName}&code=${params?.code}`
+    if (params?.name) endUrlName = `${endUrlName}&name=${params?.name}`
+    if (params?.country) endUrlName = `${endUrlName}&country=${params?.country}`
+    if (params?.state) endUrlName = `${endUrlName}&state=${params?.state}`
+    if (params?.pincode) endUrlName = `${endUrlName}&pincode=${params?.pincode}`
     try {
       const response = await this.apiServer.get<any>(endUrlName)
 
       return response
     } catch (err: any) {
-      console.log('Error fetching student list ========>', err?.message)
+      console.log('Error fetching corporate list ========>', err?.message)
+    }
+  }
+  async getCorporateListForDropdown() {
+    const endUrlName = `${this.baseUrl + apiEndPoints.corporateEdDropdownList}`
+
+    try {
+      const response = await this.apiServer.get<any>(endUrlName)
+
+      return response
+    } catch (err: any) {
+      console.log('Error fetching corporate list ========>', err?.message)
     }
   }
   async updateCorporate(code: any, params: any) {
@@ -324,7 +341,7 @@ export default class Dashboard {
 
       return response
     } catch (err: any) {
-      console.log('Error fetching student list ========>', err?.message)
+      console.log('Error updating corporate ========>', err?.message)
     }
   }
   async addCorporate(params: any) {
@@ -334,7 +351,7 @@ export default class Dashboard {
 
       return response
     } catch (err: any) {
-      console.log('Error fetching student list ========>', err?.message)
+      console.log('Error creating corporate ========>', err?.message)
     }
   }
 
@@ -605,7 +622,7 @@ export default class Dashboard {
 
       return response
     } catch (err: any) {
-      console.log('Error fetching venue ========>', err?.message)
+      return err
     }
   }
 
@@ -769,7 +786,9 @@ export default class Dashboard {
 
       return response
     } catch (err: any) {
-      console.log('Error fetching Client Contact ========>', err?.message)
+      console.log('Error fetching Client Contact ========>', err)
+
+      return err
     }
   }
 
@@ -780,7 +799,9 @@ export default class Dashboard {
 
       return response
     } catch (err: any) {
-      console.log('Error fetching edit Client Contact details ========>', err?.message)
+      console.log('Error fetching edit Client Contact details ========>', err)
+
+      return err
     }
   }
   async deleteClientContact(id?: number) {
@@ -974,7 +995,7 @@ export default class Dashboard {
     nProgress.start()
     const endUrlName = this.baseUrl + apiEndPoints.personalInfo
     try {
-      const response = await this.apiServer.patch(`${endUrlName}/${code}`, payload)
+      const response = await this.apiServer.patch(`${endUrlName}/${code}/update/basic`, payload)
 
       return response?.data?.data
     } catch (err: any) {
@@ -985,9 +1006,10 @@ export default class Dashboard {
   }
   async addUpdateStudentContactInfo(payload: IUpdateStudentContactInfo, code: number) {
     nProgress.start()
+
     const endUrlName = this.baseUrl + apiEndPoints.contactInfo
     try {
-      const response = await this.apiServer.patch(`${endUrlName}/${code}`, payload)
+      const response = await this.apiServer.patch(`${endUrlName}/${code}/update/basic`, payload)
 
       return response?.data?.data
     } catch (err: any) {
@@ -1000,7 +1022,7 @@ export default class Dashboard {
     nProgress.start()
     const endUrlName = this.baseUrl + apiEndPoints.addressInfo
     try {
-      const response = await this.apiServer.patch(`${endUrlName}/${code}`, payload)
+      const response = await this.apiServer.patch(`${endUrlName}/${code}/update/address`, payload)
 
       return response?.data?.data
     } catch (err: any) {
@@ -1013,9 +1035,9 @@ export default class Dashboard {
     nProgress.start()
     const endUrlName = this.baseUrl + apiEndPoints.educationInfo
     try {
-      const response = await this.apiServer.patch(`${endUrlName}/${code}`, payload)
+      const response = await this.apiServer.patch(`${endUrlName}/${code}/update/course`, payload)
 
-      return response?.data?.data
+      return response?.data
     } catch (err: any) {
       console.log('Error fetching Student Education Info ========>', err?.message)
     } finally {
@@ -1317,6 +1339,119 @@ export default class Dashboard {
       return response
     } catch (err: any) {
       console.log('Error updating corporate group  ========>', err?.message)
+    }
+  }
+
+  async checkDuplicateCorporateCode(code: string | number, id?: number) {
+    nProgress.start()
+    let endUrlName = `${this.baseUrl + apiEndPoints.corporateCode}?code=${code}`
+    if (id) endUrlName = `${endUrlName}&corporateId=${id}`
+
+    try {
+      const response = await this.apiServer.get(endUrlName)
+
+      return response?.data?.data
+    } catch (err: any) {
+      console.log('Error in checking duplicate Module code ========>', err?.message)
+    } finally {
+      nProgress.done()
+    }
+  }
+
+  async getCorporateManagerList(params?: DataParams) {
+    let endUrlName = `${this.baseUrl + apiEndPoints.corporateManager}?pageNumber=${params?.pageNumber}&pageSize=${
+      params?.pageSize
+    }`
+
+    if (params?.q) endUrlName = `${endUrlName}&search=${params?.q}`
+    try {
+      const response = await this.apiServer.get<any>(endUrlName)
+
+      return response
+    } catch (err: any) {
+      console.log('Error fetching manager list ========>', err?.message)
+    }
+  }
+  async createCorporateManager(params?: any) {
+    const endUrlName = `${this.baseUrl + apiEndPoints.corporateManager}`
+    try {
+      const response = await this.apiServer.post<any>(endUrlName, { ...params })
+
+      return response
+    } catch (err: any) {
+      console.log('Error creating manager ========>', err?.message)
+    }
+  }
+  async updateCorporateManager(params: any, code: number | string) {
+    const endUrlName = `${this.baseUrl + apiEndPoints.corporateManager}/${code}`
+    try {
+      const response = await this.apiServer.patch(endUrlName, { ...params })
+
+      return response
+    } catch (err: any) {
+      console.log('Error updating manager ========>', err?.message)
+    }
+  }
+  async deleteCorporateManager(code?: string) {
+    const endUrlName = `${this.baseUrl + apiEndPoints.corporateManager}/${code}`
+    try {
+      const response = await this.apiServer.delete(endUrlName)
+
+      return response
+    } catch (err: any) {
+      console.log('Error Delete Manager ========>', err?.message)
+    }
+  }
+  async getCorporateProjectManagerList() {
+    nProgress.start()
+    const endUrlName = this.baseUrl + apiEndPoints.corporateProjectManagerList
+    try {
+      const response = await this.apiServer.get(endUrlName)
+      nProgress.done()
+
+      return response
+    } catch (err: any) {
+      console.log('Error fetching Project Manager List ========>', err?.message)
+      nProgress.done()
+    }
+    nProgress.done()
+  }
+  async getCorporateAccountManagerList() {
+    nProgress.start()
+    const endUrlName = this.baseUrl + apiEndPoints.corporateAccountManagerList
+    try {
+      const response = await this.apiServer.get(endUrlName)
+      nProgress.done()
+
+      return response
+    } catch (err: any) {
+      console.log('Error fetching Account Manager List ========>', err?.message)
+      nProgress.done()
+    }
+    nProgress.done()
+  }
+  async getPaymentTypesList() {
+    nProgress.start()
+    const endUrlName = this.baseUrl + apiEndPoints.paymentTypes
+    try {
+      const response = await this.apiServer.get(endUrlName)
+      nProgress.done()
+
+      return response
+    } catch (err: any) {
+      console.log('Error fetching Payment Types list ========>', err?.message)
+      nProgress.done()
+    }
+    nProgress.done()
+  }
+  async corporateStudentChangeStatus(params: any) {
+    const endUrlName = `${this.baseUrl + apiEndPoints.corporateStudentChangeStatus}`
+    try {
+      const response = await this.apiServer.patch(endUrlName, { ...params })
+
+      return response
+    } catch (err: any) {
+      console.log('Error updating status ========>', err?.message)
     }
   }
 }

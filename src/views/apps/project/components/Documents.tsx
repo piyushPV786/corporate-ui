@@ -16,16 +16,38 @@ import { commonListTypes } from 'src/types/apps/dataTypes'
 import { errorToast, successToast } from 'src/components/Toast'
 import axios from 'axios'
 
+interface IIndex {
+  api: {
+    getRowIndex: (arg0: number) => number
+  }
+  row: {
+    id: number
+  }
+}
+
 const defaultColumns = [
   {
     flex: 0.5,
     field: 'id',
-    headerName: '#'
+    headerName: '#',
+    renderCell: (index: IIndex) => <Typography>{index.api.getRowIndex(index.row.id) + 1}</Typography>
   },
   {
-    flex: 1,
+    flex: 3,
     field: 'name',
-    headerName: 'File Name'
+    headerName: 'File Name',
+    renderCell: ({ row }: GridRenderCellParams) => (
+      <Typography
+        sx={{
+          p: 0,
+          whiteSpace: 'normal', // Allow text to wrap
+          wordWrap: 'break-word', // Break long words
+          overflow: 'visible' // Ensure visibility
+        }}
+      >
+        {row.name}
+      </Typography>
+    )
   }
 ]
 const isLoadingInitialState = {
@@ -33,16 +55,18 @@ const isLoadingInitialState = {
   listLoading: true
 }
 
-const Documents = ({ projectCode, projectId }: { projectCode: string; projectId: number }) => {
+const Documents = ({ projectCode }: { projectCode: string }) => {
   const [isLoading, setIsLoading] = useState<{ [key: string]: boolean }>(isLoadingInitialState)
   const [viewFileLoader, setViewFileLoader] = useState<{ [key: string]: boolean }>()
   const [documentList, setDocumentList] = useState<Array<IDocumentListResponseTypes>>()
   const [documentTypeList, setDocumentTypeList] = useState<Array<commonListTypes>>([])
 
   const getDocumentList = async () => {
-    const response = await StudentService.getProjectDocuments(projectId)
+    const response = await StudentService.getProjectDocuments(projectCode)
     if (response) {
       setDocumentList(response.data)
+      console.log(response.data)
+
       setIsLoading(prev => ({ ...prev, listLoading: false }))
       response?.data?.map((item: IDocumentListResponseTypes) =>
         setViewFileLoader(prev => ({ ...prev, [item.code]: false }))
@@ -51,6 +75,9 @@ const Documents = ({ projectCode, projectId }: { projectCode: string; projectId:
   }
   const getDocumentTypeList = async () => {
     const response = await CommonService.getProjectDocumentTypeList()
+
+    // console.log(response.data);
+
     if (response) {
       setDocumentTypeList(response.data)
     }
@@ -61,16 +88,17 @@ const Documents = ({ projectCode, projectId }: { projectCode: string; projectId:
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const uploadDocument = async (param: IUploadDocumentParam) => {
+  const uploadDocument = async (param: IUploadDocumentParam, docCode: string) => {
     setIsLoading(prev => ({ ...prev, documentAdding: true, listLoading: true }))
     const { file, documentTypeCode, comment } = param
     const response = await StudentService.addProjectDocuments({
-      projectCode: projectId,
+      projectCode: projectCode,
       body: {
         documentTypeCode: documentTypeCode,
         fileName: file.name,
         fileType: file.type,
-        projectCode: projectId.toString(),
+        code: docCode,
+        projectCode: projectCode.toString(),
         comment: comment
       }
     })
@@ -116,13 +144,8 @@ const Documents = ({ projectCode, projectId }: { projectCode: string; projectId:
     },
     {
       flex: 1,
-      field: 'comment',
-      headerName: 'Comments'
-    },
-    {
-      flex: 1,
       field: 'date',
-      headerName: 'Upload Date',
+      headerName: 'Uploaded Date',
       renderCell: ({ row }: GridRenderCellParams) => (
         <Typography>{row?.createdAt ? DateFormat(row?.createdAt) : '-'}</Typography>
       )

@@ -7,22 +7,31 @@ import { useEffect, useState } from 'react'
 import { FileDocumentEdit } from 'mdi-material-ui'
 import { DashboardService } from 'src/service'
 import { successToast } from 'src/components/Toast'
+import { yupResolver } from '@hookform/resolvers/yup'
+import { validationContactSchema } from 'src/views/apps/project/projectstudent/schema'
 
 interface IContactTypes {
   studentData: any
   getStudentDetailById: any
 }
 
+type ValidContactNumberFieldNames = 'contactNumber'
+
 const EditContactDetails = ({ studentData, getStudentDetailById }: IContactTypes) => {
+  const defaultValues = {
+    email: studentData?.lead?.email,
+    contactNumberCountryCode: studentData?.lead?.mobileCountryCode,
+    contactNumber: studentData?.lead?.mobileCountryCode + studentData?.lead?.mobileNumber
+  }
   const {
     handleSubmit,
-    watch,
     control,
     setValue,
     reset,
     formState: { errors }
-  } = useForm()
-  const countryCodeContact = (fieldName: string, data: any, dialCode: string) => {
+  } = useForm({ defaultValues, resolver: yupResolver(validationContactSchema) })
+
+  const countryCodeContact = (fieldName: ValidContactNumberFieldNames, data: any, dialCode: string) => {
     data && setValue(fieldName, data)
     data && setValue(`${fieldName}CountryCode`, dialCode)
   }
@@ -32,19 +41,14 @@ const EditContactDetails = ({ studentData, getStudentDetailById }: IContactTypes
   const onSubmit = async (data: any) => {
     const payload = {
       email: data?.email,
-      contactNumberCountryCode: data?.contactNumberCountryCode,
-      contactNumber: data?.contactNumber,
-      alternativeContactCountryCode: data?.alternativeContactCountryCode,
-      alternativeContact: data?.alternativeContact,
-      whatsappNumberCountryCode: data?.whatsappNumberCountryCode,
-      whatsappNumber: data?.whatsappNumber,
-      homePhone: data?.homePhone
+      mobileCountryCode: data?.contactNumberCountryCode,
+      mobileNumber: data.contactNumber.slice(data.contactNumberCountryCode.length)
     }
 
-    const response = await DashboardService.addUpdateStudentContactInfo(payload, studentData?.code)
+    const response = await DashboardService.addUpdateStudentContactInfo(payload, studentData?.applicationCode)
 
-    if (response?.code) {
-      getStudentDetailById(studentData?.id)
+    if (response?.studentCode) {
+      getStudentDetailById(studentData?.applicationCode)
 
       successToast(`Student Contact Info updated successfully`)
     }
@@ -57,19 +61,9 @@ const EditContactDetails = ({ studentData, getStudentDetailById }: IContactTypes
   }
 
   useEffect(() => {
-    !!studentData &&
-      reset({
-        email: studentData?.email,
-        contactNumberCountryCode: studentData?.contactNumberCountryCode,
-        contactNumber: studentData?.contactNumber,
-        alternativeContactCountryCode: studentData?.alternativeContactCountryCode,
-        alternativeContact: studentData?.alternativeContact,
-        whatsappNumberCountryCode: studentData?.whatsappNumberCountryCode,
-        whatsappNumber: studentData?.whatsappNumber,
-        homePhone: studentData?.homePhone
-      })
+    !!studentData && reset(defaultValues)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [studentData])
+  }, [studentData, reset, !show])
 
   return (
     <Grid>
@@ -131,7 +125,8 @@ const EditContactDetails = ({ studentData, getStudentDetailById }: IContactTypes
                         onChange={(data, countryData: { dialCode: string }) =>
                           countryCodeContact('contactNumber', data, countryData?.dialCode)
                         }
-                        country={'US'}
+                        country={'za'}
+                        countryCodeEditable={false}
                         placeholder='Enter phone number'
                         specialLabel='Contact Number'
                         inputStyle={{
@@ -140,14 +135,14 @@ const EditContactDetails = ({ studentData, getStudentDetailById }: IContactTypes
                           width: '100%'
                         }}
                       />
-                      <FormHelperText style={{ color: 'red' }}>
+                      <FormHelperText error>
                         {errors.contactNumber && (errors.contactNumber?.message as string | undefined)}
                       </FormHelperText>
                     </Box>
                   )}
                 />
               </Grid>
-              <Grid item sm={4} xs={12}>
+              {/* <Grid item sm={4} xs={12}>
                 <Controller
                   name='alternativeContact'
                   control={control}
@@ -184,9 +179,9 @@ const EditContactDetails = ({ studentData, getStudentDetailById }: IContactTypes
                 <FormHelperText style={{ color: 'red' }}>
                   {errors.alternativeContact && (errors.alternativeContact?.message as string | undefined)}
                 </FormHelperText>
-              </Grid>
+              </Grid> */}
 
-              <Grid item sm={4}>
+              {/* <Grid item sm={4}>
                 <Controller
                   name='homePhone'
                   control={control}
@@ -201,44 +196,7 @@ const EditContactDetails = ({ studentData, getStudentDetailById }: IContactTypes
                     />
                   )}
                 />
-              </Grid>
-              <Grid item sm={4} xs={12}>
-                <Controller
-                  name='whatsappNumber'
-                  control={control}
-                  render={({ field }) => (
-                    <Box
-                      sx={{
-                        '& .country-list': { top: '-40px' },
-                        '& .form-control:focus': {
-                          borderColor: theme => theme.palette.primary.main,
-                          boxShadow: theme => `0 0 0 1px ${theme.palette.primary.main}`
-                        },
-                        '& input.form-control': { color: theme => `rgb(${theme.palette.customColors.main})` }
-                      }}
-                    >
-                      <PhoneInput
-                        {...field}
-                        onChange={(data, countryData: { dialCode: string }) =>
-                          countryCodeContact('whatsappNumber', data, countryData?.dialCode)
-                        }
-                        country={'US'}
-                        placeholder='Enter whatsapp number'
-                        specialLabel='Whatsapp Number'
-                        inputStyle={{
-                          borderRadius: '10px',
-                          background: 'none',
-                          width: '100%'
-                        }}
-                      />
-                    </Box>
-                  )}
-                />
-
-                <FormHelperText style={{ color: 'red' }}>
-                  {errors.whatsappNumber && (errors.whatsappNumber?.message as string | undefined)}
-                </FormHelperText>
-              </Grid>
+              </Grid> */}
             </Grid>
           </DialogContent>
           <DialogActions sx={{ pb: { xs: 8, sm: 12.5 }, justifyContent: 'center' }}>

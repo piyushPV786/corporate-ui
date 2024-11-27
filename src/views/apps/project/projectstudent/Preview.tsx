@@ -14,7 +14,7 @@ import { IProjectStudentTypes } from 'src/types/apps/projectTypes'
 import { errorToast, successToast } from 'src/components/Toast'
 
 interface IStudentPreviewProps {
-  id: number
+  id: number | string | any
   projectCode: string
 }
 
@@ -44,12 +44,7 @@ const StudentPreview = ({ id, projectCode }: IStudentPreviewProps) => {
   return !!studentDetail ? (
     <Grid container spacing={6}>
       <Grid item xl={9} md={8} xs={12}>
-        <PreviewCard
-          studentId={id}
-          studentDetail={studentDetail}
-          getStudentDetailById={getStudentDetailById}
-          projectCode={projectCode}
-        />
+        <PreviewCard studentId={id} studentDetail={studentDetail} getStudentDetailById={getStudentDetailById} />
       </Grid>
       <Grid item xl={3} md={4} xs={12}>
         <Box className='sticky-sidebar'>
@@ -57,6 +52,8 @@ const StudentPreview = ({ id, projectCode }: IStudentPreviewProps) => {
             enrollStudentById={enrollStudentById}
             disableSubmit={studentDetail?.documents?.data?.length === 0}
             projectCode={projectCode}
+            student={studentDetail}
+            getStudentDetail={getStudentDetailById}
           />
         </Box>
       </Grid>

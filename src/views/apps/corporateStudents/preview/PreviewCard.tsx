@@ -5,8 +5,8 @@ import { useEffect, useState } from 'react'
 import { Accordion, AccordionDetails, AccordionSummary, Box, Grid, InputLabel, Theme, Typography } from '@mui/material'
 
 // ** Custom Service/Components
-import { getName } from 'src/utils'
-import { CommonService } from 'src/service'
+import { getFullName, getName } from 'src/utils'
+import { AcademicService, CommonService, DashboardService } from 'src/service'
 import {
   accordionExpandInitialState,
   corporateConstant,
@@ -39,17 +39,31 @@ const PreviewCard = ({ studentData }: IPropsTypes) => {
   const [accordionExpand, setAccordionExpand] = useState<{ [key: string]: boolean }>(accordionExpandInitialState)
 
   const getCommonList = async () => {
-    const [nationality, race, language, employeStatus, highestQualification, gender, country, states] =
-      await Promise.all([
-        CommonService.getNationalityList(),
-        CommonService.getRace(),
-        CommonService.getLanguage(),
-        CommonService.getEmployeStatus(),
-        CommonService.getHighestQualification(),
-        CommonService.getGenderList(),
-        CommonService.getCountryLists(),
-        CommonService.getStatesByCountry(studentData?.lead?.address?.[0]?.country)
-      ])
+    const [
+      nationality,
+      race,
+      language,
+      employeStatus,
+      highestQualification,
+      gender,
+      country,
+      states,
+      program,
+      projectManager,
+      accountManager
+    ] = await Promise.all([
+      CommonService.getNationalityList(),
+      CommonService.getRace(),
+      CommonService.getLanguage(),
+      CommonService.getEmployeStatus(),
+      CommonService.getHighestQualification(),
+      CommonService.getGenderList(),
+      CommonService.getCountryLists(),
+      CommonService.getStatesByCountry(studentData?.lead?.address?.[0]?.country),
+      AcademicService.getAllProgramList(),
+      DashboardService.getCorporateProjectManagerList(),
+      DashboardService.getCorporateAccountManagerList()
+    ])
     setCommonList(prev => ({
       ...prev,
       nationality: nationality?.data?.data,
@@ -61,8 +75,11 @@ const PreviewCard = ({ studentData }: IPropsTypes) => {
       country: country?.data?.data,
       state: states?.data?.map((state: any) => ({
         ...state,
-        code: state.isoCode
-      }))
+        code: state.isoCode || state.code
+      })),
+      program: program?.data?.data,
+      projectManager: projectManager?.data?.data,
+      accountManager: accountManager?.data?.data
     }))
     setIsLoading(true)
   }
@@ -172,10 +189,12 @@ const PreviewCard = ({ studentData }: IPropsTypes) => {
                             ? item === corporateConstant.dateOfBirth
                               ? `${dateBirth.getDate()}/${dateBirth.getMonth() + 1}/${dateBirth.getFullYear()}`
                               : item === corporateConstant.mobileNumber
-                                ? `${lead[parentName]['mobileCountryCode']}${lead[parentName][item]}`
+                                ? `+${lead[parentName]['mobileCountryCode']} ${lead[parentName][item]}`
                                 : corporateConstant.getNameCommonListArray.includes(item) && !!commonList
                                   ? getName(commonList[item], lead[parentName][item])
-                                  : lead[parentName][item]
+                                  : corporateConstant.getFullNameCommonListArray.includes(item) && !!commonList
+                                    ? getFullName(commonList[item], lead[parentName][item])
+                                    : lead[parentName][item]
                             : '-'}
                         </Typography>
                       </Grid>

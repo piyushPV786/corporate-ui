@@ -17,11 +17,13 @@ export default class Common {
   }
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
 
-  async getFileUrl(fileName: string, studentCode: string | boolean) {
+  async getFileUrl(fileName: string, studentCode?: string | boolean) {
     nProgress.start()
     const endUrlName = this.baseUrl + apiEndPoints.getFileUrl
     try {
-      const response = await this.apiServer.get(`${endUrlName}?filename=${fileName}&studentCode=${studentCode}`)
+      const response = await this.apiServer.get(
+        `${endUrlName}?filename=${fileName}${studentCode ? `&studentCode=${studentCode}` : ''}`
+      )
       nProgress.done()
 
       return response
@@ -425,9 +427,9 @@ export default class Common {
     nProgress.done()
   }
 
-  async getStatesByCountry(countryCode: string) {
+  async getStatesByCountry(countryCode?: string) {
     nProgress.start()
-    const endUrlName = `${this.baseUrl + apiEndPoints.stateByCountry}/${countryCode}`
+    const endUrlName = `${this.baseUrl + apiEndPoints.stateByCountry}/${countryCode ? countryCode : ''}`
 
     try {
       const response = await this.apiServer.get(endUrlName)

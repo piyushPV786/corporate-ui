@@ -15,7 +15,7 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 
 import { Controller, useForm } from 'react-hook-form'
-import { paymentTypeList, userInformationStatus } from 'src/context/common'
+import { userInformationStatus } from 'src/context/common'
 
 import {
   FormControl,
@@ -51,13 +51,15 @@ interface ICostContractDialogProps {
   handleEditSuccess: () => void
   data: IFormDataTypes
   createCostContract: (arg: IPayloadTypes) => void
+  paymentTypeList: any[]
 }
 
 const CostContractDetail = ({
   handleClickSuccess,
   data,
   handleEditSuccess,
-  createCostContract
+  createCostContract,
+  paymentTypeList
 }: ICostContractDialogProps) => {
   const [show, setShow] = useState<boolean>(false)
   const [showVariance, setShowVariance] = useState(false)
@@ -84,6 +86,12 @@ const CostContractDetail = ({
     createCostContract(payload)
     setShow(false)
     !!data ? handleEditSuccess() : handleClickSuccess()
+    reset()
+  }
+
+  const handleCancel = () => {
+    setShow(false)
+    reset()
   }
 
   function handleClick(value: string) {
@@ -135,13 +143,26 @@ const CostContractDetail = ({
                 <TextField
                   inputProps={{ min: 0 }}
                   type='number'
-                  {...register('fullCost', { required: userInformationStatus.CostOfTrainingQuoteRequired })}
+                  {...register('fullCost', {
+                    required: userInformationStatus.CostOfTrainingQuoteRequired,
+                    validate: value => {
+                      if (value <= 0) {
+                        return 'Full cost must be greater than 0'
+                      } else if (value > 1000000) {
+                        return 'Full cost must not exceed 1000000'
+                      }
+                    }
+                  })}
                   fullWidth
                   label={<RequiredLabel label='Full Cost of Training Quoted (in Rand)' />}
                   defaultValue={data?.fullCost}
                   error={!!errors?.fullCost}
                   onChange={e => {
-                    setValue('fullCost', e.target.value)
+                    const value = parseFloat(e.target.value)
+                    setValue('fullCost', value)
+                    if (value > 0 && value <= 1000000) {
+                      clearErrors('fullCost')
+                    }
                   }}
                   helperText={errors.fullCost && (errors.fullCost?.message as string | undefined)}
                 />
@@ -151,13 +172,26 @@ const CostContractDetail = ({
                 <TextField
                   inputProps={{ min: 0 }}
                   type='number'
-                  {...register('contractCost', { required: userInformationStatus.ContractCostRequired })}
+                  {...register('contractCost', {
+                    required: userInformationStatus.ContractCostRequired,
+                    validate: value => {
+                      if (value <= 0) {
+                        return 'Contract cost must be greater than 0'
+                      } else if (value > 1000000) {
+                        return 'Contract cost must not exceed 1000000'
+                      }
+                    }
+                  })}
                   fullWidth
                   label={<RequiredLabel label='Contract Cost' />}
                   defaultValue={data?.contractCost}
                   error={!!errors?.contractCost}
                   onChange={e => {
-                    setValue('contractCost', e.target.value)
+                    const value = parseFloat(e.target.value)
+                    setValue('contractCost', value)
+                    if (value > 0 && value <= 1000000) {
+                      clearErrors('contractCost')
+                    }
                   }}
                   helperText={errors.contractCost && (errors.contractCost?.message as string | undefined)}
                 />
@@ -217,11 +251,11 @@ const CostContractDetail = ({
                     style={{ width: '100%' }}
                     options={paymentTypeList}
                     onChange={(_, value) => {
-                      value && setValue('paymentType', value.name)
+                      value && setValue('paymentType', value.paymentCode)
                       clearErrors('paymentType')
                     }}
-                    value={paymentTypeList?.find(i => i.name === watch('paymentType'))}
-                    getOptionLabel={option => option.name}
+                    value={paymentTypeList?.find(i => i.paymentCode === watch('paymentType'))}
+                    getOptionLabel={option => option.paymentName}
                     renderInput={params => (
                       <TextField
                         {...params}
@@ -240,7 +274,7 @@ const CostContractDetail = ({
             </Grid>
           </DialogContent>
           <DialogActions sx={{ pb: { xs: 8, sm: 12.5 }, justifyContent: 'center' }}>
-            <Button variant='outlined' color='secondary' onClick={() => setShow(false)}>
+            <Button variant='outlined' color='secondary' onClick={handleCancel}>
               cancel
             </Button>
             <Button variant='contained' sx={{ mr: 2 }} type='submit'>

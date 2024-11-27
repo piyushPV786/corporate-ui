@@ -11,20 +11,13 @@ import { corporateConstant } from 'src/context/corporateData'
 // ** Icons Imports
 import ArrowLeft from 'mdi-material-ui/ArrowLeft'
 
-// import CorpStudConfirmationDialog from 'src/views/pages/dialog/CorpStudConfirmationDialog'
 import { Fragment } from 'react'
-import { IDynamicObject } from 'src/types/apps/corporatTypes'
+
 import { CommonActivityTab } from 'src/views/dashboards/comments/CommentComponenet'
+import EnrollToRetail from './EnrollToRetail'
+import { applicationStatus, cancelledApplicationStatus } from 'src/context/common'
 
-interface IPropsTypes {
-  rejectStudent: (comments: string) => void
-  approveStudent: () => void
-  data: IDynamicObject
-  disableApprove: boolean
-  disableReject: boolean
-}
-
-const PreviewActions = ({ data }: IPropsTypes) => {
+const PreviewActions = ({ data, getCorporateStudentsDetailById }: any) => {
   return (
     <Fragment>
       <Card>
@@ -34,6 +27,9 @@ const PreviewActions = ({ data }: IPropsTypes) => {
               Back to List
             </Button>
           </Link>
+          {(data?.status === applicationStatus || data?.status === cancelledApplicationStatus) && (
+            <EnrollToRetail studentCode={data?.lead?.studentCode} />
+          )}
         </CardContent>
         {/* <CardContent>
           <CorporateReject rejectStudent={rejectStudent} disable={disableReject} />
@@ -43,7 +39,7 @@ const PreviewActions = ({ data }: IPropsTypes) => {
           <CorpStudConfirmationDialog submit={approveStudent} disable={disableApprove} />
         </CardContent> */}
       </Card>
-      <CommonActivityTab data={data} />
+      <CommonActivityTab data={data} getCorporateStudentsDetailById={getCorporateStudentsDetailById} />
     </Fragment>
   )
 }

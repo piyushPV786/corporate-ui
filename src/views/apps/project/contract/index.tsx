@@ -13,11 +13,9 @@ import VenueLogisticsDetail from 'src/views/pages/dialog/VenueLogistics'
 import InstallmentDetail from 'src/views/pages/dialog/InstallmentDetails'
 import { successToast } from '../../../../components/Toast'
 import { messages } from '../../../../context/common'
-import CustomChip from 'src/@core/components/mui/chip'
 
 // ** Third Party Styles Imports
 import 'react-datepicker/dist/react-datepicker.css'
-import { ThemeColor } from 'src/@core/layouts/types'
 import {
   IAddVenueTypes,
   IPayloadTypes,
@@ -30,31 +28,24 @@ import { Typography } from '@mui/material'
 import { CommonService, DashboardService } from 'src/service'
 import { status } from 'src/context/common'
 import { CloseBox } from 'mdi-material-ui'
-import { DDMMYYYDateFormat } from 'src/utils'
+import { DDMMYYYDateFormat, minTwoDigits, serialNumber } from 'src/utils'
 
 interface CellType {
   row: InvoiceInstallmentType
 }
 
-interface ColorsType {
-  [key: string]: ThemeColor
-}
-
 interface propsType {
   code: string
-}
-const statusColors: ColorsType = {
-  paid: 'success',
-  pending: 'warning',
-  upcoming: 'secondary'
 }
 
 const CostContract = ({ code }: propsType) => {
   const [pageSize, setPageSize] = useState<number>(10)
+  const [pageNumber, setPageNumber] = useState<number>(1)
   const [response, setResponse] = useState<any>()
   const [installmentList, setInstallmentList] = useState<any>()
   const [venueLogisticsList, setVenueLogisticsList] = useState<any>()
   const [currencyList, SetCurrencyList] = useState<any>([])
+  const [paymentTypeList, setPaymentTypeList] = useState<any>([])
 
   const handleCostSuccess = () => {
     successToast(messages.CostContractAdd)
@@ -144,18 +135,30 @@ const CostContract = ({ code }: propsType) => {
     }
   }
 
+  const getPaymentListDetails = async () => {
+    const response = await DashboardService.getPaymentTypesList()
+    if (response?.data.statusCode == status.successCode && response?.data?.data) {
+      setPaymentTypeList(response.data.data)
+    }
+  }
+
   useEffect(() => {
     getCostContractList()
     getInstallmentAll()
     getInstallmentList()
     getVenueLogisticsList()
     getCurrencyListDetails()
+    getPaymentListDetails()
   }, [])
+
+  const installmentPaginatedData = installmentList?.slice((pageNumber - 1) * pageSize, pageNumber * pageSize) || []
+
   const columns = [
     {
       field: 'id',
       minWidth: 40,
-      headerName: '#'
+      headerName: '#',
+      renderCell: (index: any) => minTwoDigits(serialNumber(index.api.getRowIndex(index.row.id), pageNumber, pageSize))
     },
     {
       flex: 0.1,
@@ -186,33 +189,6 @@ const CostContract = ({ code }: propsType) => {
       field: 'dueDate',
       headerName: 'Due Date',
       renderCell: ({ row }: any) => <Box>{row.dueDate ? DDMMYYYDateFormat(row.dueDate) : '-'}</Box>
-    },
-    {
-      flex: 0.1,
-      minWidth: 200,
-      field: 'status',
-      headerName: 'Status',
-      renderCell: ({ row }: CellType) => (
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Tooltip title='View'>
-            <Box>
-              <CustomChip
-                skin='light'
-                size='small'
-                label={row.status}
-                color={statusColors[row.status]}
-                sx={{
-                  height: 20,
-                  fontSize: '0.75rem',
-                  fontWeight: 500,
-                  borderRadius: '5px',
-                  textTransform: 'capitalize'
-                }}
-              />
-            </Box>
-          </Tooltip>
-        </Box>
-      )
     },
     {
       flex: 0.1,
@@ -252,6 +228,7 @@ const CostContract = ({ code }: propsType) => {
               handleEditSuccess={handleCostEdit}
               data={response}
               createCostContract={createCostContract}
+              paymentTypeList={paymentTypeList}
             />
           </Grid>
         </Grid>
@@ -271,7 +248,12 @@ const CostContract = ({ code }: propsType) => {
             </Grid>
             <Grid item xs={3}>
               <label>Payment Type</label>
-              <Typography>{response?.paymentType ?? '-'}</Typography>
+              <Typography>
+                {response?.paymentType
+                  ? paymentTypeList.find((payment: any) => payment.paymentCode === response.paymentType)?.paymentName ||
+                    response.paymentType
+                  : '-'}
+              </Typography>
             </Grid>
           </Grid>
         ) : (
@@ -311,13 +293,14 @@ const CostContract = ({ code }: propsType) => {
               disableColumnMenu
               disableColumnFilter
               disableColumnSelector
-              rows={installmentList}
+              rows={installmentPaginatedData}
+              rowCount={installmentList.length}
               columns={columns}
               disableSelectionOnClick
               pageSize={Number(pageSize)}
-              rowsPerPageOptions={[10, 25, 50]}
               sx={{ '& .MuiDataGrid-columnHeaders': { borderRadius: 0 } }}
               onPageSizeChange={newPageSize => setPageSize(newPageSize)}
+              onPageChange={newPage => setPageNumber(newPage + 1)}
             />
           </Grid>
         ) : (

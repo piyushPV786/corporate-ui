@@ -11,14 +11,25 @@ import {
   ListItemText,
   Typography
 } from '@mui/material'
+import { IAddressStateTypes } from 'src/types/apps/admittedStudent'
+import { commonListTypes } from 'src/types/apps/dataTypes'
+import { getName, getStateNameWithCountryCode } from 'src/utils'
 
 type params = {
   conformationOpen: boolean
   handleCloseConfirmationPopup: () => void
   selectedRows: any
+  countryList: commonListTypes[]
+  statesList: IAddressStateTypes[]
 }
 
-const CorporateInformation = ({ conformationOpen, handleCloseConfirmationPopup, selectedRows }: params) => {
+const CorporateInformation = ({
+  conformationOpen,
+  handleCloseConfirmationPopup,
+  selectedRows,
+  countryList,
+  statesList
+}: params) => {
   return (
     <Dialog
       open={conformationOpen}
@@ -47,7 +58,7 @@ const CorporateInformation = ({ conformationOpen, handleCloseConfirmationPopup, 
                   <ListItemText primary='Company Code' secondary={selectedRows?.code} />
                 </ListItem>
                 <ListItem>
-                  <ListItemText primary='Email' secondary={selectedRows?.email} />
+                  <ListItemText primary='Email' secondary={selectedRows?.email || '-'} />
                 </ListItem>
               </List>
             </Grid>
@@ -57,7 +68,7 @@ const CorporateInformation = ({ conformationOpen, handleCloseConfirmationPopup, 
                   <ListItemText primary='Company Type' secondary={selectedRows?.companyType} />
                 </ListItem>
                 <ListItem>
-                  <ListItemText primary='Contact Number' secondary={selectedRows?.phoneNumber} />
+                  <ListItemText primary='Contact Number' secondary={selectedRows?.phoneNumber || '-'} />
                 </ListItem>
               </List>
             </Grid>
@@ -83,7 +94,7 @@ const CorporateInformation = ({ conformationOpen, handleCloseConfirmationPopup, 
                   <ListItem>
                     <ListItemText
                       primary={item?.addressType === 'POSTAL' ? 'Postal Address' : 'Physical Address'}
-                      secondary={`${item?.address1} ${item?.address2} ${item?.country} ${item?.state} - ${item?.pincode}`}
+                      secondary={`${item?.address1}, ${item?.address2 ? `${item.address2}, ` : ''}${item?.city ? `${item.city}, ` : ''}${item?.state ? `${getStateNameWithCountryCode(statesList, item.state, item.country)}, ` : ''}${item?.country ? `${getName(countryList, item.country)}, ` : ''}${item?.pincode}`}
                     />
                   </ListItem>
                 </List>

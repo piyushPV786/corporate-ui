@@ -87,7 +87,7 @@ const CorporateStudentPreview = ({ studentCode }: IPropsTypes) => {
           <DynamicBreadcrumb asPath={router.asPath} code={studentCode.toString()} />
         </Typography>
         <Typography className='page-header'>
-          Student ID: {studentCode}
+          Student ID: {data?.lead?.studentCode}
           <Chip
             size='small'
             label={
@@ -108,6 +108,7 @@ const CorporateStudentPreview = ({ studentCode }: IPropsTypes) => {
       <Grid item xs={3}>
         <Box className='sticky-sidebar'>
           <PreviewActions
+            getCorporateStudentsDetailById={getCorporateStudentsDetailById}
             data={data}
             rejectStudent={rejectStudent}
             approveStudent={approveStudent}

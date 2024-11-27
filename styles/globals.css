@@ -148,6 +148,13 @@ p.page-header {
   font-weight: bold !important;
 }
 
+.ellipsis-text {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
 .side-menu li p {
   font-weight: 400 !important;
   font-size: 14px;
@@ -302,4 +309,10 @@ td.MuiTableCell-body p {
 .atlwdg-trigger.atlwdg-TOP{
   left: 91% !important;
   top: 92% !important;
+}
+
+.phone-number-required .special-label::after {
+  content: '*';
+  color: red;
+  margin-left: 3px;
 }

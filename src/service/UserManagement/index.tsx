@@ -111,4 +111,19 @@ export default class UserManagement {
     }
     nProgress.done()
   }
+
+  async getSalesAgentList() {
+    nProgress.start()
+    const endUrlName = this.baseUrl + apiEndPoints.salesAgentList
+    try {
+      const response = await this.apiServer.get(endUrlName)
+      nProgress.done()
+
+      return response
+    } catch (err: any) {
+      console.log('Error fetching Sales Agent List ========>', err?.message)
+      nProgress.done()
+    }
+    nProgress.done()
+  }
 }

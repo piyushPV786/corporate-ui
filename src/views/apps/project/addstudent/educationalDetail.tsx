@@ -90,6 +90,7 @@ export const EducationalDetail = ({ control, errors }: Ieducational) => {
                   <Controller
                     name='isInternationalDegreeHolder'
                     control={control}
+                    defaultValue={0}
                     rules={{ required: true }}
                     render={({ field }) => (
                       <RadioGroup row {...field} aria-label='international-degree' name='international-degree-radio'>

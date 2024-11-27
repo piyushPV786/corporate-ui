@@ -13,7 +13,7 @@ const nextConfig = {
     return [
       {
         source: '/',
-        destination: '/enrolment',
+        destination: '/corporate',
         basePath: false,
         permanent: false
       }

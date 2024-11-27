@@ -36,6 +36,7 @@ export type InvoiceAddInstallmentType = {
 }
 export type projectStudentType = {
   id: number
+  applicationCode: string
   name: string
   contact: {
     email: string
@@ -633,6 +634,7 @@ export interface ICorporateAddressTypes {
   address2: string
   country: string
   state: string
+  city: string
   pincode: string
   addressType: string
 }

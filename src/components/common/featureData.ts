@@ -75,6 +75,14 @@ export const FeatureCodes = {
     viewAndDownloadGraduation: 'VIEW-AND-DOWNLOAD-GRADUATION-AMS',
     examSchedule: 'EXAM-SCHEDULE-AMS',
     viewExamAttendance: 'EXAM-ATTENDENCE-AMS'
+  },
+  CES: {
+    corporateStudents: 'CORPORATE-STUDENT',
+    corporate: 'CORPORATE',
+    corporateStudentManagement: 'CORPORATE-STUDENT-MANAGEMENT',
+    projectManagement: 'PROJECT-MANAGEMENT',
+    corporateGroup: 'CORPORATE-GROUP',
+    corporateManager: 'CORPORATE-MANAGER'
   }
 }
 
@@ -93,7 +101,8 @@ export const moduleKeys = {
   adminAcademics: 'adminacademics',
   adminAssessment: 'adminassessment',
   adminOperation: 'adminoperation',
-  user: 'usermanagement'
+  user: 'usermanagement',
+  corporate: 'corporate'
 }
 
 export const RoleCodes: any = {}
@@ -119,6 +128,7 @@ ModuleCodes[moduleKeys.assessment] = 'AAMS'
 ModuleCodes[moduleKeys.sales] = 'EMS'
 ModuleCodes[moduleKeys.operation] = 'OMS'
 ModuleCodes[moduleKeys.user] = 'UMS'
+ModuleCodes[moduleKeys.corporate] = 'CES'
 
 export const PermissionsCodes: any = {
   view: 'VIEW',
@@ -133,26 +143,19 @@ MenuTitles[moduleKeys.operation] = 'Operations Management'
 MenuTitles[moduleKeys.sales] = 'Enrolment Management'
 MenuTitles[moduleKeys.user] = 'User Management'
 MenuTitles[moduleKeys.assessment] = 'Assessment Management System'
+MenuTitles[moduleKeys.corporate] = 'Corporate Education System'
 
 export const url = {
-  student: 'student',
-  applicationEnrollment: 'application-enrollment',
-  assignIntake: 'assign-intake',
-  admission: 'admission',
-  studentsManagement: 'students-management',
-  admittedStudent: 'admitted-student',
-  academic: 'academic',
-  studentSupportAdministrative: 'Student-Support-Administrative',
-  graduateStudent: 'graduate-student'
+  corporate: 'corporate',
+  corporateStudents: 'corporate-students',
+  corporateStudentManagement: 'corporate-students-management',
+  projectManagement: 'project',
+  corporateGroup: 'corporate-groups'
 }
 
 export const UrlToModule: any = {}
-UrlToModule[url.student] = FeatureCodes.EMS.application
-UrlToModule[url.applicationEnrollment] = FeatureCodes.EMS.applicationEnrollment
-UrlToModule[url.assignIntake] = FeatureCodes.EMS.assignIntake
-UrlToModule[url.admission] = FeatureCodes.EMS.admission
-UrlToModule[url.studentsManagement] = FeatureCodes.EMS.studentManagement
-UrlToModule[url.admittedStudent] = FeatureCodes.EMS.admittedStudent
-UrlToModule[url.academic] = FeatureCodes.EMS.academicTranscript
-UrlToModule[url.studentSupportAdministrative] = FeatureCodes.EMS.assignStudentSupport
-UrlToModule[url.graduateStudent] = FeatureCodes.EMS.graduateStudent
+UrlToModule[url.corporate] = FeatureCodes.CES.corporate
+UrlToModule[url.corporateStudents] = FeatureCodes.CES.corporateStudents
+UrlToModule[url.corporateStudentManagement] = FeatureCodes.CES.corporateStudentManagement
+UrlToModule[url.projectManagement] = FeatureCodes.CES.projectManagement
+UrlToModule[url.corporateGroup] = FeatureCodes.CES.corporateGroup

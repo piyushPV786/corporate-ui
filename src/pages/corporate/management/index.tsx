@@ -33,8 +33,24 @@ import CorporateInformation from 'src/views/pages/dialog/CorporateInformation'
 import { Controller, useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
-import { Autocomplete, Backdrop, Checkbox, CircularProgress, FormControlLabel, Stack, Switch } from '@mui/material'
-import { addressDetails, getStateList, minTwoDigits, serialNumber } from 'src/utils'
+import {
+  Autocomplete,
+  Backdrop,
+  Checkbox,
+  CircularProgress,
+  FormControlLabel,
+  FormHelperText,
+  Stack,
+  Switch
+} from '@mui/material'
+import {
+  addressDetails,
+  getName,
+  getStateList,
+  getStateNameWithCountryCode,
+  minTwoDigits,
+  serialNumber
+} from 'src/utils'
 import { errorToast, successToast } from 'src/components/Toast'
 import { ThemeColor } from 'src/@core/layouts/types'
 import Chip from 'src/@core/components/mui/chip'
@@ -43,6 +59,11 @@ import { AxiosResponse } from 'axios'
 import ControlledAutocomplete from 'src/components/ControlledAutocomplete'
 import { IAddressStateTypes } from 'src/types/apps/admittedStudent'
 import RequiredLabel from 'src/components/RequiredLabel'
+import AlertBox from 'src/layouts/components/Alert'
+import PhoneInput from 'react-phone-input-2'
+import 'react-phone-input-2/lib/material.css'
+import Filter from 'src/components/Filter'
+import { IDynamicObject } from 'src/types/apps/corporatTypes'
 
 interface CellType {
   row: InvoiceType
@@ -116,11 +137,13 @@ const defaultValues = {
   phoneNumber: '',
   country: '',
   state: '',
+  city: '',
   address1: '',
   pincode: '',
   address2: '',
   physicalCountry: '',
   physicalState: '',
+  physicalCity: '',
   physicalAddress1: '',
   physicalAddress2: '',
   physicalPincode: '',
@@ -129,25 +152,51 @@ const defaultValues = {
 }
 
 const schema = yup.object().shape({
-  name: yup.string().required('required'),
+  name: yup
+    .string()
+    .required('required')
+    .matches(/^[A-Za-z0-9]+([ ]?[A-Za-z0-9]+)*$/, 'Name can only contain alphanumeric characters')
+    .test('not-only-numbers', 'Name cannot contain only numbers', (value: string | undefined) => {
+      return value ? /[a-zA-Z]/.test(value) : false
+    }),
   code: yup
     .string()
-    .matches(/^[\w@.-]*$/, `Code Must be without space you can use dash(-) instead`)
+    .matches(/^[\w@.-]*$/, `Special characters are not allowed in the Company Code`)
     .required('required'),
+  email: yup.string().email('Please enter a valid email address').nullable().notRequired(),
+  mobileCountryCode: yup.string().notRequired(),
+  phoneNumber: yup.string().when('mobileCountryCode', {
+    is: (mobileCountryCode: string) => mobileCountryCode !== '',
+    then: yup
+      .string()
+      .test('phoneNumber-validation', 'Mobile number must be a minimum of 6 digits', (value: any, context: any) => {
+        const { mobileCountryCode } = context.parent
+
+        if (value && value.trim() === mobileCountryCode.trim()) {
+          return true
+        }
+
+        return value && value.trim().length >= 6
+      }),
+    otherwise: yup.string().notRequired()
+  }),
   companyType: yup.string().required('required'),
   country: yup.string().required('required'),
   state: yup.string().required('required'),
+  city: yup.string().required('reuired'),
   address1: yup.string().required('required'),
-  pincode: yup.string().required('required').min(5).max(6),
+  pincode: yup.string().required('required').min(4, 'Minimum 4 characters required').max(6, 'Maximum 6 characters are allowed'),
   physicalCountry: yup.string().required('required'),
   physicalState: yup.string().required('required'),
+  physicalCity: yup.string().required('required'),
   physicalAddress1: yup.string().required('required'),
-  physicalPincode: yup.string().required('required').min(5).max(6)
+  physicalPincode: yup.string().required('required').min(4, 'Minimum 4 characters required').max(6, 'Maximum 6 characters are allowed')
 })
 
 const StudentList = () => {
   // ** State
   const [value, setQuery] = useState<string>('')
+  const [filterData, setFilterData] = useState<IDynamicObject>()
   const [pageSize, setPageSize] = useState<number>(10)
   const [pageNumber, setPageNumber] = useState<number>(1)
   const [selectedRows, setSelectedRows] = useState<any[]>([])
@@ -159,9 +208,10 @@ const StudentList = () => {
   const [companyTypes, setCompanyTypes] = useState<Array<commonListTypes>>()
   const [country, setCountry] = useState<Array<commonListTypes>>([])
   const [states, setStates] = useState<IAddressStateTypes[] | []>([])
-  const [loadingStates, setLoadingStates] = useState<boolean>(false)
-  const [defaultCountry, setDefaultCountry] = useState({})
-  const [defaultState, setDefaultState] = useState({})
+  const [postalStates, setPostalStates] = useState<IAddressStateTypes[] | []>([])
+  const [allStates, setAllStates] = useState<IAddressStateTypes[] | []>([])
+  const [filterCountry, setFilterCountry] = useState<string>('')
+  const [loadingForm, setLoadingForm] = useState<boolean>(false)
 
   const {
     setValue,
@@ -170,6 +220,8 @@ const StudentList = () => {
     watch,
     reset,
     control,
+    setError,
+    clearErrors,
     formState: { errors }
   } = useForm<any>({
     defaultValues: corporateFormData,
@@ -178,6 +230,8 @@ const StudentList = () => {
     resolver: yupResolver(schema)
   })
   const countryWatch = watch('country')
+  const physicalCountryWatch = watch('physicalCountry')
+
   const getCountryLists = async () => {
     const response = await CommonService.getCountryLists()
     if (response?.status === status.successCode && response?.data?.data?.length) {
@@ -185,8 +239,18 @@ const StudentList = () => {
     }
   }
 
-  const fetchStates = async (countryCode: string) => {
-    setLoadingStates(true)
+  const getAllStateList = async () => {
+    const response = await CommonService.getStatesByCountry()
+    if (response?.statusCode === status.successCode && response?.data?.length) {
+      setAllStates(response.data)
+    }
+  }
+
+  const fetchStates = async (
+    countryCode: string,
+    setStates: React.Dispatch<React.SetStateAction<IAddressStateTypes[]>>
+  ) => {
+    setLoadingForm(true)
     if (countryCode) {
       const fetchedStates = await getStateList(countryCode)
       const FormattedData = fetchedStates.map((region: any) => {
@@ -199,15 +263,102 @@ const StudentList = () => {
     } else {
       setStates([])
     }
-    setLoadingStates(false)
+    setLoadingForm(false)
   }
 
   useEffect(() => {
     if (countryWatch) {
-      fetchStates(countryWatch)
+      fetchStates(countryWatch, setStates)
     }
   }, [countryWatch])
 
+  useEffect(() => {
+    if (filterCountry) {
+      fetchStates(filterCountry, setStates)
+    }
+  }, [filterCountry])
+
+  useEffect(() => {
+    if (physicalCountryWatch) {
+      fetchStates(physicalCountryWatch, setPostalStates)
+    }
+  }, [physicalCountryWatch])
+
+  const checkDuplicateCorporateCode = async (code: string, id?: number) => {
+    const response = await DashboardService?.checkDuplicateCorporateCode(code, id)
+    response?.message && setError('code', { type: 'custom', message: response?.message })
+
+    return response?.message
+  }
+
+  const statusList = [
+    {
+      name: ProjectStatusTypes.Active,
+      code: 'true'
+    },
+    {
+      name: ProjectStatusTypes.Inactive,
+      code: 'false'
+    }
+  ]
+
+  const filterFields = [
+    {
+      id: 0,
+      name: 'name',
+      label: 'Company Name'
+    },
+    {
+      id: 1,
+      name: 'code',
+      label: 'Code'
+    },
+    {
+      id: 2,
+      name: 'companyType',
+      label: 'Company Type',
+      list: companyTypes
+    },
+    {
+      id: 3,
+      name: 'country',
+      label: 'Country',
+      list: country as any
+    },
+    {
+      id: 4,
+      name: 'state',
+      label: 'State / Province',
+      list: states as any
+    },
+    {
+      id: 5,
+      name: 'pincode',
+      label: 'Pincode'
+    },
+    {
+      id: 6,
+      name: 'isActive',
+      label: 'Status',
+      list: statusList
+    }
+  ]
+
+  const defaultFilterFields = {
+    name: '',
+    code: '',
+    companyType: '',
+    country: '',
+    state: '',
+    pincode: '',
+    projectCount: '',
+    studentCount: '',
+    status: ''
+  }
+
+  const handleSort = (val: IDynamicObject) => {
+    setFilterData(val)
+  }
   const formValue = watch()
   const router = useRouter()
   const columns = [
@@ -248,7 +399,10 @@ const StudentList = () => {
       flex: 0.1,
       minWidth: 200,
       field: 'companyType',
-      headerName: 'Company Type'
+      headerName: 'Company Type',
+      renderCell: ({ row }: any) => {
+        return <Box>{getName(companyTypes, row?.companyType)}</Box>
+      }
     },
     {
       flex: 0.1,
@@ -256,7 +410,9 @@ const StudentList = () => {
       field: 'country',
       headerName: 'Country',
       renderCell: ({ row }: any) => {
-        return <Box>{addressDetails(row?.corporateAddress, 'country')}</Box>
+        const addressCountry = addressDetails(row?.corporateAddress, 'country')
+
+        return <Box>{addressCountry && addressCountry !== '-' ? getName(country, addressCountry) : '-'}</Box>
       }
     },
     {
@@ -265,7 +421,16 @@ const StudentList = () => {
       field: 'state',
       headerName: 'Province/ State',
       renderCell: ({ row }: any) => {
-        return <Box>{addressDetails(row?.corporateAddress, 'state')}</Box>
+        const addressState = addressDetails(row?.corporateAddress, 'state')
+        const addressCountry = addressDetails(row?.corporateAddress, 'country')
+
+        return (
+          <Box>
+            {addressState && addressState !== '-'
+              ? getStateNameWithCountryCode(allStates, addressState, addressCountry)
+              : '-'}{' '}
+          </Box>
+        )
       }
     },
     {
@@ -346,20 +511,22 @@ const StudentList = () => {
     const residential = data?.corporateAddress?.find(item => item.addressType === 'RESIDENTIAL') ?? defaultValues
     const postal = data?.corporateAddress?.find(item => item.addressType === 'POSTAL') ?? defaultValues
     const rowValues = {
-      email: data.email,
+      email: data.email ?? '',
       name: data.name,
       code: data.code,
       companyType: data.companyType,
-      phoneNumber: data.phoneNumber,
+      phoneNumber: data.phoneNumber || '',
       country: residential.country,
       state: residential.state,
+      city: residential.city ?? '',
       address1: residential.address1,
       pincode: residential.pincode,
-      address2: residential.address2,
+      address2: residential.address2 ?? '',
       physicalCountry: postal.country,
       physicalState: postal.state,
+      physicalCity: postal.city ?? '',
       physicalAddress1: postal.address1,
-      physicalAddress2: postal.address2,
+      physicalAddress2: postal.address2 ?? '',
       physicalPincode: postal.pincode,
       isActive: data.isActive,
       isSameAddress: data.isSameAddress
@@ -387,15 +554,17 @@ const StudentList = () => {
     register('isActive')
     getCompanyTypeList()
     getCountryLists()
+    getAllStateList()
   }, [])
   useEffect(() => {
     getCorporateList({
       q: value,
       pageSize: pageSize,
       pageNumber: pageNumber,
-      status: ''
+      status: '',
+      ...filterData
     })
-  }, [pageSize, pageNumber, value])
+  }, [pageSize, pageNumber, value, filterData])
   const handleModalOpenClose = () => {
     setOpenEdit(prevState => ({ ...prevState, show: !prevState?.show }))
     reset(defaultValues)
@@ -411,70 +580,120 @@ const StudentList = () => {
   const { show, actionType } = { ...openEdit }
 
   const onSubmit = async (data: any) => {
+    setLoadingForm(true)
     reset({}, { keepValues: true })
+    const duplicateName =
+      actionType === 'Add'
+        ? await checkDuplicateCorporateCode(data?.code)
+        : await checkDuplicateCorporateCode(data?.code, openEdit?.data?.id)
 
-    const { name, code, companyType, email, phoneNumber, isSameAddress, isActive } = data
-    let res: AxiosResponse | undefined
-    const { address1 = '', address2 = '', country = '', state = '', pincode = '', ...postalAddress } = { ...data }
+    if (duplicateName === undefined) {
+      const { name, code, companyType, email, mobileCountryCode, phoneNumber, isSameAddress, isActive } = data
 
-    const postalAddr = {
-      address1: postalAddress?.physicalAddress1,
-      address2: postalAddress?.physicalAddress2,
-      country: postalAddress?.physicalCountry,
-      state: postalAddress?.physicalState,
-      pincode: postalAddress?.physicalPincode,
-      addressType: 'POSTAL'
-    }
-    const address = [
-      { address1, address2, country, state, pincode, addressType: 'RESIDENTIAL' },
-      {
-        ...postalAddr,
+      let res: AxiosResponse | undefined
+      const {
+        address1 = '',
+        address2 = '',
+        country = '',
+        state = '',
+        city = '',
+        pincode = '',
+        ...postalAddress
+      } = { ...data }
+
+      const postalAddr = {
+        address1: postalAddress?.physicalAddress1,
+        address2: postalAddress?.physicalAddress2,
+        country: postalAddress?.physicalCountry,
+        state: postalAddress?.physicalState,
+        city: postalAddress?.physicalCity,
+        pincode: postalAddress?.physicalPincode,
         addressType: 'POSTAL'
       }
-    ]
+      const address = [
+        { address1, address2, country, state, city, pincode, addressType: 'RESIDENTIAL' },
+        {
+          ...postalAddr,
+          addressType: 'POSTAL'
+        }
+      ]
 
-    const payload = { name, code, companyType, email, phoneNumber, isSameAddress, isActive, address }
+      const payload = { name, code, companyType, email, phoneNumber, isSameAddress, isActive, address }
 
-    if (openEdit?.actionType === 'Add') {
-      res = await DashboardService?.addCorporate(payload)
-    } else {
-      res = await DashboardService?.updateCorporate(code, payload)
+      if (openEdit?.actionType === 'Add') {
+        const isNotValidPhoneNumber = phoneNumber === mobileCountryCode
+        if (isNotValidPhoneNumber) {
+          delete payload.phoneNumber
+        }
+        res = await DashboardService?.addCorporate(payload)
+      } else {
+        if (!phoneNumber) {
+          delete payload.phoneNumber
+        }
+        res = await DashboardService?.updateCorporate(code, payload)
+      }
+      if (res?.data?.statusCode === status?.successCodeOne || res?.data?.statusCode === status?.successCode) {
+        getCorporateList({
+          q: value,
+          pageSize: pageSize,
+          pageNumber: pageNumber,
+          status: ''
+        })
+        setOpenEdit(prevState => ({ ...prevState, show: false, data: null, actionType: 'Add' }))
+        successToast(`${openEdit?.actionType === 'Add' ? messages.corporateAdded : messages.corporateEdited}`)
+      } else {
+        errorToast(messages.error)
+        setError('code', { type: 'custom', message: response?.message })
+      }
     }
-    if (res?.data?.statusCode === status?.successCodeOne || res?.data?.statusCode === status?.successCode) {
-      getCorporateList({
-        q: value,
-        pageSize: pageSize,
-        pageNumber: pageNumber,
-        status: ''
-      })
-      setOpenEdit(prevState => ({ ...prevState, show: false, data: null, actionType: 'Add' }))
-      successToast(
-        `${payload.name} ${openEdit?.actionType === 'Add' ? messages.corporateAdded : messages.corporateEdited}`
-      )
-    } else {
-      errorToast(messages.error)
-    }
+    setLoadingForm(false)
+  }
+
+  const countryCodeContact = (data: any, dialCode: string) => {
+    data && setValue(`mobileCountryCode`, dialCode)
   }
 
   const handlePhysicalAddress = (event: any) => {
-    setLoadingStates(true)
+    setLoadingForm(true)
     const isSameAddress = event.target.checked
-    setDefaultCountry(country?.find(item => (item as any)?.code === watch('country')) ?? '')
-    setDefaultState(states?.find(item => (item as any)?.code === watch('state')) ?? '')
 
     if (isSameAddress) {
       const currentCountry = watch('country')
       const currentState = watch('state')
+      const currentCity = watch('city')
 
       setValue('physicalCountry', currentCountry, { shouldDirty: true, shouldValidate: true })
       setValue('physicalState', currentState, { shouldDirty: true, shouldValidate: true })
+      setValue('physicalCity', currentCity, { shouldDirty: true, shouldValidate: true })
       setValue('physicalAddress1', watch('address1'), { shouldDirty: true, shouldValidate: true })
       setValue('physicalAddress2', watch('address2'), { shouldDirty: true, shouldValidate: true })
       setValue('physicalPincode', watch('pincode'), { shouldDirty: true, shouldValidate: true })
     }
 
     setValue('isSameAddress', isSameAddress)
-    setLoadingStates(false)
+    setLoadingForm(false)
+  }
+
+  const isChange = () => {
+    return (
+      watch('name') !== corporateFormData?.name ||
+      watch('companyType') !== corporateFormData?.companyType ||
+      watch('email') !== corporateFormData?.email ||
+      watch('phoneNumber') !== corporateFormData?.phoneNumber ||
+      watch('address1') !== corporateFormData?.address1 ||
+      watch('address2') !== corporateFormData?.address2 ||
+      watch('country') !== corporateFormData?.country ||
+      watch('state') !== corporateFormData?.state ||
+      watch('city') !== corporateFormData?.city ||
+      watch('pincode') !== corporateFormData?.pincode ||
+      watch('physicalAddress1') !== corporateFormData?.physicalAddress1 ||
+      watch('physicalAddress2') !== corporateFormData?.physicalAddress2 ||
+      watch('physicalCountry') !== corporateFormData?.physicalCountry ||
+      watch('physicalState') !== corporateFormData?.physicalState ||
+      watch('physicalCity') !== corporateFormData?.physicalCity ||
+      watch('physicalPincode') !== corporateFormData?.physicalPincode ||
+      watch('isActive') !== corporateFormData?.isActive
+    )
   }
 
   return (
@@ -500,8 +719,26 @@ const StudentList = () => {
             conformationOpen={conformationOpen}
             handleCloseConfirmationPopup={handleCloseConfirmationPopup}
             selectedRows={selectedRows}
+            countryList={country}
+            statesList={allStates}
           />
-          <TableHeader value={value} selectedRows={selectedRows} handleFilter={handleFilter} />
+          <Grid container display='flex' justifyContent='space-between'>
+            <Grid item xs={6}>
+              <TableHeader value={value} selectedRows={selectedRows} handleFilter={handleFilter} />
+            </Grid>
+            <Grid item xs={6} display='flex' justifyContent='flex-end'>
+              <Box sx={{ p: 5 }}>
+                <Filter
+                  studentData={response?.data}
+                  handleSort={handleSort}
+                  fields={filterFields}
+                  filterDefaultValues={defaultFilterFields}
+                  setSearchValue={setQuery}
+                  setFilterCountry={setFilterCountry}
+                />
+              </Box>
+            </Grid>
+          </Grid>
           <DataGrid
             loading={loading}
             autoHeight
@@ -548,6 +785,7 @@ const StudentList = () => {
                         {...field}
                         disabled={openEdit?.actionType !== 'Add'}
                         fullWidth
+                        onBlur={() => checkDuplicateCorporateCode(field.value)}
                         label={<RequiredLabel label='Company Code' />}
                         error={!!errors.code}
                         helperText={errors?.code?.message as string | undefined}
@@ -573,7 +811,14 @@ const StudentList = () => {
                     control={control}
                     name='companyType'
                     options={companyTypes ?? []}
-                    renderInput={params => <TextField {...params} label='Company Type' />}
+                    renderInput={params => (
+                      <TextField
+                        {...params}
+                        label={<RequiredLabel label='Company Type' />}
+                        helperText={errors?.companyType?.message as string | undefined}
+                        error={errors.companyType as any}
+                      />
+                    )}
                   />
                 </Grid>
                 <Grid item xs={6}>
@@ -590,7 +835,7 @@ const StudentList = () => {
                     error={errors.email as any as any}
                   />
                 </Grid>
-                <Grid item xs={6}>
+                {/* <Grid item xs={6}>
                   <TextField
                     fullWidth
                     {...register('phoneNumber')}
@@ -601,6 +846,52 @@ const StudentList = () => {
                     type='number'
                     label='Contact Number (Optional)'
                     defaultValue={formValue?.phoneNumber}
+                  />
+                </Grid> */}
+                <Grid item xs={6}>
+                  <Controller
+                    name='phoneNumber'
+                    control={control}
+                    render={({ field }) => (
+                      <Box
+                        sx={{
+                          '& .country-list': { top: '-40px' },
+                          '& .form-control:focus': {
+                            borderColor: theme => theme.palette.primary.main,
+                            boxShadow: theme => `0 0 0 1px ${theme.palette.primary.main}`
+                          },
+                          '& input.form-control': { color: theme => `rgb(${theme.palette.customColors.main})` }
+                        }}
+                      >
+                        <PhoneInput
+                          {...field}
+                          countryCodeEditable={false}
+                          placeholder='Enter Contact Number'
+                          specialLabel='Contact Number (Optional)'
+                          value={watch('phoneNumber') || '+27'}
+                          {...register('phoneNumber')}
+                          onChange={(data, countryData: { dialCode: string }) => {
+                            countryCodeContact(data, countryData?.dialCode)
+                            data && setValue('phoneNumber', data)
+                            clearErrors('phoneNumber')
+                          }}
+                          inputStyle={{
+                            borderRadius: '4px',
+                            background: 'none',
+                            width: '100%'
+                          }}
+                        />
+                        <FormHelperText error>
+                          {errors.phoneNumber && (errors.phoneNumber?.message as string | undefined)}
+                        </FormHelperText>
+                        <input
+                          type='hidden'
+                          {...register('mobileCountryCode')}
+                          value={field.value || ''}
+                          onChange={() => setValue('mobileCountryCode', field?.value)}
+                        />
+                      </Box>
+                    )}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -660,11 +951,12 @@ const StudentList = () => {
                             getOptionLabel={option => option?.name || ''}
                             onChange={(event, data) => {
                               field.onChange(data?.code)
+                              watch('country') == undefined && setValue('country', '')
                             }}
                             renderInput={params => (
                               <TextField
                                 {...params}
-                                label='Country'
+                                label={<RequiredLabel label='Country' />}
                                 error={!!errors?.country}
                                 helperText={errors?.country?.message as string | undefined}
                                 fullWidth
@@ -683,14 +975,17 @@ const StudentList = () => {
                             {...field}
                             options={states ?? []}
                             getOptionLabel={option => option?.name || ''}
-                            value={states?.find(item => (item as any)?.code === field?.value)}
+                            value={
+                              states.length > 0 ? states.find((item: any) => item?.code === field?.value) || null : null
+                            }
                             onChange={(event, data: any) => {
                               field.onChange(data?.code)
+                              watch('state') == undefined && setValue('state', '')
                             }}
                             renderInput={params => (
                               <TextField
                                 {...params}
-                                label='Province / State'
+                                label={<RequiredLabel label='Province / State' />}
                                 error={!!errors?.state}
                                 helperText={errors?.state?.message as string | undefined}
                                 fullWidth
@@ -698,6 +993,20 @@ const StudentList = () => {
                             )}
                           />
                         )}
+                      />
+                    </Grid>
+                    <Grid item xs={4}>
+                      <TextField
+                        {...register('city')}
+                        fullWidth
+                        onChange={(e: any) => {
+                          setValue(e.target.name, e.target.value)
+                        }}
+                        type='string'
+                        label={<RequiredLabel label='City' />}
+                        defaultValue={formValue?.city}
+                        helperText={errors?.city && (errors?.city?.message as string | undefined)}
+                        error={errors.city as any}
                       />
                     </Grid>
                     <Grid item xs={4}>
@@ -794,21 +1103,15 @@ const StudentList = () => {
                             {...field}
                             options={country ?? []}
                             disabled={formValue?.isSameAddress}
-                            value={
-                              defaultCountry
-                                ? defaultCountry
-                                : country?.find(item => (item as any)?.code === field?.value)
-                            }
+                            value={country?.find(item => (item as any)?.code === field?.value) || null}
                             getOptionLabel={(option: any) => option?.name || ''}
                             onChange={(event, data: any) => {
-                              setDefaultCountry('')
                               field.onChange(data?.code)
-                              fetchStates(data?.code)
                             }}
                             renderInput={params => (
                               <TextField
                                 {...params}
-                                label='Country'
+                                label={<RequiredLabel label='Country' />}
                                 error={!!errors?.physicalCountry}
                                 helperText={errors?.physicalCountry?.message as string | undefined}
                                 fullWidth
@@ -825,20 +1128,21 @@ const StudentList = () => {
                         render={({ field }) => (
                           <Autocomplete
                             {...field}
-                            options={states ?? []}
+                            options={postalStates ?? []}
                             disabled={formValue?.isSameAddress}
                             value={
-                              defaultState ? defaultState : states?.find(item => (item as any)?.code === field?.value)
+                              postalStates.length > 0
+                                ? postalStates.find((item: any) => item?.code === field?.value) || null
+                                : null
                             }
                             getOptionLabel={(option: any) => option?.name || ''}
                             onChange={(event, data: any) => {
-                              setDefaultState('')
                               field.onChange(data?.code)
                             }}
                             renderInput={params => (
                               <TextField
                                 {...params}
-                                label='State'
+                                label={<RequiredLabel label='State' />}
                                 error={!!errors?.physicalState}
                                 helperText={errors?.physicalState?.message as string | undefined}
                                 fullWidth
@@ -846,6 +1150,21 @@ const StudentList = () => {
                             )}
                           />
                         )}
+                      />
+                    </Grid>
+                    <Grid item xs={4}>
+                      <TextField
+                        {...register('physicalCity')}
+                        onChange={(e: any) => {
+                          setValue(e.target.name, e.target.value)
+                        }}
+                        fullWidth
+                        disabled={formValue?.isSameAddress}
+                        label={<RequiredLabel label='City' />}
+                        value={formValue?.physicalCity}
+                        defaultValue={formValue?.physicalCity}
+                        helperText={errors?.physicalCity && (errors?.physicalCity?.message as string | undefined)}
+                        error={errors.physicalCity as any}
                       />
                     </Grid>
                     <Grid item xs={4}>
@@ -884,20 +1203,34 @@ const StudentList = () => {
                     <Typography>Active</Typography>
                   </Stack>
                 </Grid>
-                {loadingStates && (
+                {loadingForm && (
                   <Backdrop
-                    open={loadingStates}
+                    open={loadingForm}
                     sx={{ color: '#fff', zIndex: (theme: { zIndex: { drawer: number } }) => theme.zIndex.drawer + 1 }}
                   >
                     <CircularProgress color='inherit' />
                   </Backdrop>
                 )}
               </Grid>
+              <Grid container display='flex' justifyContent='center'>
+                <Grid item xs={7.3}>
+                  {formValue && isChange() && openEdit?.actionType !== 'Add' ? (
+                    <AlertBox
+                      sx={{ mb: 6 }}
+                      color='warning'
+                      variant={'filled ' as any}
+                      header='Unsaved Changes'
+                      message='You have made changes. Do you want to save or discard them?'
+                      severity='warning'
+                    />
+                  ) : null}
+                </Grid>
+              </Grid>
             </DialogContent>
 
             <DialogActions sx={{ justifyContent: 'center', marginTop: 3 }}>
               <Button variant='outlined' color='secondary' onClick={handleModalOpenClose}>
-                Cancel
+                {openEdit?.actionType !== 'Add' ? 'discard' : 'cancel'}
               </Button>
               <Button type='submit' variant='contained' sx={{ mr: 1 }}>
                 {openEdit?.actionType !== 'Add' ? 'Save' : 'Add Corporate'}

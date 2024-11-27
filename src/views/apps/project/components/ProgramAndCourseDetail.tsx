@@ -6,9 +6,16 @@ import { AcademicService, CommonService } from 'src/service'
 import { commonListTypes } from 'src/types/apps/dataTypes'
 import { status } from 'src/context/common'
 import { IProgramList } from 'src/types/apps/invoiceTypes'
+import { getName } from 'src/utils'
 
 export const formateDate = (date: string) => {
   const newDate = new Date(date)
+
+  // Check if the resulting Date object is invalid
+  if (isNaN(newDate.getTime())) {
+    return '-'
+  }
+
   let mm = (newDate.getMonth() + 1).toString() // Get month and convert to string
   let dd = newDate.getDate().toString() // Get day and convert to string
   const yyyy = newDate.getFullYear()
@@ -178,7 +185,10 @@ const ProgramAndCourseDetail = ({
                 Facilitator
               </Typography>
               <Typography variant='body2' color='black' sx={{ fontWeight: 600 }}>
-                {projectData?.programDetails?.facilitator}
+                {projectData?.programDetails?.facilitator
+                  ?.split(',')
+                  .map((facilitator: any) => getName(facilitatorList, facilitator))
+                  .join(', ')}
               </Typography>
             </Box>
           </Grid>

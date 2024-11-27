@@ -22,6 +22,7 @@ export const apiEndPoints = {
   allIntake: 'intake/all',
   addressList: 'common/address-type',
   qualification: 'common/qualification',
+  interestedQualification: 'programs/all',
   studyMode: 'common/study-mode',
   socialMedia: 'common/social-media',
   agent: 'common/agent',
@@ -31,6 +32,7 @@ export const apiEndPoints = {
   individualDetails: 'finance/aggregate/',
   enrollIndividualDetails: 'enrolment/aggregate/',
   corporateEd: 'corporate-ed',
+  corporateEdDropdownList: 'corporate-ed/corporate-dropdown-list',
   projectList: 'project',
   projectDocumentDelete: 'project/projectCode/document',
   venueList: 'projectVenue',
@@ -112,10 +114,10 @@ export const apiEndPoints = {
   getStudentDetailAppCode: 'application/student-details-by-appcode/:appCode',
   applicationDetails: 'lead/:leadId/application',
   salesSudents: 'sales/student',
-  personalInfo: 'projectStudent/projectStudent/personalInformation',
-  contactInfo: 'projectStudent/projectStudent/contactInformation',
-  addressInfo: 'projectStudent/projectStudent/addressInformation',
-  educationInfo: 'projectStudent/projectStudent/educationInformation',
+  personalInfo: 'sales',
+  contactInfo: 'sales',
+  addressInfo: 'sales',
+  educationInfo: 'sales',
   unenrollStudent: 'admitted-students/unenroll-student',
   globalSearch: 'application/global-search',
   checkDuplicateProject: 'project/check-duplicate-project',
@@ -171,7 +173,14 @@ export const apiEndPoints = {
   assignGroup: 'corporate-group/assing/corporateGroup',
   allGroup: 'corporate-group/all',
   corporateGroup: 'corporate-group',
-  corporateGroupStudents: 'corporate-group/all-student'
+  corporateGroupStudents: 'corporate-group/all-student',
+  corporateCode: 'corporate-ed/check-duplicate-corporate',
+  corporateManager: 'corporate-managers',
+  corporateProjectManagerList: 'corporate-managers/all/manager/CE_Project_Manager',
+  corporateAccountManagerList: 'corporate-managers/all/manager/CE_Account_Manager',
+  paymentTypes: 'project/paymentTypes/all',
+  salesAgentList: 'user/role/Sales',
+  corporateStudentChangeStatus: 'corporate-student/change-status'
 }
 
 export const allowedDocsForCreditVetting = ['SMARTID', 'PASSPORT']

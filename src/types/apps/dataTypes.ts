@@ -207,39 +207,40 @@ export interface IUpdateStudentPersonalInfo {
   gender: string
   dateOfBirth: string
   nationality: string
-  citizenship: string
-  ifOthersSpecifyTheCitizenship: string
+
+  //citizenship: string
+  //ifOthersSpecifyTheCitizenship: string
   race: string
-  ifOtherSpecifyEquityCode: string
-  homeLanguage: string
-  socioEconomicStatusCode: string
-  disability: string
-  medicalIssueIfAny: string
+
+  //ifOtherSpecifyEquityCode: string
+  //homeLanguage: string
+  language: string
+
+  //socioEconomicStatusCode: string
+  //disability: string
+  //medicalIssueIfAny: string
 }
 export interface IUpdateStudentContactInfo {
   email: string
-  contactNumberCountryCode: string
-  contactNumber: string
-  alternativeContactCountryCode: string
-  alternativeContact: string
-  homePhone: string
-  whatsappNumberCountryCode: string
-  whatsappNumber: string
+  mobileCountryCode: string
+  mobileNumber: string
 }
 export interface IUpdateStudentAddressInfo {
-  streetAddress: string
+  street: string
   suburb: string
   town: string
   province: string
   country: string
-  zipCode: number
-  idType: string
-  ifOthersSpecifyTheIdType: string
-  idNo: string
+  zipcode: number
+
+  // identificationDocumentType: string
+  // ifOthersSpecifyTheIdType: string
+  // identificationNumber: string
 }
 export interface IUpdateStudenteducationInfo {
-  highestQualification: string
-  highestQualificationCompletedYear: number
+  qualificationCode: string
+
+  //highestQualificationCompletedYear: number
 }
 export interface IListOfCommonTypes {
   race?: commonListTypes[]
@@ -253,6 +254,7 @@ export interface IListOfCommonTypes {
   highestQualification?: commonListTypes[]
   idType?: commonListTypes[]
   year?: number[]
+  state?: commonListTypes[]
 }
 
 export type IDocumentFile = {

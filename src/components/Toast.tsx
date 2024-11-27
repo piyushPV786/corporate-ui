@@ -8,7 +8,8 @@ export const successToast = (message: string) => {
     style: {
       borderRadius: '10px',
       background: '#1f2b37',
-      color: '#fff'
+      color: '#fff',
+      border: '1px solid #02b535'
     },
     id: toasterLoading
   })
@@ -20,7 +21,8 @@ export const errorToast = (message: string) => {
     style: {
       borderRadius: '10px',
       background: '#1f2b37',
-      color: '#fff'
+      color: '#fff',
+      border: '1px solid #d60202'
     },
     id: toasterLoading
   })

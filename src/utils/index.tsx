@@ -14,7 +14,7 @@ import { IIntakeCommonLists, IdocumentDataType } from 'src/types/apps/invoiceTyp
 
 export const getName = (list: Array<commonListTypes | any> = [], code: string) => {
   if (list?.length > 0) {
-    return list.find(item => item.code === code)?.name
+    return list.find(item => item.code === code)?.name || code
   }
 
   return code
@@ -54,6 +54,11 @@ export const getExemptCourseName = (list: Array<IAcademicApi> = [], code: string
 
 export const getStateName = (list: Array<IAddressStateTypes> = [], code: string) =>
   list?.length > 0 ? (list?.find(state => state.isoCode === code)?.name ?? code) : code
+
+export const getStateNameWithCountryCode = (list: Array<IAddressStateTypes> = [], code: string, countryCode: string) =>
+  list?.length > 0
+    ? (list?.find(state => state.isoCode === code && state.countryCode === countryCode)?.name ?? code)
+    : code
 
 export const getSymbol = (list: Array<commonListTypes>, code: string) => {
   if (list?.length > 0) {
@@ -211,6 +216,21 @@ export const DDMMYYYDateFormat = (date: Date) => {
 }
 
 export const formatDate = (date: Date | string, dateFormat = 'dd-MM-yyyy'): string => {
+  if (!date) {
+    return 'Invalid Date'
+  }
+
+  const parsedDate = new Date(date)
+
+  // Check if the parsed date is invalid
+  if (isNaN(parsedDate.getTime())) {
+    return 'Invalid Date'
+  }
+
+  return format(parsedDate, dateFormat)
+}
+
+export const formatDateYMD = (date: Date | string, dateFormat = 'yyyy-MM-dd'): string => {
   const parsedDate = new Date(date)
 
   return format(parsedDate, dateFormat)
@@ -230,8 +250,13 @@ export const addressDetails = (data: any, key: string) => {
   let result = '-'
 
   if (data?.length > 0) {
-    const address = data[0]
-    result = address[key]
+    const residentialAddress = data.find((address: any) => address.addressType === 'RESIDENTIAL')
+    if (residentialAddress) {
+      result = residentialAddress[key]
+    } else {
+      const address = data[0]
+      result = address[key]
+    }
   }
 
   return result

@@ -19,7 +19,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { schema } from './schema'
 import { IDynamicObject } from 'src/types/apps/corporatTypes'
-import { formatDate } from 'src/utils'
+import { formatDateYMD } from 'src/utils'
 
 const intialState = {
   firstName: '',
@@ -150,8 +150,8 @@ const AddStudentPreview = ({ projectCode }: IstudentPreview) => {
       lastName: data.lastName,
       email: data.email,
       mobileNumber: data.mobileNumber.slice(data.mobileNumberCountryCode.length),
-      mobileCountryCode: `+${data.mobileNumberCountryCode}`,
-      dateOfBirth: data.dateOfBirth ? formatDate(data.dateOfBirth) : '',
+      mobileCountryCode: data.mobileNumberCountryCode,
+      dateOfBirth: data.dateOfBirth ? formatDateYMD(data.dateOfBirth) : '',
       nationalityStatus: data.nationalityStatus,
       permenantResident: data.permanentResident,
       identificationNumber: data.identificationNumber,
@@ -161,7 +161,7 @@ const AddStudentPreview = ({ projectCode }: IstudentPreview) => {
       language: data.homeLanguage,
       race: data.race,
       isAgreedTermsAndConditions: true,
-      PassportExpiryDate: data.passportExpiryDate ? formatDate(data.passportExpiryDate) : ''
+      passportExpiryDate: data.passportExpiryDate ? formatDateYMD(data.passportExpiryDate) : ''
     }
 
     const addressPayload = {
@@ -255,7 +255,7 @@ const AddStudentPreview = ({ projectCode }: IstudentPreview) => {
                   }
                 }}
               >
-                <span className='breadcrumb'>Dashboard /Project Management / MMl: FLP 2023</span> / Add Student
+                <span className='breadcrumb'>Dashboard /Project Management</span> / Add Student
               </Typography>
             </Box>
           </Grid>
@@ -294,7 +294,7 @@ const AddStudentPreview = ({ projectCode }: IstudentPreview) => {
             <Box className='sticky-sidebar'>
               <Card>
                 <CardContent>
-                  <Link href={`${AddStudent.BackToList}${projectCode}`} passHref>
+                  <Link href={`${AddStudent.BackToList}${projectCode}?tab=students`} passHref>
                     <Button fullWidth startIcon={<ArrowLeft />} component='a' sx={{ mb: 3.5 }} variant='outlined'>
                       Back to List
                     </Button>
@@ -310,6 +310,7 @@ const AddStudentPreview = ({ projectCode }: IstudentPreview) => {
                   >
                     Save As Draft
                   </Button> */}
+
                   <Button fullWidth variant='contained' type='submit' disabled={!isDirty || !isValid}>
                     Submit
                   </Button>

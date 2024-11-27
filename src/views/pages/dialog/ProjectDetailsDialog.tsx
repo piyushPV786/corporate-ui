@@ -43,16 +43,9 @@ interface FormInputs {
   proposalSubmissionDate: DateType
 }
 
-interface DataParams {
-  q: string
-  status: any
-  pageSize: number
-  pageNumber: number
-}
-
 interface CustomInputProps {
-  value: DateType
-  label: ReactNode
+  value: DateType | any
+  label: string | ReactNode
   error: boolean
   onChange: (event: ChangeEvent) => void
 }
@@ -101,21 +94,16 @@ const ProjectDetailsDialog = ({
       setprogrammeBusinessUnit(response?.data)
     }
   }
-  const getCorporateList = async (params: DataParams) => {
-    const response = await DashboardService?.getCorporateList(params)
+  const getCorporateList = async () => {
+    const response = await DashboardService?.getCorporateListForDropdown()
     if (response?.status === 200 && response?.data?.data) {
-      setCorporateList(response?.data?.data?.data)
+      setCorporateList(response?.data?.data)
     }
   }
 
   useEffect(() => {
     getProgrammeBusinessUnit()
-    getCorporateList({
-      q: '',
-      pageSize: 100,
-      pageNumber: 1,
-      status: ''
-    })
+    getCorporateList()
   }, [])
 
   // ** Hooks
@@ -131,6 +119,7 @@ const ProjectDetailsDialog = ({
   } = useForm<FormInputs>({ defaultValues })
   const handleClose = () => {
     onClose()
+    reset()
   }
 
   const onSubmit = async (data: any) => {
@@ -188,7 +177,7 @@ const ProjectDetailsDialog = ({
       fullWidth={true}
       maxWidth={'md'}
     >
-      <DialogTitle textAlign={'center'}>Manage Project Details</DialogTitle>
+      <DialogTitle textAlign={'center'}>Add or Edit Project Details</DialogTitle>
       <form onSubmit={handleSubmit(onSubmit)}>
         <DialogContent>
           <Grid container spacing={5}>
@@ -197,7 +186,13 @@ const ProjectDetailsDialog = ({
                 <Controller
                   name='projectName'
                   control={control}
-                  rules={{ required: true }}
+                  rules={{
+                    required: true,
+                    pattern: {
+                      value: /^[_a-zA-Z].*$/,
+                      message: 'Name must start with an underscore or an alphabet'
+                    }
+                  }}
                   render={({ field }) => (
                     <TextField
                       {...field}
@@ -210,7 +205,7 @@ const ProjectDetailsDialog = ({
                 />
                 {errors.projectName && (
                   <FormHelperText sx={{ color: 'error.main' }} id='projectName'>
-                    This field is required
+                    {errors.projectName.message || 'This field is required'}
                   </FormHelperText>
                 )}
               </FormControl>
@@ -370,7 +365,13 @@ const ProjectDetailsDialog = ({
                   name='typeOfNotificationReceived'
                   control={control}
                   defaultValue={projectData?.programDetails?.typeOfNotificationReceived}
-                  rules={{ required: true }}
+                  rules={{
+                    required: true,
+                    pattern: {
+                      value: /^[a-zA-Z0-9 ]*$/,
+                      message: 'Special characters are not allowed'
+                    }
+                  }}
                   render={({ field }) => (
                     <TextField
                       {...field}
@@ -382,7 +383,9 @@ const ProjectDetailsDialog = ({
                 />
                 {errors.typeOfNotificationReceived && (
                   <FormHelperText sx={{ color: 'error.main' }} id='typeOfNotificationReceived'>
-                    This field is required
+                    {errors.typeOfNotificationReceived.message !== ''
+                      ? errors.typeOfNotificationReceived.message
+                      : 'This field is required'}
                   </FormHelperText>
                 )}
               </FormControl>
@@ -390,7 +393,7 @@ const ProjectDetailsDialog = ({
             <Grid item xs={12} sm={4} mb={5}>
               <FormControl error={Boolean(errors.approvedProposal)}>
                 <FormLabel sx={{ fontSize: '12px' }}>
-                  <RequiredLabel label='Variation form original approved Proposal / Submission label=' />
+                  <RequiredLabel label='Variation form original approved Proposal / Submission label' />
                 </FormLabel>
                 <Controller
                   name='approvedProposal'
@@ -450,7 +453,13 @@ const ProjectDetailsDialog = ({
                 <Controller
                   name='releaseOfNotification'
                   control={control}
-                  rules={{ required: true }}
+                  rules={{
+                    required: true,
+                    pattern: {
+                      value: /^[a-zA-Z0-9 ]*$/,
+                      message: 'Special characters are not allowed'
+                    }
+                  }}
                   render={({ field }) => (
                     <TextField
                       {...field}
@@ -463,7 +472,9 @@ const ProjectDetailsDialog = ({
                 />
                 {errors.releaseOfNotification && (
                   <FormHelperText sx={{ color: 'error.main' }} id='releaseOfNotification'>
-                    This field is required
+                    {errors.releaseOfNotification.message !== ''
+                      ? errors.releaseOfNotification.message
+                      : 'This field is required'}
                   </FormHelperText>
                 )}
               </FormControl>
@@ -480,6 +491,7 @@ const ProjectDetailsDialog = ({
                       onKeyDown={e => {
                         e.preventDefault()
                       }}
+                      minDate={new Date()} // Ensures only today and future dates are selectable
                       selected={value}
                       showYearDropdown
                       showMonthDropdown

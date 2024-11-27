@@ -7,22 +7,25 @@ import Link from 'next/link'
 // ** MUI Imports
 import { Box, Card, Grid, IconButton, Tooltip, Typography } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
+import { styled } from '@mui/material/styles'
 
 // ** Custom Components Imports
 import TableHeader from 'src/views/apps/admission/list/TableHeader'
 import { InvoiceType } from 'src/types/apps/invoiceTypes'
 import { ThemeColor } from 'src/@core/layouts/types'
 import { ProjectStatusTypes, projectMessages, status } from 'src/context/common'
-import { getName, minTwoDigits, serialNumber } from 'src/utils'
+import { getFullName, getName, minTwoDigits, serialNumber } from 'src/utils'
 import ProjectManagementAddDialog from 'src/views/pages/dialog/ProjectManagementAddDialog'
 import { successToast } from 'src/components/Toast'
 import { commonListTypes } from 'src/types/apps/dataTypes'
-import { AcademicService, CommonService, DashboardService, UserManagementService } from 'src/service'
+import { AcademicService, CommonService, DashboardService } from 'src/service'
 
 // ** Third Party Styles Imports
 import 'react-datepicker/dist/react-datepicker.css'
 import { FolderPlusOutline } from 'mdi-material-ui'
 import CustomChip from 'src/@core/components/mui/chip'
+import ProjectInformation from 'src/views/pages/dialog/ProjectInformation'
+import ProjectStudentListDialog from 'src/views/pages/dialog/ProjectStudentListDialog'
 
 interface CellType {
   row: InvoiceType
@@ -68,6 +71,15 @@ const getProjectStatus = (status: boolean) => {
 }
 
 // ** Styled component for the link in the dataTable
+const StyledLink = styled('a')(({ theme }) => ({
+  color: theme.palette.primary.main,
+  cursor: 'pointer',
+  ':hover': {
+    textDecoration: 'underline'
+  }
+}))
+
+// ** Styled component for the link in the dataTable
 
 const ProjectManagement = () => {
   // ** State
@@ -83,6 +95,19 @@ const ProjectManagement = () => {
     accountManagerList: [],
     projectManagerList: []
   })
+  const [selectedProjectDetails, setSelectedProjectDetails] = useState<any>()
+  const [projectDetailsOpen, setProjectDetailsOpen] = useState<boolean>(false)
+  const [projectStudentListOpen, setProjectStudentListOpen] = useState<boolean>(false)
+
+  const handleCloseProjectDetails = () => {
+    setProjectDetailsOpen(false)
+    setSelectedProjectDetails(null)
+  }
+
+  const handleCloseProjectStudentList = () => {
+    setProjectStudentListOpen(false)
+    setSelectedProjectDetails(null)
+  }
 
   const columns = [
     {
@@ -99,7 +124,18 @@ const ProjectManagement = () => {
       minWidth: 250,
       headerName: 'Project Name',
       colSize: 6,
-      renderCell: ({ row }: CellType) => <Typography variant='body2'>{row.name}</Typography>
+      renderCell: ({ row }: CellType) => (
+        <Box>
+          <StyledLink
+            onClick={() => {
+              setSelectedProjectDetails(row)
+              setProjectDetailsOpen(true)
+            }}
+          >
+            {row.name}
+          </StyledLink>
+        </Box>
+      )
     },
     {
       flex: 0.25,
@@ -114,7 +150,15 @@ const ProjectManagement = () => {
       field: 'corporateName',
       headerName: 'Corporate Name',
       colSize: 12,
-      renderCell: ({ row }: CellType) => row?.corporateEd?.name
+      renderCell: ({ row }: CellType) => {
+        return (
+          <Tooltip title={row?.corporateEd?.name}>
+            <Typography variant='body2' className='ellipsis-text'>
+              {row?.corporateEd?.name}
+            </Typography>
+          </Tooltip>
+        )
+      }
     },
 
     {
@@ -123,7 +167,17 @@ const ProjectManagement = () => {
       field: 'projectManager',
       headerName: 'Project Manager',
       colSize: 6,
-      renderCell: ({ row }: CellType) => getName(commonList.projectManagerList, row?.projectManager)
+      renderCell: ({ row }: CellType) => {
+        const projectManager = getFullName(commonList.projectManagerList, row?.projectManager)
+
+        return (
+          <Tooltip title={projectManager}>
+            <Typography variant='body2' className='ellipsis-text'>
+              {projectManager}
+            </Typography>
+          </Tooltip>
+        )
+      }
     },
     {
       flex: 0.1,
@@ -131,28 +185,66 @@ const ProjectManagement = () => {
       field: 'accountManager',
       headerName: 'Account Manager',
       colSize: 6,
-      renderCell: ({ row }: CellType) => getName(commonList.accountManagerList, row?.accountManager)
+      renderCell: ({ row }: CellType) => {
+        const accountManager = getFullName(commonList.accountManagerList, row?.accountManager)
+
+        return (
+          <Tooltip title={accountManager}>
+            <Typography variant='body2' className='ellipsis-text'>
+              {accountManager}
+            </Typography>
+          </Tooltip>
+        )
+      }
     },
     {
       flex: 0.1,
       minWidth: 200,
       field: 'program',
       headerName: 'Qualification Name',
-      renderCell: ({ row }: CellType) => getName(commonList.programList, row?.program)
+      renderCell: ({ row }: CellType) => {
+        const qualification = getName(commonList.programList, row?.program)
+
+        return (
+          <Tooltip title={qualification}>
+            <Typography variant='body2' className='ellipsis-text'>
+              {qualification}
+            </Typography>
+          </Tooltip>
+        )
+      }
     },
 
     {
       flex: 0.1,
       minWidth: 200,
       field: 'courseType',
-      headerName: 'Module Type'
+      headerName: 'Module Type',
+      renderCell: ({ row }: CellType) => getName(commonList.courseTypeList, row?.courseType)
     },
     {
       flex: 0.1,
       minWidth: 200,
       field: 'noOfStudent',
       headerName: 'No of Students',
-      renderCell: ({ row }: CellType) => (row.noOfStudent ? row.noOfStudent : '-')
+      renderCell: ({ row }: CellType) => (
+        <>
+          {row?.noOfStudent ? (
+            <Box>
+              <StyledLink
+                onClick={() => {
+                  setSelectedProjectDetails(row)
+                  setProjectStudentListOpen(true)
+                }}
+              >
+                {row.noOfStudent}
+              </StyledLink>
+            </Box>
+          ) : (
+            '-'
+          )}
+        </>
+      )
     },
     {
       flex: 0.1,
@@ -228,13 +320,13 @@ const ProjectManagement = () => {
   }
 
   const getProjectManagerList = async () => {
-    const response = await UserManagementService.getProjectManagerList()
+    const response = await DashboardService.getCorporateProjectManagerList()
     if (response?.status === status?.successCode && response?.data?.data?.length) {
       setCommonList(prev => ({ ...prev, projectManagerList: response?.data?.data }))
     }
   }
   const getAccountManagerList = async () => {
-    const response = await UserManagementService.getAccountManagerList()
+    const response = await DashboardService.getCorporateAccountManagerList()
     if (response?.status === status?.successCode && response?.data?.data?.length) {
       setCommonList(prev => ({ ...prev, accountManagerList: response?.data?.data }))
     }
@@ -246,13 +338,9 @@ const ProjectManagement = () => {
     }
   }
   const getCorporateList = async () => {
-    const params = {
-      pageSize: 100,
-      pageNumber: 1
-    }
-    const response = await DashboardService?.getCorporateList(params)
+    const response = await DashboardService?.getCorporateListForDropdown()
     if (response?.status === 200 && response?.data?.data) {
-      setCommonList(prev => ({ ...prev, corporateList: response?.data?.data?.data }))
+      setCommonList(prev => ({ ...prev, corporateList: response?.data?.data }))
     }
   }
   const createProject = async (params: any) => {
@@ -351,6 +439,17 @@ const ProjectManagement = () => {
             sx={{ '& .MuiDataGrid-columnHeaders': { borderRadius: 0 } }}
             onPageSizeChange={newPageSize => setPageSize(newPageSize)}
             onPageChange={newPage => setPageNumber(newPage + 1)}
+          />
+          <ProjectInformation
+            projectDetailsOpen={projectDetailsOpen}
+            handleCloseProjectDetails={handleCloseProjectDetails}
+            project={selectedProjectDetails}
+            commonList={commonList}
+          />
+          <ProjectStudentListDialog
+            open={projectStudentListOpen}
+            handleCloseStudentListPopup={handleCloseProjectStudentList}
+            selectedProject={selectedProjectDetails}
           />
         </Card>
       </Grid>

@@ -81,7 +81,8 @@ export enum feeModeCode {
 
 export enum FileName {
   Template = 'student-template.xlsx',
-  List = 'student-List.xlsx'
+  List = 'student-List.xlsx',
+  StudentBulkUploadTemplate = 'student-bulk-upload-template.xlsx'
 }
 
 export const status: LoginParams = {
@@ -138,8 +139,8 @@ export const messages = {
   programDocumentTypeValidation: 'Please Select Document Type',
   programDocumentFileValidation: 'Please upload any File',
   enrolAccept: 'Enrolment Approved Successfully',
-  corporateAdded: 'added successfully',
-  corporateEdited: 'edited successfully',
+  corporateAdded: 'Corporate Added Successfully',
+  corporateEdited: 'Corporate details updated successfully!',
   intakeCourseValidationMessage: 'The courses in the group is not matching with courses in the intake selected',
   successUnenrollStudent: 'The selected student Unenrolled from the Qualification Successfully',
   filtersCleared: 'Filters Cleared Successfully',
@@ -161,7 +162,8 @@ export const messages = {
   generateInvoice: 'Invoice generated successfully.',
   nullData: 'User not found in Regenesys Database',
   quoteGenerated: 'quote will be downloaded in 2-3 mintues.',
-  assignIntake: 'Intake assigned successfully'
+  assignIntake: 'Intake assigned successfully',
+  defaultErrorMessage: 'Something went wrong. Please try again'
 }
 
 export const dataMessages = {
@@ -220,7 +222,14 @@ export const projectMessages = {
   projectManager: 'Please Select a Project Manager',
   accountManager: 'Please Select a Account Manager',
   program: 'Please Select a Qualification',
+  studyMode: 'Please Select Study Mode',
   courseType: 'Please Select a Module Type'
+}
+
+export const CorporateManagerMessages = {
+  add: 'Manager Added Successfully',
+  edit: 'Manager Updated Successfully',
+  delete: 'Manager Deleted Successfully'
 }
 
 export enum documentStatus {
@@ -305,10 +314,20 @@ export enum Regex {
   Alpha = '^[a-zA-Z]+$',
   Pascal_Case = '^[A-Z][a-z A-Z0-9-]+$'
 }
-
+export const EditStudentMessages = {
+  firstNameRequired: ' First Name is Required',
+  firstNameError:
+    'First name must be character. Please ensure first letter of the name starts with an uppercase letter and use single spaces or hyphens only.',
+  lastNameRequired: 'Last Name is Required',
+  lastNameError:
+    'Last Name must be character. Please ensure first letter of the name starts with an uppercase letter and use single spaces or hyphens only.',
+  middleNameError:
+    'Middle Name must be character. Please ensure first letter of the name starts with an uppercase letter and use single spaces or hyphens only.'
+}
 export const AddStudentMessages = {
   firstNameRequired: ' First Name is Required',
   firstNameError: 'First name must be character',
+  middleNameError: 'Middle name must be character',
   lastNameRequired: 'last Name is Required',
   lastNameError: 'last Name must be character',
   genderRequired: 'Gender is required',
@@ -328,6 +347,7 @@ export const AddStudentMessages = {
   disabilityRequired: 'Disability is required',
   medicalIssueRequired: 'Medical Issue  is required',
   emailRequired: 'Email  is required',
+  contactMinError: 'Contact number must be atleast 6 digits',
   contactRequired: 'contact number is required',
   contactMaxError: 'max home phone 12 digit',
   alternateContactRequired: ' Alternate contact number is required',
@@ -344,7 +364,8 @@ export const AddStudentMessages = {
   cityRequired: 'City is required',
   zipCodeRequired: 'ZipCode is required',
   zipCodeError: 'Must be only digits',
-  zipCodeMaxError: 'Must be exactly 5 digits',
+  zipCodeMaxError: 'Min length should be 4 or Max length should be 6.',
+  identificationNumberLengthError: 'Min length should be 8 or Max length should be 13',
   idTypeRequired: 'Id Type is required',
   idNoRequired: 'Id Number is required',
   ifOthersSpecifyTheIdType: 'if Other Id Type is required',
@@ -385,9 +406,9 @@ export enum userInformationStatus {
   VarianceRequired = 'Variance  is required',
   VarianceDetailRequired = 'Variance Details  is required',
   PaymentTypeRequired = 'Payment Type is required',
-  InstallmentNameRequired = 'InstallmentName is required',
+  InstallmentNameRequired = 'Installment Name is required',
   CurrencyRequired = 'Currency is required',
-  DueAmountRequired = 'DueAmount is required',
+  DueAmountRequired = 'Due Amount is required',
   DueDateRequired = 'Due Date is required',
   DateRequired = 'Date is required',
   AccommodationRequired = 'Accommodation  is required',
@@ -410,6 +431,7 @@ export enum userInformationStatus {
   DocumentType = 'Document Type is required',
   IdentificationNumber = 'Identification Number is required',
   DueAmountRequiredError = 'Amount Must be only digits',
+  DueAmountPositiveError = 'Due Amount must be greater than 0',
   PaymentMode = 'Payment mode is required',
   program = 'Qualification Name is required',
   startDate = 'Please enter valid Date',
@@ -434,7 +456,8 @@ export enum userInformationStatus {
   IdentificationNumbermax = 'Maximum 13 characters allowed',
   IdentificationNumberSmart = 'Identification number must be 13 digits and contain only numbers for smartID, e.g.- YYMMDD1234567',
   IdentificationNumberPassport = 'Passport number must be valid, e.g:- P4366918',
-  CityNameInvalid = 'City name must be characters'
+  CityNameInvalid = 'City name must be characters',
+  RoleRequired = 'Role is Required'
 }
 
 export const costResponse = {
@@ -507,8 +530,11 @@ export enum ClientContactDetails {
   MobileRequired = 'Mobile Number is Required',
   TelephoneRequired = 'Telephone Number is Required',
   DepartmentRequired = 'Department is Required',
+  DepartmentError = 'Department must be characters or numbers',
   DesignationRequired = 'Designation is Required',
-  RelationshipRequired = 'Relationship '
+  RelationshipRequired = 'Relationship ',
+  mobileNumberLength = 'Mobile number must be atleast 6 digits',
+  telephoneNumberLength = 'Telephone number must be atleast 6 digits'
 }
 
 interface UserStatusType {
@@ -1007,4 +1033,8 @@ export const callFunctionOn = {
 export const studentApplicationSubStatus: IDynamicObject = {
   'SUB-DEFERRED-FEES_PENDING': 'FEES_PENDING',
   'SUB-CANCELLED-FEES_PENDING': 'FEES_PENDING'
+}
+
+export const addInstallmentMessage = {
+  installmentNameError: 'Name should start with character or underscore only.'
 }

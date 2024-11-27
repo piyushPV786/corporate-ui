@@ -5,7 +5,7 @@ const ProjectStudentPreview = () => {
   const router = useRouter()
   const { projectCode, studentId } = router.query
 
-  return <StudentPreview id={Number(studentId)} projectCode={String(projectCode)} />
+  return <StudentPreview id={studentId} projectCode={String(projectCode)} />
 }
 
 export default ProjectStudentPreview

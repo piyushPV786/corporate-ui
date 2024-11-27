@@ -653,7 +653,9 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
   }, [])
 
   useEffect(() => {
-    tableData()
+    if (projectStudentListData) {
+      tableData()
+    }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectStudentListData])
@@ -690,7 +692,6 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
               . Please fill all the mandatory fields and re-upload the file.
             </Alert>
           )}
-          <LoadingBackdrop open={showLoader} />
         </DialogContent>
 
         <DialogActions sx={{ justifyContent: 'center' }}>

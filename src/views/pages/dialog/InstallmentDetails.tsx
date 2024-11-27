@@ -42,7 +42,7 @@ interface IInstallmentDialogProps {
   type: string
   AddInstallment?: any
   data?: any
-  EditInstallment?: (arg: InvoiceEditInstallmentType, id: number) => void
+  EditInstallment?: (arg: InvoiceEditInstallmentType, id: number) => Promise<void>
   currencyList: ICurrencyList[]
 }
 
@@ -110,8 +110,8 @@ const InstallmentDetail = ({
       dueDate: formatDate(formData.dueDate, 'yyyy-MM-dd')
     }
 
-    type === 'add' ? AddInstallment && AddInstallment(payload) : null
-    type === 'edit' ? EditInstallment && EditInstallment(payload, data?.id) : null
+    type === 'add' ? AddInstallment && await AddInstallment(payload) : null
+    type === 'edit' ? EditInstallment && await EditInstallment(payload, data?.id) : null
 
     setShow(false)
 

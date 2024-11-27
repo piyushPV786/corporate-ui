@@ -77,9 +77,9 @@ const VenueDetailsDialog = ({ title, data, createVenue, handleEdit, facilitatorL
     }
   }, [show, reset, data])
 
-  const onSubmit = (param: any) => {
-    createVenue && createVenue(param)
-    handleEdit && handleEdit(param, data.id)
+  const onSubmit = async (param: any) => {
+    createVenue && (await createVenue(param))
+    handleEdit && (await handleEdit(param, data.id))
     reset()
     setShow(false)
   }

@@ -13,7 +13,7 @@ import { TrashCanOutline, ProgressClose } from 'mdi-material-ui'
 
 interface DialogFormProps {
   row: { id: number; madeBy: string }
-  deleteNotes: (arg1: number) => void
+  deleteNotes: (arg1: number) => Promise<void>
   userName: string
 }
 const DialogForm = ({ row, userName, deleteNotes }: DialogFormProps) => {
@@ -21,6 +21,11 @@ const DialogForm = ({ row, userName, deleteNotes }: DialogFormProps) => {
   const [open, setOpen] = useState<boolean>(false)
   const handleClickOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
+
+  const handleDeleteNotes = async (id: number) => {
+    await deleteNotes(id)
+    handleClose()
+  }
 
   return (
     <Fragment>
@@ -79,8 +84,7 @@ const DialogForm = ({ row, userName, deleteNotes }: DialogFormProps) => {
             variant='contained'
             color='error'
             onClick={() => {
-              deleteNotes(row.id)
-              handleClose()
+              handleDeleteNotes(row.id)
             }}
           >
             Delete

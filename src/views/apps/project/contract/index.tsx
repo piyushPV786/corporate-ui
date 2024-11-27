@@ -75,10 +75,12 @@ const CostContract = ({ code, setLoading }: propsType) => {
   }
 
   const createCostContract = async (data: IPayloadTypes) => {
+    setLoading(true)
     const response: any = await DashboardService?.addEditCost(data, code)
     if (response?.data?.statusCode == status.successCode) {
-      getCostContractList()
+      await getCostContractList()
     }
+    setLoading(false)
   }
 
   const getInstallmentAll = async () => {
@@ -89,6 +91,7 @@ const CostContract = ({ code, setLoading }: propsType) => {
   }
 
   const AddInstallment = async (data: InvoiceAddInstallmentType) => {
+    setLoading(true)
     const payload = {
       currency: data.currency,
       dueAmount: data.dueAmount,
@@ -98,8 +101,9 @@ const CostContract = ({ code, setLoading }: propsType) => {
     }
     const response: any = await DashboardService?.AddInstallmentDetails(payload)
     if (response?.data?.statusCode === status.successCodeOne) {
-      getInstallmentAll()
+      await getInstallmentAll()
     }
+    setLoading(false)
   }
 
   const getInstallmentList = async () => {
@@ -109,10 +113,12 @@ const CostContract = ({ code, setLoading }: propsType) => {
     }
   }
   const EditInstallment = async (data: InvoiceEditInstallmentType, installmentId: number) => {
+    setLoading(true)
     const response = await DashboardService?.EditInstallment(data, installmentId)
     if (response?.data?.statusCode == status.successCode) {
-      getInstallmentList()
+      await getInstallmentList()
     }
+    setLoading(false)
   }
 
   const getVenueLogisticsList = async () => {
@@ -123,10 +129,12 @@ const CostContract = ({ code, setLoading }: propsType) => {
   }
 
   const venueLogisticsDetails = async (data: IAddVenueTypes) => {
+    setLoading(true)
     const response: any = await DashboardService?.addVenueLogistic(data, code)
     if (response?.data?.statusCode == status.successCode) {
-      getVenueLogisticsList()
+      await getVenueLogisticsList()
     }
+    setLoading(false)
   }
 
   const getCurrencyListDetails = async () => {

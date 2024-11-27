@@ -232,7 +232,7 @@ const TabDetails = ({ projectData, fetchProject, setLoading }: ITabDetail) => {
           <ContactDetailsList code={projectData?.code} />
         </TabPanel>
         <TabPanel value={value} index={3} dir={theme.direction}>
-          <ProgramAndCourseDetail fetchProject={fetchProject} projectData={projectData} />
+          <ProgramAndCourseDetail fetchProject={fetchProject} projectData={projectData} setLoading={setLoading} />
         </TabPanel>
         <TabPanel value={value} index={4} dir={theme.direction}>
           <StudentList projectCode={projectData?.code as any} projectName={projectData?.name as any} />
@@ -241,10 +241,10 @@ const TabDetails = ({ projectData, fetchProject, setLoading }: ITabDetail) => {
           <Documents projectCode={projectData?.code} />
         </TabPanel>
         <TabPanel value={value} index={6} dir={theme.direction}>
-          <VenueDetails code={projectData?.code} />
+          <VenueDetails code={projectData?.code} setIsLoading={setLoading}/>
         </TabPanel>
         <TabPanel value={value} index={7} dir={theme.direction}>
-          <Notes projectData={projectData} />
+          <Notes projectData={projectData} setLoading={setLoading}/>
         </TabPanel>
       </AppBar>
     </Box>

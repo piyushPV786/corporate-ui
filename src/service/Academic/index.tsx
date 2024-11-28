@@ -13,11 +13,12 @@ export default class Academic {
   }
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
 
-  async getFacilitator() {
+  async getFacilitator(isActive?: boolean) {
     nProgress.start()
     const endUrlName = this.baseUrl + apiEndPoints.facilitator
+    const updateEndUrl = isActive !== undefined ? `${endUrlName}?isActive=${isActive}` : endUrlName
     try {
-      const response = await this.apiServer.get(endUrlName)
+      const response = await this.apiServer.get(updateEndUrl)
       nProgress.done()
 
       return response

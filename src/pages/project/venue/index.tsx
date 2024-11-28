@@ -65,7 +65,8 @@ const VenueDetails = ({ code, setIsLoading }: propsType) => {
   const [facilitatorList, setFacilitatorList] = useState<any[]>([])
 
   const getFacilitator = async () => {
-    const response = await AcademicService.getFacilitator()
+    const isActive = true
+    const response = await AcademicService.getFacilitator(isActive)
     if (response?.status === status?.successCode && response?.data?.data?.length) {
       setFacilitatorList(response?.data?.data)
     }

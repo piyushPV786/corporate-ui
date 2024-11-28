@@ -64,8 +64,9 @@ const ProgramAndCourseDetail = ({
   }
 
   const getFacilitator = async () => {
-    const response = await AcademicService.getFacilitator()
-    if (response?.status === status?.successCode && response?.data?.data?.length) {
+    const isActive = true
+    const response = await AcademicService.getFacilitator(isActive)
+      if (response?.status === status?.successCode && response?.data?.data?.length) {
       setFacilitatorList(response?.data?.data)
     }
   }

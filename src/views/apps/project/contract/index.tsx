@@ -36,9 +36,10 @@ interface CellType {
 
 interface propsType {
   code: string
+  setLoading: (isLoading: boolean) => void
 }
 
-const CostContract = ({ code }: propsType) => {
+const CostContract = ({ code, setLoading }: propsType) => {
   const [pageSize, setPageSize] = useState<number>(10)
   const [pageNumber, setPageNumber] = useState<number>(1)
   const [response, setResponse] = useState<any>()
@@ -74,10 +75,12 @@ const CostContract = ({ code }: propsType) => {
   }
 
   const createCostContract = async (data: IPayloadTypes) => {
+    setLoading(true)
     const response: any = await DashboardService?.addEditCost(data, code)
     if (response?.data?.statusCode == status.successCode) {
-      getCostContractList()
+      await getCostContractList()
     }
+    setLoading(false)
   }
 
   const getInstallmentAll = async () => {
@@ -88,6 +91,7 @@ const CostContract = ({ code }: propsType) => {
   }
 
   const AddInstallment = async (data: InvoiceAddInstallmentType) => {
+    setLoading(true)
     const payload = {
       currency: data.currency,
       dueAmount: data.dueAmount,
@@ -97,8 +101,9 @@ const CostContract = ({ code }: propsType) => {
     }
     const response: any = await DashboardService?.AddInstallmentDetails(payload)
     if (response?.data?.statusCode === status.successCodeOne) {
-      getInstallmentAll()
+      await getInstallmentAll()
     }
+    setLoading(false)
   }
 
   const getInstallmentList = async () => {
@@ -108,10 +113,12 @@ const CostContract = ({ code }: propsType) => {
     }
   }
   const EditInstallment = async (data: InvoiceEditInstallmentType, installmentId: number) => {
+    setLoading(true)
     const response = await DashboardService?.EditInstallment(data, installmentId)
     if (response?.data?.statusCode == status.successCode) {
-      getInstallmentList()
+      await getInstallmentList()
     }
+    setLoading(false)
   }
 
   const getVenueLogisticsList = async () => {
@@ -122,10 +129,12 @@ const CostContract = ({ code }: propsType) => {
   }
 
   const venueLogisticsDetails = async (data: IAddVenueTypes) => {
+    setLoading(true)
     const response: any = await DashboardService?.addVenueLogistic(data, code)
     if (response?.data?.statusCode == status.successCode) {
-      getVenueLogisticsList()
+      await getVenueLogisticsList()
     }
+    setLoading(false)
   }
 
   const getCurrencyListDetails = async () => {
@@ -143,13 +152,22 @@ const CostContract = ({ code }: propsType) => {
   }
 
   useEffect(() => {
-    getCostContractList()
-    getInstallmentAll()
-    getInstallmentList()
-    getVenueLogisticsList()
-    getCurrencyListDetails()
-    getPaymentListDetails()
-  }, [])
+    const fetchData = async () => {
+      setLoading(true)
+      await Promise.all([
+        getCostContractList(),
+        getInstallmentAll(),
+        getInstallmentList(),
+        getVenueLogisticsList(),
+        getCurrencyListDetails(),
+        getPaymentListDetails()
+      ])
+      setLoading(false)
+    }
+    if (code) {
+      fetchData()
+    }
+  }, [code])
 
   const installmentPaginatedData = installmentList?.slice((pageNumber - 1) * pageSize, pageNumber * pageSize) || []
 

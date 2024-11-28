@@ -32,6 +32,7 @@ import { FeatureCodes, moduleKeys, PermissionsCodes } from 'src/components/commo
 import BulkIntake from './BulkIntake'
 import { commonListTypes } from 'src/types/apps/dataTypes'
 import { IAddressStateTypes } from 'src/types/apps/admittedStudent'
+import LoadingBackdrop from 'src/@core/components/loading-backdrop'
 
 interface IStudentProps {
   projectCode: string
@@ -124,6 +125,7 @@ interface CustomFileType extends File {
 const StudentList = ({ projectCode, projectName }: IStudentProps) => {
   const [openFileUpload, setOpenFileUpload] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [showLoader, setShowLoader] = useState(false)
   const [pageSize, setPageSize] = useState<number>(10)
   const [pageNumber, setPageNumber] = useState<number>(1)
   const [projectStudentListData, setProjectStudentListData] = useState<IStudent>()
@@ -202,7 +204,7 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
   }
 
   const downloadStudent = async (projectCode: string) => {
-    setIsLoading(true)
+    setShowLoader(true)
 
     const param = {
       pageNumber: 1,
@@ -259,7 +261,7 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
     } catch (error) {
       console.error('Error downloading student data:', error)
     } finally {
-      setIsLoading(false)
+      setShowLoader(false)
     }
   }
 
@@ -281,18 +283,17 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
   }
 
   const bulkUploadStudent = async (projectCode: string, file: File) => {
-    setIsLoading(true)
+    setShowLoader(true)
 
     //this demo api only for fileName once api ready this will remove
     const response = await DashboardService.uploadBulkStudent(projectCode, file)
     if (response?.data?.statusCode === status.successCodeOne && response?.data?.data) {
       downloadBulkUploadSuccessResponseData(response.data.data, file)
-      successToast('Your data has been processed successfully. Please find the attached Excel sheet.')
       setUploadedFile(null)
     } else {
+      setShowLoader(false)
       errorToast('There was an issue processing the file. Please try again.')
     }
-    setIsLoading(true)
   }
 
   const downloadBulkUploadSuccessResponseData = (response: BulkUploadResponseType[], file: File) => {
@@ -358,6 +359,9 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
       link.href = URL.createObjectURL(blob)
       link.download = `${projectCode}_upload_student_status.xlsx`
       link.click()
+      setShowLoader(false)
+      setOpenFileUpload(false)
+      successToast('Your data has been processed successfully. Please find the attached Excel sheet.')
     }
 
     reader.readAsArrayBuffer(file)
@@ -584,12 +588,9 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
     const result = await validateExcelForBulkUpload(file)
     setUploadedFile(result)
   }
-  const uploadBulkDocument = () => {
-    bulkUploadStudent(projectCode, uploadedFile!)
-    setOpenFileUpload(false)
-    setTimeout(() => {
-      getStudentList(projectCode, { pageNumber: 1, pageSize: 10 })
-    }, 2000)
+  const uploadBulkDocument = async () => {
+    await bulkUploadStudent(projectCode, uploadedFile!)
+    getStudentList(projectCode, { pageNumber: 1, pageSize: 10 })
   }
   const handleCloseBulkUpload = () => {
     setOpenFileUpload(!openFileUpload)
@@ -629,7 +630,9 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
   }, [])
 
   useEffect(() => {
-    tableData()
+    if (projectStudentListData) {
+      tableData()
+    }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectStudentListData])
@@ -762,6 +765,7 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
           />
         </Grid>
       </Card>
+      <LoadingBackdrop open={showLoader} />
     </Box>
   )
 }

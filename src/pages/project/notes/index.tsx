@@ -41,6 +41,7 @@ interface DataParams {
 
 interface IProject {
   projectData: { code: string }
+  setLoading: (isLoading: boolean) => void
 }
 const ReadMore = ({ children }: { children: string }) => {
   const text = children
@@ -63,7 +64,7 @@ const ReadMore = ({ children }: { children: string }) => {
     </Box>
   )
 }
-const Notes = ({ projectData }: IProject) => {
+const Notes = ({ projectData, setLoading }: IProject) => {
   // ** State
   const [pageSize, setPageSize] = useState<number>(10)
   const [pageNumber, setPageNumber] = useState<number>(0)
@@ -100,25 +101,31 @@ const Notes = ({ projectData }: IProject) => {
   }
 
   const createNotes = async (params: IAddNotes) => {
+    setLoading(true)
     const response = await DashboardService?.createNotes(params)
     if (response?.status === 201) {
+      await getNotesList({ pageSize: pageSize, pageNumber: pageNumber, status: '', projectCode: projectCode })
       handleSuccess()
-      getNotesList({ pageSize: pageSize, pageNumber: pageNumber, status: '', projectCode: projectCode })
     }
+    setLoading(false)
   }
   const updateNotes = async (params: { notes: string }, id: string | number | undefined) => {
+    setLoading(true)
     const response = await DashboardService?.updateNotes(params, id)
     if (response?.status === 200) {
+      await getNotesList({ pageSize: pageSize, pageNumber: pageNumber, status: '', projectCode: projectCode })
       handleEdit()
-      getNotesList({ pageSize: pageSize, pageNumber: pageNumber, status: '', projectCode: projectCode })
     }
+    setLoading(false)
   }
   const deleteNotes = async (id: string | number | undefined) => {
+    setLoading(true)
     const response = await DashboardService?.deleteNotes(id)
     if (response?.status === 200) {
+      await getNotesList({ pageSize: pageSize, pageNumber: pageNumber, status: '', projectCode: projectCode })
       handleDelete()
-      getNotesList({ pageSize: pageSize, pageNumber: pageNumber, status: '', projectCode: projectCode })
     }
+    setLoading(false)
   }
   useEffect(() => {
     getNotesList({

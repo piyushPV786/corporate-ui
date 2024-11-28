@@ -17,6 +17,7 @@ import * as yup from 'yup'
 import { DashboardService } from 'src/service'
 import { errorToast, successToast } from 'src/components/Toast'
 import { messages, status } from 'src/context/common'
+import LoadingBackdrop from 'src/@core/components/loading-backdrop'
 
 const schema = yup.object().shape({
   name: yup.string().required('Group is required')
@@ -32,6 +33,8 @@ const BulkIntake = ({ selectedRow, studentList, projectCode, getStudent, setSele
   const [open, setOpen] = useState<boolean>(false)
   const [group, setGroup] = useState([])
   const [disable, setDisabled] = useState(false)
+  const [loading, setLoading] = useState<boolean>(false)
+
   const handleClickOpen = () => {
     setOpen(true)
     reset()
@@ -63,6 +66,7 @@ const BulkIntake = ({ selectedRow, studentList, projectCode, getStudent, setSele
   }
 
   const handleEnroll = async (data: any) => {
+    setLoading(true)
     setDisabled(true)
     const payload = {
       corporateGroupId: Number(data?.name),
@@ -71,11 +75,12 @@ const BulkIntake = ({ selectedRow, studentList, projectCode, getStudent, setSele
 
     const res = await assignGroup(payload)
     if (res?.status === status.successCode) {
-      getStudent()
+      await getStudent()
       successToast(messages.assignIntake)
     } else {
       errorToast(messages.error)
     }
+    setLoading(false)
     handleClose()
     setSelectedRow([])
     setDisabled(false)
@@ -83,7 +88,7 @@ const BulkIntake = ({ selectedRow, studentList, projectCode, getStudent, setSele
 
   useEffect(() => {
     projectCode && getAllGroup(projectCode)
-  }, [])
+  }, [projectCode])
 
   return (
     <Fragment>
@@ -149,6 +154,7 @@ const BulkIntake = ({ selectedRow, studentList, projectCode, getStudent, setSele
           </DialogActions>
         </form>
       </Dialog>
+      <LoadingBackdrop open={loading} />
     </Fragment>
   )
 }

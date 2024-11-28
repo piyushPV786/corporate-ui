@@ -19,12 +19,14 @@ import { useForm } from 'react-hook-form'
 import * as yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
 
-import { ClientContactDetails } from 'src/context/common'
+import { ClientContactDetails, clientcontactMessages, messages, status } from 'src/context/common'
 import { Autocomplete, FormHelperText, IconButton } from '@mui/material'
 import { PencilOutline } from 'mdi-material-ui'
 import AlertBox from 'src/layouts/components/Alert'
 import { IClientContact } from 'src/types/apps/invoiceTypes'
 import RequiredLabel from 'src/components/RequiredLabel'
+import { DashboardService } from 'src/service'
+import { errorToast, successToast } from 'src/components/Toast'
 
 interface IDialogClientContactProps {
   data?: IClientContact
@@ -32,6 +34,11 @@ interface IDialogClientContactProps {
   projectId?: string | number | undefined
   createClientContact?: (arg: IClientContact) => void
   handleEdit?: (arg: IClientContact, id?: number) => void
+  pageNumber:number,
+  pageSize:number
+  setLoading:any
+  projectCode:string
+  getClientContactList:(arg:any)=>void
 }
 
 type FormFields =
@@ -54,7 +61,7 @@ const Transition = forwardRef(function Transition(
   return <Fade ref={ref} {...props} />
 })
 
-const DialogClientContact = ({ title, data, createClientContact, handleEdit }: IDialogClientContactProps) => {
+const DialogClientContact = ({ title, data,pageNumber,pageSize,setLoading,projectCode,getClientContactList}: IDialogClientContactProps) => {
   const [show, setShow] = useState<boolean>(false)
   const schema = yup.object().shape({
     title: yup.string().required(ClientContactDetails.TitleRequired),
@@ -102,6 +109,7 @@ const DialogClientContact = ({ title, data, createClientContact, handleEdit }: I
   const {
     register,
     handleSubmit,
+    setError,
     setValue,
     watch,
     clearErrors,
@@ -131,17 +139,89 @@ const DialogClientContact = ({ title, data, createClientContact, handleEdit }: I
     trigger(name)
   }
 
+
+  const handleBackendErrors = (message: string) => {
+    if (message.includes("Mobile Number")) {
+      setError("mobileNumber", { type: "manual", message });
+    } else if (message.includes("Email")) {
+      setError("email", { type: "manual", message });
+    } else if (message.includes("Telephone")) {
+      setError("telephoneNumber", { type: "manual", message });
+    } 
+  };
+
+
+
+  const handleEdit = async (params: IClientContact, id?: number) => {
+    setLoading(true)
+    const payload = {
+      ...params
+    }
+    const response = await DashboardService?.editClientContact(payload, id)
+
+    if (response?.status === status.successCode) {
+      getClientContactList({
+        pageSize: pageSize,
+        pageNumber: pageNumber,
+        projectCode: projectCode
+      })
+      successToast(clientcontactMessages.edit)
+      setShow(false)
+      reset()
+    }
+    else if(response?.status === status.badRequestCode){
+      handleBackendErrors(response?.data?.message )
+    }
+    else {
+      errorToast(response?.data?.message || messages.defaultErrorMessage)
+      setShow(false)
+      reset()
+    }
+    setLoading(false)
+  }
+
+  const createClientContact = async (params: IClientContact) => {
+    setLoading(true)
+    const payload = {
+      ...params,
+      projectCode: projectCode
+    }
+    const response = await DashboardService?.createClientContact(payload)
+    if (response?.status === status.successCodeOne) {
+      getClientContactList({
+        pageSize: pageSize,
+        pageNumber: pageNumber,
+        projectCode: projectCode
+      })
+      successToast(clientcontactMessages.add)
+      setShow(false)
+      reset()
+    }
+    else if(response?.status === status.badRequestCode){
+      handleBackendErrors(response?.data?.message )
+    }
+    else {
+      errorToast(response?.data?.message || messages.defaultErrorMessage)
+      setShow(false)
+      reset()
+    }
+    setLoading(false)
+  }
+
   const onSubmit = (param: any) => {
     const payload = {
       ...param,
       mobileNumber: param.mobileNumber.slice(param.mobileCountryCode.length, param.mobileNumber.length),
       telephoneNumber: param.telephoneNumber.slice(param.telephoneCountryCode.length, param.telephoneNumber.length)
     }
+   if(data){
+    handleEdit(payload, data?.id)
+   }
+   else{
+    createClientContact(payload)
+   }
 
-    createClientContact && createClientContact(payload)
-    handleEdit && handleEdit(payload, data?.id)
-    setShow(false)
-    reset()
+   
   }
 
   const handleOpen = () => {

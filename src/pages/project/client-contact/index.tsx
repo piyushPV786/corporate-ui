@@ -9,9 +9,8 @@ import DeleteClientContact from 'src/views/pages/dialog/DeleteClientContact'
 import { IClientContact } from 'src/types/apps/invoiceTypes'
 import { DashboardService } from 'src/service'
 import { useEffect, useState } from 'react'
-import { clientcontactMessages, messages } from 'src/context/common'
-import { errorToast, successToast } from 'src/components/Toast'
-import { status } from 'src/context/common'
+import { clientcontactMessages } from 'src/context/common'
+import {  successToast } from 'src/components/Toast'
 import { Typography } from '@mui/material'
 
 interface CellType {
@@ -49,25 +48,6 @@ const ContactDetailsList = ({ code }: propsType) => {
   const [response, setResponse] = useState<IResponseTypes>(initialState)
   const [loading, setLoading] = useState<boolean>(false)
 
-  const handleEdit = async (params: IClientContact, id?: number) => {
-    setLoading(true)
-    const payload = {
-      ...params
-    }
-    const response = await DashboardService?.editClientContact(payload, id)
-
-    if (response?.status === status.successCode) {
-      getClientContactList({
-        pageSize: pageSize,
-        pageNumber: pageNumber,
-        projectCode: projectCode
-      })
-      successToast(clientcontactMessages.edit)
-    } else {
-      errorToast(response?.data?.message || messages.defaultErrorMessage)
-    }
-    setLoading(false)
-  }
 
   const deleteClientContact = async (id?: number) => {
     const response = await DashboardService?.deleteClientContact(id)
@@ -154,7 +134,7 @@ const ContactDetailsList = ({ code }: propsType) => {
       headerName: 'Actions',
       renderCell: ({ row }: CellType) => (
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <DialogClientContact title='Edit' data={row} handleEdit={handleEdit} />
+          <DialogClientContact title='Edit' data={row}  pageNumber={pageNumber} pageSize={pageSize} projectCode={projectCode} setLoading={setLoading} getClientContactList={getClientContactList} />
           <DeleteClientContact row={row} deleteClientContact={deleteClientContact} />
         </Box>
       )
@@ -169,33 +149,15 @@ const ContactDetailsList = ({ code }: propsType) => {
     }
     setLoading(false)
   }
-  const createClientContact = async (params: IClientContact) => {
-    setLoading(true)
-    const payload = {
-      ...params,
-      projectCode: projectCode
-    }
-    const response = await DashboardService?.createClientContact(payload)
 
-    if (response?.status === status.successCodeOne) {
-      getClientContactList({
-        pageSize: pageSize,
-        pageNumber: pageNumber,
-        projectCode: projectCode
-      })
-      successToast(clientcontactMessages.add)
-    } else {
-      errorToast(response?.data?.message || messages.defaultErrorMessage)
-    }
-    setLoading(false)
-  }
+ 
   useEffect(() => {
     getClientContactList({
       pageSize: pageSize,
       pageNumber: pageNumber,
       projectCode: projectCode
     })
-  }, [pageSize, pageNumber])
+  }, [pageSize, pageNumber,projectCode])
 
   return (
     <Grid container sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -216,7 +178,7 @@ const ContactDetailsList = ({ code }: propsType) => {
             <Box sx={{ mb: 2 }}>
               <Typography variant='h5'>Client- Contact Details</Typography>
             </Box>
-            <DialogClientContact title='Add' createClientContact={createClientContact} />
+            <DialogClientContact title='Add' pageNumber={pageNumber} pageSize={pageSize} projectCode={projectCode} setLoading={setLoading} getClientContactList={getClientContactList}  />
           </Grid>
           <DataGrid
             loading={loading}

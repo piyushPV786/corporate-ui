@@ -48,6 +48,7 @@ const PreviewCard = ({ studentData }: IPropsTypes) => {
       gender,
       country,
       states,
+      identificationDocumentType,
       program,
       projectManager,
       accountManager
@@ -60,6 +61,7 @@ const PreviewCard = ({ studentData }: IPropsTypes) => {
       CommonService.getGenderList(),
       CommonService.getCountryLists(),
       CommonService.getStatesByCountry(studentData?.lead?.address?.[0]?.country),
+      CommonService.identificationType({ projectIdentificationType: true }),
       AcademicService.getAllProgramList(),
       DashboardService.getCorporateProjectManagerList(),
       DashboardService.getCorporateAccountManagerList()
@@ -77,6 +79,7 @@ const PreviewCard = ({ studentData }: IPropsTypes) => {
         ...state,
         code: state.isoCode || state.code
       })),
+      identificationDocumentType: identificationDocumentType?.data?.data,
       program: program?.data?.data,
       projectManager: projectManager?.data?.data,
       accountManager: accountManager?.data?.data
@@ -237,7 +240,11 @@ const PreviewCard = ({ studentData }: IPropsTypes) => {
                               {corporatePreviewNames[parentName][item]}
                             </InputLabel>
                             <Typography sx={{ color: theme => (section.isDarkBg ? theme.palette.common.white : null) }}>
-                              {!!lead[parentName]?.[item] ? lead[parentName][item] : '-'}
+                              {!!lead[parentName]?.[item]
+                                ? corporateConstant.getNameCommonListArray.includes(item) && !!commonList
+                                  ? getName(commonList[item], lead[parentName][item])
+                                  : lead[parentName][item]
+                                : '-'}
                             </Typography>
                           </Grid>
                         ))}

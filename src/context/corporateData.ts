@@ -27,7 +27,8 @@ export const corporateConstant: IDynamicObject = {
     'qualificationCode',
     'country',
     'state',
-    'program'
+    'program',
+    'identificationDocumentType'
   ],
   getFullNameCommonListArray: ['projectManager', 'accountManager'],
   documentCommentValidationMSG: 'Please Type reason to Reject',

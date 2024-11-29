@@ -102,7 +102,15 @@ const CorporateStudentListPopup = ({
       field: 'Intakename',
       headerName: 'Intake Name',
       renderCell: ({ row }: CellType) => {
-        return <Typography variant='body2'>{row?.enrolment?.corporateGroup?.intake?.name}</Typography>
+        const intakeName = row?.enrolment?.corporateGroup?.intake?.name;
+    
+        return (
+          <Tooltip title={intakeName || 'No intake name available'} arrow>
+            <Typography variant='body2' noWrap>
+              {intakeName}
+            </Typography>
+          </Tooltip>
+        );
       }
     },
     {

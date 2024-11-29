@@ -1,10 +1,11 @@
 import { Box, Card, CardContent, Chip, Grid, Typography } from '@mui/material'
 import { IProject } from './TabDetails'
-import { CommonService, AcademicService } from 'src/service'
+import { CommonService, AcademicService, DashboardService } from 'src/service'
 import { useEffect, useState } from 'react'
-import { commonListTypes } from 'src/types/apps/dataTypes'
+import { commonListTypes, IAccountManagerList, IProjectManagerList } from 'src/types/apps/dataTypes'
 import { IProgramList } from 'src/types/apps/invoiceTypes'
 import { status } from 'src/context/common'
+import { getFullName } from 'src/utils'
 
 const HeaderPreview = (props: IProject) => {
   const { accountManager, code, courseType, isActive, name, program, projectManager, corporateEd, noOfStudent } = {
@@ -12,12 +13,34 @@ const HeaderPreview = (props: IProject) => {
   }
   const [courseTypeList, setCourseTypeList] = useState<commonListTypes[]>([])
   const [programList, setProgramList] = useState<IProgramList[]>([])
+  const [accountManagerList, setAccountManagerList] = useState<IAccountManagerList[]>([])
+  const [projectManagerList, setProjectManagerList] = useState<IProjectManagerList[]>([])
+
+  const getProjectManagerList = async () => {
+    const response = await DashboardService.getCorporateProjectManagerList()
+    if (response?.status === status?.successCode && response?.data?.data?.length) {
+      setProjectManagerList(response?.data?.data)
+    }
+  }
+  const getAccountManagerList = async () => {
+    const response = await DashboardService.getCorporateAccountManagerList()
+    if (response?.status === status?.successCode && response?.data?.data?.length) {
+      setAccountManagerList(response?.data?.data)
+    }
+  }
+
   const getCourseTypeList = async () => {
     const response = await CommonService.getCourseTypeList()
     if (response?.status === status?.successCode && response?.data?.data?.length) {
       setCourseTypeList(response?.data?.data)
     }
   }
+
+
+  useEffect(()=>{
+    getAccountManagerList()
+    getProjectManagerList()
+  },[])
 
   const getProgramList = async () => {
     const response = await AcademicService.getAllProgramList()
@@ -77,7 +100,7 @@ const HeaderPreview = (props: IProject) => {
                 Project Manager
               </Typography>
               <Typography variant='h6' sx={{ fontWeight: 600, color: 'common.white' }}>
-                {projectManager}
+                {getFullName(projectManagerList,projectManager)}
               </Typography>
             </Box>
           </Grid>
@@ -89,7 +112,7 @@ const HeaderPreview = (props: IProject) => {
                 Account Manager
               </Typography>
               <Typography variant='body2' sx={{ fontWeight: 600, color: 'common.white' }}>
-                {accountManager}
+                {getFullName(accountManagerList,accountManager)}
               </Typography>
             </Box>
           </Grid>

@@ -15,7 +15,7 @@ import { Fragment } from 'react'
 
 import { CommonActivityTab } from 'src/views/dashboards/comments/CommentComponenet'
 import EnrollToRetail from './EnrollToRetail'
-import { applicationStatus, cancelledApplicationStatus } from 'src/context/common'
+import { applicationStatus, cancelledApplicationStatus, completedApplicationStatus } from 'src/context/common'
 
 const PreviewActions = ({ data, getCorporateStudentsDetailById }: any) => {
   return (
@@ -27,7 +27,7 @@ const PreviewActions = ({ data, getCorporateStudentsDetailById }: any) => {
               Back to List
             </Button>
           </Link>
-          {(data?.status === applicationStatus || data?.status === cancelledApplicationStatus) && (
+          {(data?.status === applicationStatus || data?.status === cancelledApplicationStatus || data?.status ===completedApplicationStatus) && (
             <EnrollToRetail studentCode={data?.lead?.studentCode} />
           )}
         </CardContent>

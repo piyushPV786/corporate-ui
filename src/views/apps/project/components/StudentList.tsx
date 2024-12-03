@@ -282,90 +282,104 @@ const StudentList = ({ projectCode, projectName }: IStudentProps) => {
     }
   }
 
+
+
   const bulkUploadStudent = async (projectCode: string, file: File) => {
-    setShowLoader(true)
-
-    //this demo api only for fileName once api ready this will remove
-    const response = await DashboardService.uploadBulkStudent(projectCode, file)
-    if (response?.data?.statusCode === status.successCodeOne && response?.data?.data) {
-      downloadBulkUploadSuccessResponseData(response.data.data, file)
-      setUploadedFile(null)
-    } else {
-      setShowLoader(false)
-      errorToast('There was an issue processing the file. Please try again.')
+    try {
+      setShowLoader(true);
+  
+      const response = await DashboardService.uploadBulkStudent(projectCode, file);
+      if (response?.data?.statusCode === status.successCodeOne && response?.data?.data) {
+        await downloadBulkUploadSuccessResponseData(response.data.data, file, projectCode);
+        setUploadedFile(null);
+      } else {
+        errorToast('There was an issue processing the file. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error during bulk upload:', error);
+      errorToast('An unexpected error occurred. Please try again.');
+    } finally {
+      setShowLoader(false);
     }
-  }
-
-  const downloadBulkUploadSuccessResponseData = (response: BulkUploadResponseType[], file: File) => {
-    const reader = new FileReader()
-    reader.onload = async (e: any) => {
-      const arrayBuffer = e.target.result as ArrayBuffer
-      const workbook = new ExcelJS.Workbook()
-      await workbook.xlsx.load(arrayBuffer)
-
-      // Get the sheet
-      const sheet = workbook.worksheets[0]
-
-      // Add the "Upload_Status" header (add a new cell in the header row)
-      const headerRow = sheet.getRow(1) // Get the first row (header row)
-      headerRow.getCell(headerRow.cellCount + 1).value = 'Upload_Status' // Add new Upload_Status header
-      headerRow.getCell(headerRow.cellCount + 1).value = 'Message' // Add new Message header
-
-      // Process the rows and add status to the "Upload_Status" column
-      response.forEach((responseItem, index) => {
-        let status = ''
-        let message = ''
-        let fillColor = ''
-
-        if (responseItem.applicationExist) {
-          status = 'Application Exist'
-          message = responseItem.applicationExist
-          fillColor = 'FF0000' // Red for Application Exist
-        } else if (responseItem.createdApplication) {
-          status = 'Application Created'
-          message = responseItem.createdApplication
-          fillColor = '00FF00' // Green for Application Created
-        } else if (responseItem.MissingRequiredFields) {
-          status = 'Missing Required Fields'
-          message = responseItem.MissingRequiredFields
-          fillColor = 'FFFF00' // Yellow for Missing Fields
+  };
+  
+  const downloadBulkUploadSuccessResponseData = async (
+    response: BulkUploadResponseType[],
+    file: File,
+    projectCode: string
+  ) => {
+    try {
+      const arrayBuffer = await file.arrayBuffer(); 
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
+  
+      const sheet = workbook.worksheets[0];
+  
+      // Add new headers in bulk
+      const headerRow = sheet.getRow(1);
+      const uploadStatusIndex = headerRow.cellCount + 1;
+      headerRow.getCell(uploadStatusIndex).value = 'Upload_Status';
+      headerRow.getCell(uploadStatusIndex + 1).value = 'Message';
+  
+      // Add status and message in rows
+      const rowsData = response.map((item, index) => {
+        let status = '';
+        let message = '';
+        let fillColor = '';
+  
+        if (item?.applicationExist) {
+          status = 'Application Exist';
+          message = item.applicationExist;
+          fillColor = 'FF0000';
+        } else if (item.createdApplication) {
+          status = 'Application Created';
+          message = item.createdApplication;
+          fillColor = '00FF00';
+        } else if (item.MissingRequiredFields) {
+          status = 'Missing Required Fields';
+          message = item.MissingRequiredFields;
+          fillColor = 'FFFF00';
         }
-
-        // Find the corresponding row (skip the header row, so start from index 2)
-        const row = sheet.getRow(index + 2)
-
-        // Set the value of the new "Upload_Status" column
-        const statusCell = row.getCell(headerRow.cellCount - 1) // This should be the second-to-last cell in the row (Upload_Status)
-        statusCell.value = status
-
-        // Set the value of the new "Message" column
-        const messageCell = row.getCell(headerRow.cellCount) // This should be the last cell in the row (Message)
-        messageCell.value = message
-
+  
+        return { rowIndex: index + 2, status, message, fillColor };
+      });
+  
+      // Batch update rows
+      rowsData.forEach(({ rowIndex, status, message, fillColor }) => {
+        const row = sheet.getRow(rowIndex);
+        const statusCell = row.getCell(uploadStatusIndex);
+        const messageCell = row.getCell(uploadStatusIndex + 1);
+  
+        statusCell.value = status;
+        messageCell.value = message;
+  
         if (fillColor) {
           statusCell.fill = {
             type: 'pattern',
             pattern: 'solid',
-            fgColor: { argb: fillColor }
-          }
-          statusCell.font = { bold: true, color: { argb: '000000' } }
+            fgColor: { argb: fillColor },
+          };
+          statusCell.font = { bold: true, color: { argb: '000000' } };
         }
-      })
-
-      // Save the workbook as a file and trigger download
-      const buffer = await workbook.xlsx.writeBuffer()
-      const blob = new Blob([buffer], { type: 'application/octet-stream' })
-      const link = document.createElement('a')
-      link.href = URL.createObjectURL(blob)
-      link.download = `${projectCode}_upload_student_status.xlsx`
-      link.click()
-      setShowLoader(false)
-      setOpenFileUpload(false)
-      successToast('Your data has been processed successfully. Please find the attached Excel sheet.')
+      });
+  
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/octet-stream' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `${projectCode}_upload_student_status.xlsx`;
+      link.click();
+  
+      successToast('Your data has been processed successfully. Please find the attached Excel sheet.');
+    } catch (error) {
+      console.error('Error processing Excel file:', error);
+      errorToast('Failed to process the Excel file.');
+    } finally {
+      setShowLoader(false);
+      setOpenFileUpload(false);
     }
-
-    reader.readAsArrayBuffer(file)
-  }
+  };
+  
 
   const handleSuccess = (msg: string) => {
     successToast(msg)

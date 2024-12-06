@@ -413,7 +413,7 @@ const CorporateStudentManagement = () => {
               }}
               onPageSizeChange={newPageSize => setPageSize(newPageSize)}
               onPageChange={newPage => setPageNumber(newPage + 1)}
-              isRowSelectable={(params: GridRowParams) => params?.row?.status !== EnrollIntakeType.enrolled || true}
+              isRowSelectable={(params: GridRowParams) => params?.row?.status === EnrollIntakeType.enrollPending }
             />
           ) : (
             <FallbackSpinner />

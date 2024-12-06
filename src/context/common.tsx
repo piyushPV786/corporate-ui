@@ -616,7 +616,8 @@ export enum StudentStatus {
 }
 
 export enum EnrollIntakeType {
-  enrolled = 'ENROLLED-TO-REGENIUS'
+  enrolled = 'ENROLLED-TO-REGENIUS',
+  enrollPending='ENROLLMENT-PENDING'
 }
 
 export const CreditAffordableDataStatus: IDynamicObject = {

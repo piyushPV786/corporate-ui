@@ -491,7 +491,6 @@ const ProjectDetailsDialog = ({
                       onKeyDown={e => {
                         e.preventDefault()
                       }}
-                      minDate={new Date()} // Ensures only today and future dates are selectable
                       selected={value}
                       showYearDropdown
                       showMonthDropdown

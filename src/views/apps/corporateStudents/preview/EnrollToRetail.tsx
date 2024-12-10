@@ -26,6 +26,7 @@ import { status } from 'src/context/common'
 import { IStudyModeCodeTypes } from 'src/types/apps/dataTypes'
 import LoadingBackdrop from 'src/@core/components/loading-backdrop'
 import { successToast } from 'src/components/Toast'
+import { getName } from 'src/utils'
 
 // Define the Yup validation schema
 const validationSchema = Yup.object({
@@ -43,6 +44,7 @@ interface Education {
   studyModeCode?: string
   agentCode?: string
   studentTypeCode?: string
+  programName?:string
 
 }
 
@@ -118,7 +120,8 @@ const EnrollToRetail = ({ studentCode }: Props) => {
     const education: Education = {
       programCode: data.interestedQualification,
       qualificationCode: data.highestQualification,
-      studentTypeCode: "RETAIL"
+      studentTypeCode: "RETAIL",
+      programName:getName(interestedQualificationList,data?.interestedQualification)
 
     }
     if (data.studyMode) {

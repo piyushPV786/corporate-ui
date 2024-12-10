@@ -176,7 +176,6 @@ const AddStudentPreview = ({ projectCode }: IstudentPreview) => {
     const educationPayload = {
       qualificationCode: data.highestQualification,
       agentCode: null,
-      highSchoolName: data.highSchoolName,
       studentTypeCode: 'CORPORATE',
       referredById: null,
       isInternationDegree: data.isInternationalDegreeHolder

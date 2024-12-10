@@ -66,7 +66,7 @@ export const EducationalDetail = ({ control, errors }: Ieducational) => {
                   )}
                 />
               </Grid>
-              <Grid item sm={6}>
+              {/* <Grid item sm={6}>
                 <Controller
                   name='highSchoolName'
                   control={control}
@@ -80,7 +80,7 @@ export const EducationalDetail = ({ control, errors }: Ieducational) => {
                     />
                   )}
                 />
-              </Grid>
+              </Grid> */}
 
               <Grid item sm={12}>
                 <FormControl error={Boolean(errors.isInternationalDegreeHolder)}>

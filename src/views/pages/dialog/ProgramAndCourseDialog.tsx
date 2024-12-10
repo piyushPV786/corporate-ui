@@ -223,7 +223,7 @@ const ProgramAndCourseDialog = ({
                     <TextField
                       type='number'
                       value={value}
-                      label={<RequiredLabel label='Duration' />}
+                      label={<RequiredLabel label='Duration in months' />}
                       onChange={onChange}
                       placeholder=''
                       error={Boolean(errors.duration)}

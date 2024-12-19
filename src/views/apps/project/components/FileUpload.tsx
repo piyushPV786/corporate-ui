@@ -103,7 +103,7 @@ const FileUploadComponent = ({ setSelectedFiles, removedFiles }: IFileUploadProp
                         Drag and drop, or <span style={{ color: '#008554' }}>browse</span> your regenesys Bulk upload
                         <em> .XLSX</em> template file
                       </Typography>
-                      <Typography variant='caption'>Max size of 3MB</Typography>
+                      <Typography variant='caption'>Max size of 20MB</Typography>
                     </GreenFormHeading>
                     {uploadDocs && (
                       <Card onClick={e => e.stopPropagation()}>

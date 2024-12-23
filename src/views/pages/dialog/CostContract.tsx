@@ -50,7 +50,7 @@ interface ICostContractDialogProps {
   handleClickSuccess: () => void
   handleEditSuccess: () => void
   data: IFormDataTypes
-  createCostContract: (arg: IPayloadTypes) => void
+  createCostContract: (arg: IPayloadTypes) => Promise<void>
   paymentTypeList: any[]
 }
 
@@ -83,7 +83,7 @@ const CostContractDetail = ({
       varianceDetails: formData.varianceDetails
     }
 
-    createCostContract(payload)
+    await createCostContract(payload)
     setShow(false)
     !!data ? handleEditSuccess() : handleClickSuccess()
     reset()

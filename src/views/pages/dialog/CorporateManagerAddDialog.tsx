@@ -79,6 +79,7 @@ const CorporateManagerAddDialog = ({ isEdit, managerData, actions }: ICorporateM
     control,
     reset,
     setValue,
+    setError,
     watch,
     clearErrors,
     trigger,
@@ -118,6 +119,13 @@ const CorporateManagerAddDialog = ({ isEdit, managerData, actions }: ICorporateM
     clearErrors(name)
     trigger(name)
   }
+const handleError=(errorMessage:any)=>{
+  if (errorMessage?.includes('Phone number')) {
+    setError('mobileNumber', { type: 'manual', message: errorMessage });
+  } else if (errorMessage.includes('Email')) {
+    setError('email', { type: 'manual', message: errorMessage });
+  }
+}
 
   const onSubmit = async (data: FieldValues) => {
     setLoading(true)
@@ -134,13 +142,18 @@ const CorporateManagerAddDialog = ({ isEdit, managerData, actions }: ICorporateM
     if (!isEdit && !managerDetails.middleName) {
       delete managerDetails.middleName
     }
+    let errorMessage:any = null;
     if (isEdit && !!actions?.updateManager && !!managerData) {
-      await actions.updateManager(managerDetails, managerData?.code)
+      errorMessage=await actions.updateManager(managerDetails, managerData?.code)
     } else if (!!actions?.createManager) {
-      await actions?.createManager(managerDetails)
+      errorMessage = await actions.createManager(managerDetails);
     }
     setLoading(false)
-    handleClose()
+    if (errorMessage) {
+     handleError(errorMessage)
+    } else {
+      handleClose();
+    }
   }
 
   const hasUnsavedChanges =

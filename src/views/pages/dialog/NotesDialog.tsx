@@ -26,8 +26,8 @@ interface INoteDialogsProps {
   title: string
   projectCode?: string | number | undefined
   userName: string
-  createNotes?: (arg: IAddNotes) => void
-  updateNotes?: (arg: { notes: string }, id: string | number | undefined) => void
+  createNotes?: (arg: IAddNotes) => Promise<void>
+  updateNotes?: (arg: { notes: string }, id: string | number | undefined) => Promise<void>
 }
 
 const schema = yup.object().shape({
@@ -69,14 +69,14 @@ const NoteDialogs = ({ title, data, projectCode, userName, createNotes, updateNo
     },
     resolver: yupResolver(schema)
   })
-  const onSubmit = (data: any) => {
+  const onSubmit = async (data: any) => {
     const apiData = {
       projectCode: projectCode,
       notes: data.notes,
       madeBy: userName
     }
-    createNotes && createNotes(apiData)
-    updateNotes && updateNotes({ notes: data.notes }, id)
+    createNotes && (await createNotes(apiData))
+    updateNotes && (await updateNotes({ notes: data.notes }, id))
     setShow(false)
     reset()
   }

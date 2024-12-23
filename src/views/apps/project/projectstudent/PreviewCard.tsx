@@ -648,7 +648,6 @@ const PreviewCard = ({ studentId, studentDetail, getStudentDetailById }: Props) 
                     studentData={studentDetail}
                     getStudentDetailById={getStudentDetailById}
                     listOf={listOf}
-                    qualificationList={qualificationList}
                   />
                 </Grid>
               </Grid>

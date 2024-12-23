@@ -36,6 +36,7 @@ interface propsType {
   fetchProject: (id: string | number) => void
   projectData: any
   facilitatorList: any
+  setLoading: (isLoading: boolean) => void
 }
 
 const validationSchema = Yup.object({
@@ -61,7 +62,8 @@ const ProgramAndCourseDialog = ({
   courseTypeList,
   programList,
   facilitatorList,
-  projectData
+  projectData,
+  setLoading
 }: propsType) => {
   const defaultValues = {
     courseType: projectData?.courseType,
@@ -97,11 +99,13 @@ const ProgramAndCourseDialog = ({
   }
 
   const onSubmit = async (data: any) => {
+    setLoading(true)
     const Data = { ...data, facilitator: data.facilitator.join(','), noOfStudent: Number(data?.noOfStudent) }
     await DashboardService?.editProgramAndCourseDetail(code, Data)
+    await fetchProject(code)
     handleClose()
+    setLoading(false)
     reset()
-    fetchProject(code)
   }
 
   useEffect(() => {
@@ -219,7 +223,7 @@ const ProgramAndCourseDialog = ({
                     <TextField
                       type='number'
                       value={value}
-                      label={<RequiredLabel label='Duration' />}
+                      label={<RequiredLabel label='Duration in months' />}
                       onChange={onChange}
                       placeholder=''
                       error={Boolean(errors.duration)}

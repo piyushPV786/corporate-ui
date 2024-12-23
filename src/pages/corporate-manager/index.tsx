@@ -61,7 +61,7 @@ const CorporateManager = () => {
   }
 
   const createManager = async (params: any) => {
-    const response = await DashboardService?.createCorporateManager(params)
+    const response:any = await DashboardService?.createCorporateManager(params)
     if (response?.status === 201 && response?.data?.data) {
       getManagersList({
         q: value,
@@ -69,7 +69,13 @@ const CorporateManager = () => {
         pageNumber: pageNumber
       })
       successToast(CorporateManagerMessages.add)
+
+      return null
     }
+    else{
+      return response
+    }
+   
   }
   const updateManager = async (params: any, code: string) => {
     const response = await DashboardService?.updateCorporateManager(params, code)
@@ -80,6 +86,11 @@ const CorporateManager = () => {
         pageNumber: pageNumber
       })
       successToast(CorporateManagerMessages.edit)
+      
+      return null
+    }
+    else{
+      return response
     }
   }
 

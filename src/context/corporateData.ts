@@ -27,7 +27,8 @@ export const corporateConstant: IDynamicObject = {
     'qualificationCode',
     'country',
     'state',
-    'program'
+    'program',
+    'identificationDocumentType'
   ],
   getFullNameCommonListArray: ['projectManager', 'accountManager'],
   documentCommentValidationMSG: 'Please Type reason to Reject',
@@ -43,7 +44,7 @@ export const corporateStudentPreviewCardSections = [
     sectionIcon: ChartBoxOutline,
     sectionSubItems: {
       parentName: 'project',
-      list: ['name', 'code', 'program', 'projectManager', 'accountManager', 'noOfStudent']
+      list: ['name', 'code', 'program', 'projectManager', 'accountManager']
     },
     sectionItems: [],
     isDarkBg: true

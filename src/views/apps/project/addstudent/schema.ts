@@ -61,7 +61,6 @@ export const schema = yup.object().shape({
     .min(1000, AddStudentMessages.zipCodeMaxError)
     .max(999999, AddStudentMessages.zipCodeMaxError),
   highestQualification: yup.string().required(AddStudentMessages.higerQualificationRequired),
-  highSchoolName: yup.string().required(AddStudentMessages.highSchoolNameRequired),
   isInternationalDegreeHolder: yup.string().required(AddStudentMessages.isInternationalDegreeHolderRequired)
 })
 

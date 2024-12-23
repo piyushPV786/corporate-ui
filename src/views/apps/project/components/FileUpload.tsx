@@ -52,6 +52,20 @@ const FileUploadComponent = ({ setSelectedFiles, removedFiles }: IFileUploadProp
     setUploadDocs(uploadedFiles as any)
   }
 
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const files = event.dataTransfer.files;
+    if (files.length > 0) {
+      uploadDocuments(files[0]);
+    }
+  };
+
   return (
     <>
       <Grid
@@ -67,7 +81,9 @@ const FileUploadComponent = ({ setSelectedFiles, removedFiles }: IFileUploadProp
           <CardContent sx={{ p: 0 }}>
             <Grid sx={{ display: 'flex' }}>
               <div className='d-flex text-center justify-content-center w-100 flex-column '>
-                <UploadDocsContainer onClick={onDocUploadClick} className='w-100'>
+                <UploadDocsContainer onClick={onDocUploadClick} className='w-100'   
+                   onDragOver={handleDragOver}
+                  onDrop={handleDrop}>
                   <div ref={fileUploadRef} className='text-center'>
                     <div>
                       <FileExcel style={{ color: '#008554', fontSize: '60px' }} />
@@ -87,7 +103,7 @@ const FileUploadComponent = ({ setSelectedFiles, removedFiles }: IFileUploadProp
                         Drag and drop, or <span style={{ color: '#008554' }}>browse</span> your regenesys Bulk upload
                         <em> .XLSX</em> template file
                       </Typography>
-                      <Typography variant='caption'>Max size of 3MB</Typography>
+                      <Typography variant='caption'>Max size of 20MB</Typography>
                     </GreenFormHeading>
                     {uploadDocs && (
                       <Card onClick={e => e.stopPropagation()}>

@@ -31,7 +31,7 @@ const StudentPreview = ({ id, projectCode }: IStudentPreviewProps) => {
     if (!!studentDetail) {
       const response = await StudentService.enrollProjectStudent(studentDetail?.code)
       if (status.successCodeArr.includes(response?.statusCode)) {
-        successToast(`${studentDetail.firstName} ${studentDetail.lastName} Application Submitted Successfully`)
+        successToast(`${studentDetail?.lead?.firstName} ${studentDetail?.lead?.lastName} Application Submitted Successfully`)
       }
     } else {
       errorToast('Student Code is not available')

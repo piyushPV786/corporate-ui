@@ -29,7 +29,7 @@ interface IEditVenueTypes {
 interface IVenueLogisticsDialogProps {
   handleClickSuccess: () => void
   handleVenueEdit: () => void
-  venueLogisticsDetails: (arg: IAddVenueTypes) => void
+  venueLogisticsDetails: (arg: IAddVenueTypes) => Promise<void>
   data: IEditVenueTypes
 }
 
@@ -81,7 +81,7 @@ const VenueLogisticsDetail = ({
       venueCostIncluded: formData.venueCostIncluded === 'yes'
     }
 
-    venueLogisticsDetails(payload)
+    await venueLogisticsDetails(payload)
     setShow(false)
     data ? handleVenueEdit() : handleClickSuccess()
   }

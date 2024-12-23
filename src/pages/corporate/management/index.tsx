@@ -153,12 +153,12 @@ const defaultValues = {
 
 const schema = yup.object().shape({
   name: yup
-    .string()
-    .required('required')
-    .matches(/^[A-Za-z0-9]+([ ]?[A-Za-z0-9]+)*$/, 'Name can only contain alphanumeric characters')
-    .test('not-only-numbers', 'Name cannot contain only numbers', (value: string | undefined) => {
-      return value ? /[a-zA-Z]/.test(value) : false
-    }),
+  .string()
+  .required('required')
+  .matches(/^[A-Za-z0-9()]+([ ]?[A-Za-z0-9()]+)*$/, 'Name can only contain alphanumeric characters and parentheses')
+  .test('not-only-numbers', 'Name cannot contain only numbers', (value: string | undefined) => {
+    return value ? /[a-zA-Z]/.test(value) : false;
+  }),
   code: yup
     .string()
     .matches(/^[\w@.-]*$/, `Special characters are not allowed in the Company Code`)

@@ -31,10 +31,12 @@ export const formateDate = (date: string) => {
 
 const ProgramAndCourseDetail = ({
   fetchProject,
-  projectData
+  projectData,
+  setLoading
 }: {
   fetchProject: (code: string | number) => void
   projectData: IProject
+  setLoading: (isLoading: boolean) => void
 }) => {
   const { programDetails, code } = { ...projectData }
   const [open, setOpen] = useState(false)
@@ -62,8 +64,9 @@ const ProgramAndCourseDetail = ({
   }
 
   const getFacilitator = async () => {
-    const response = await AcademicService.getFacilitator()
-    if (response?.status === status?.successCode && response?.data?.data?.length) {
+    const isActive = true
+    const response = await AcademicService.getFacilitator(isActive)
+      if (response?.status === status?.successCode && response?.data?.data?.length) {
       setFacilitatorList(response?.data?.data)
     }
   }
@@ -85,6 +88,7 @@ const ProgramAndCourseDetail = ({
         open={open}
         onClose={onClose}
         projectData={projectData}
+        setLoading={setLoading}
       />
       <CardContent>
         <Grid container mb={10} mt={2} spacing={6}>

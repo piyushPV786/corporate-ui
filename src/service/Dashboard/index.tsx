@@ -1380,6 +1380,8 @@ export default class Dashboard {
       return response
     } catch (err: any) {
       console.log('Error creating manager ========>', err?.message)
+
+      return err?.data?.message
     }
   }
   async updateCorporateManager(params: any, code: number | string) {
@@ -1390,6 +1392,9 @@ export default class Dashboard {
       return response
     } catch (err: any) {
       console.log('Error updating manager ========>', err?.message)
+      
+      return err?.data?.message
+
     }
   }
   async deleteCorporateManager(code?: string) {

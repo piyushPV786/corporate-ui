@@ -42,6 +42,7 @@ interface DataParams {
 
 interface propsType {
   code: string
+  setIsLoading: (isLoading: boolean) => void
 }
 
 // ** Styled component for the link in the dataTable
@@ -52,7 +53,7 @@ const StyledLink = styled('a')(({ theme }) => ({
   cursor: 'pointer'
 }))
 
-const VenueDetails = ({ code }: propsType) => {
+const VenueDetails = ({ code, setIsLoading }: propsType) => {
   const projectCode: string = code
 
   // ** State
@@ -64,14 +65,15 @@ const VenueDetails = ({ code }: propsType) => {
   const [facilitatorList, setFacilitatorList] = useState<any[]>([])
 
   const getFacilitator = async () => {
-    const response = await AcademicService.getFacilitator()
+    const isActive = true
+    const response = await AcademicService.getFacilitator(isActive)
     if (response?.status === status?.successCode && response?.data?.data?.length) {
       setFacilitatorList(response?.data?.data)
     }
   }
 
   const handleEdit = async (params: any, id: number) => {
-    setLoading(true)
+    setIsLoading(true)
     const payload = {
       ...params,
       date: new Date(params.date)
@@ -79,7 +81,7 @@ const VenueDetails = ({ code }: propsType) => {
     const response = await DashboardService?.editVenue(payload, id)
 
     if (response?.status === status.successCode) {
-      getVenueList({
+      await getVenueList({
         q: value,
         pageSize: pageSize,
         pageNumber: pageNumber,
@@ -87,7 +89,7 @@ const VenueDetails = ({ code }: propsType) => {
       })
       successToast(venueMessages.edit)
     }
-    setLoading(false)
+    setIsLoading(false)
   }
 
   const columns = [
@@ -141,7 +143,7 @@ const VenueDetails = ({ code }: propsType) => {
     setLoading(false)
   }
   const createVenue = async (params: any) => {
-    setLoading(true)
+    setIsLoading(true)
     const payload = {
       ...params,
       projectCode: projectCode,
@@ -149,7 +151,7 @@ const VenueDetails = ({ code }: propsType) => {
     }
     const response = await DashboardService?.createVenue(payload)
     if (response?.status === status.successCodeOne) {
-      getVenueList({
+      await getVenueList({
         q: value,
         pageSize: pageSize,
         pageNumber: pageNumber,
@@ -173,7 +175,7 @@ const VenueDetails = ({ code }: propsType) => {
     } else {
       errorToast(messages.defaultErrorMessage)
     }
-    setLoading(false)
+    setIsLoading(false)
   }
   const user = window.localStorage.getItem('userData')
   useEffect(() => {

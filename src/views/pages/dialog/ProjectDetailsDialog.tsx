@@ -177,7 +177,7 @@ const ProjectDetailsDialog = ({
       fullWidth={true}
       maxWidth={'md'}
     >
-      <DialogTitle textAlign={'center'}>Add or Edit Project Details</DialogTitle>
+      <DialogTitle textAlign={'center'}>Manage Project Details</DialogTitle>
       <form onSubmit={handleSubmit(onSubmit)}>
         <DialogContent>
           <Grid container spacing={5}>
@@ -491,7 +491,6 @@ const ProjectDetailsDialog = ({
                       onKeyDown={e => {
                         e.preventDefault()
                       }}
-                      minDate={new Date()} // Ensures only today and future dates are selectable
                       selected={value}
                       showYearDropdown
                       showMonthDropdown

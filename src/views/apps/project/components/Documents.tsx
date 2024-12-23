@@ -58,15 +58,13 @@ const isLoadingInitialState = {
 const Documents = ({ projectCode }: { projectCode: string }) => {
   const [isLoading, setIsLoading] = useState<{ [key: string]: boolean }>(isLoadingInitialState)
   const [viewFileLoader, setViewFileLoader] = useState<{ [key: string]: boolean }>()
-  const [documentList, setDocumentList] = useState<Array<IDocumentListResponseTypes>>()
+  const [documentList, setDocumentList] = useState<Array<IDocumentListResponseTypes>>([])
   const [documentTypeList, setDocumentTypeList] = useState<Array<commonListTypes>>([])
 
   const getDocumentList = async () => {
     const response = await StudentService.getProjectDocuments(projectCode)
     if (response) {
       setDocumentList(response.data)
-      console.log(response.data)
-
       setIsLoading(prev => ({ ...prev, listLoading: false }))
       response?.data?.map((item: IDocumentListResponseTypes) =>
         setViewFileLoader(prev => ({ ...prev, [item.code]: false }))
@@ -75,8 +73,6 @@ const Documents = ({ projectCode }: { projectCode: string }) => {
   }
   const getDocumentTypeList = async () => {
     const response = await CommonService.getProjectDocumentTypeList()
-
-    // console.log(response.data);
 
     if (response) {
       setDocumentTypeList(response.data)
@@ -203,9 +199,7 @@ const Documents = ({ projectCode }: { projectCode: string }) => {
         </Grid>
       </Grid>
       <Grid container my={5} rowSpacing={10}>
-        {documentList && (
-          <DataGrid loading={isLoading.listLoading} autoHeight rows={documentList} columns={columns} hideFooter />
-        )}
+        <DataGrid loading={isLoading.listLoading} autoHeight rows={documentList} columns={columns} hideFooter />
       </Grid>
     </Card>
   )
